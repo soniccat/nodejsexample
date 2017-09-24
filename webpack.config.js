@@ -32,6 +32,10 @@ module.exports = {
       }
     ]
   },
+    devtool: 'inline-source-map',
+    devServer: {
+        contentBase: './dist'
+    },
   plugins: [
   	//new UglifyJSPlugin(),
   	new HtmlWebpackPlugin({
