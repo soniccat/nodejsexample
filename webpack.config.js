@@ -1,5 +1,6 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+var ManifestPlugin = require('webpack-manifest-plugin');
 const path = require('path');
 
 module.exports = {
@@ -33,6 +34,9 @@ module.exports = {
   },
   plugins: [
   	//new UglifyJSPlugin(),
-  	new HtmlWebpackPlugin()
+  	new HtmlWebpackPlugin({
+        title: 'Output Management'
+    }),
+      new ManifestPlugin()
   ]
 };
