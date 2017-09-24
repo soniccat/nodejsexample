@@ -11,8 +11,9 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
+          {loader: "style-loader"},
           { loader: "css-loader" }
-        ],
+        ]
       }
     ]
   },
@@ -20,4 +21,4 @@ module.exports = {
   	new UglifyJSPlugin(),
   	new HtmlWebpackPlugin()
   ]
-}
+};
