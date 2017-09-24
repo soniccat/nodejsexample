@@ -5,6 +5,8 @@
     "json-loader": "^0.5.7",
     "jsx": "^0.9.89",
     "style-loader": "^0.18.2",
+    "to-string-loader": "^1.1.5",
+    "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.5.6"
   }
 }
