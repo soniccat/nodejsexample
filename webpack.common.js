@@ -1,13 +1,13 @@
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-var ManifestPlugin = require('webpack-manifest-plugin');
 const path = require('path');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   entry: './src/app.js',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -32,15 +32,10 @@ module.exports = {
       }
     ]
   },
-    devtool: 'inline-source-map',
-    devServer: {
-        contentBase: './dist'
-    },
   plugins: [
-  	//new UglifyJSPlugin(),
+    new CleanWebpackPlugin(['dist']),
   	new HtmlWebpackPlugin({
         title: 'Output Management'
-    }),
-      new ManifestPlugin()
+    })
   ]
 };
