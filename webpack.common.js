@@ -4,10 +4,15 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './src/app.js',
+  entry: {
+      main: './src/app.js',
+      vendor: [
+          "path"
+      ]
+  },
   output: {
-    filename: '[name].js',
-    chunkFilename: '[name].bundle.js',
+    filename: '[name].[chunkhash].js',
+    chunkFilename: '[name].[chunkhash].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/'
   },
@@ -38,6 +43,13 @@ module.exports = {
     new CleanWebpackPlugin(['dist']),
   	new HtmlWebpackPlugin({
         title: 'Output Management'
+    }),
+      new webpack.HashedModuleIdsPlugin(),
+      new webpack.optimize.CommonsChunkPlugin({
+          name: 'vendor'
+      }),
+    new webpack.optimize.CommonsChunkPlugin({
+        name: 'mychunk'
     })
   ]
 };
