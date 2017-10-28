@@ -1,4 +1,11 @@
-var bar = require('./bar');
+//var bar = require('./bar');
+require.ensure([], function(require) {
+    return require("./bar");
+}, "mychunk2").then(function (bar) {
+    //console.log("fulfill function is called " + bar);
+    bar()
+});
+
 var image = require('./screen.png');
 
 function addElement() {
@@ -13,5 +20,6 @@ function addElement() {
     document.body.appendChild(element2);
 }
 
-bar();
+
+//bar();
 addElement();
