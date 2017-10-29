@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "webpack-dev-server --open --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build": "webpack --config webpack.prod.js",
+    "prodserver": "NODE_ENV=production node ./src/prodserver.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^0.1.17",
