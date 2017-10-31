@@ -2,12 +2,14 @@
   "scripts": {
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "prodserver": "NODE_ENV=production node ./src/prodserver.js"
+    "prodserver": "NODE_ENV=production node ./src/prodserver.js",
+    "prodserver2": "NODE_ENV=production node ./src/prodserver2.js"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^0.1.17",
     "css-loader": "^0.28.7",
     "express": "^4.16.1",
+    "express-http-proxy": "^1.0.7",
     "file-loader": "^0.11.2",
     "html-webpack-plugin": "^2.30.1",
     "json-loader": "^0.5.7",
