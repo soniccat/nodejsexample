@@ -18,8 +18,7 @@ app.get('*', function(req, res) {
     var host = needRedirect ? redirectHost : reqUrl.host;
     var path = reqUrl.path;
     var defaultHeaders = {
-        "Accept": "*/*",
-        "Accept-Encoding": "text, gzip"
+        "Accept": "*/*"
     };
     var headers = needRedirect ? defaultHeaders : req.headers;
     console.log("send  " +  util.inspect(req.headers));
@@ -64,6 +63,7 @@ app.get('*', function(req, res) {
         });
 
         cres.on('end', function(){
+            res.header("Content-Type", cres.headers['content-type']);
 
             //console.log("end  " +  util.inspect(cres));
             //console.log(cres.body);
@@ -79,40 +79,19 @@ app.get('*', function(req, res) {
                         res.send(sendString);
                     } else {
                         console.log("error " + util.inspect(err));
-
-                        // zlib.inflate(buffer, function(err, decoded) {
-                        //     console.log("inflating");
-                        //     if (!err) {
-                        //         console.log("inflated");
-                        //         sendString = decoded.toString();
-                        //     } else {
-                        //         console.log("error " + util.inspect(err));
-                        //     }
-                        // })
                     }
                 });
             } else {
-                sendString = buffer.toString();
+                var isImage = cres.headers['content-type'] == "image/jpeg" || cres.headers['content-type'] == "image/gif";
+                if (isImage) {
+                    console.log("image detected");
+                    sendString = buffer;
+                } else {
+                    sendString = buffer.toString();
+                }
+
                 res.send(sendString);
             }
-            // finished, let's finish client request as well
-            //res.writeHead(cres.statusCode);
-
-            // const d = Buffer.from('eJzT0yMA', 'base64');
-            // zlib.unzip(d, function(err, buffer) {
-            //     if (!err) {
-            //         var result = buffer.toString();
-            //         res.send(result);
-            //         console.log(result);
-            //     } else {
-            //         console.log("zlib error");
-            //     // handle error
-            //     }
-            // });
-
-
-            //res.header("Content-Type", res.headers['content-type']);
-            //console.log(data);
         });
 
     }).on('error', function(e) {
