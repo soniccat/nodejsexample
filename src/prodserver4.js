@@ -9,9 +9,27 @@ const zlib = require('zlib');
 const gzip = zlib.createGzip();
 
 
+function handleGzip(cres, buffer, completion) {
+    var isGzip = cres.headers['content-encoding'] == "gzip";
+    if (isGzip) {
+        zlib.unzip(buffer, function(err, decoded) {
+            console.log("decoding...");
+            if (!err) {
+                console.log("decoded");
+                completion(decoded, undefined);
+            } else {
+                console.log("error " + util.inspect(err));
+                completion(undefined, err);
+            }
+        });
+    } else {
+        completion(buffer, undefined)
+    }
+}
+
 app.get('*', function(req, res) {
     var reqUrl = url.parse(req.url);
-    var redirectHost = 'www.soniccat.ru';
+    var redirectHost = 'news360.com';
     console.log("host  " + reqUrl.host);
     var needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
     var host = needRedirect ? redirectHost : reqUrl.host;
@@ -26,7 +44,7 @@ app.get('*', function(req, res) {
         // host to forward to
         host:   host,
         // port to forward to
-        port:   80,
+        port:   443,
         // path to forward to
         path:   path,
         // request method
@@ -37,7 +55,7 @@ app.get('*', function(req, res) {
         gzip: true
     };
 
-    var creq = http.request(options, function(cres) {
+    var creq = https.request(options, function(cres) {
 
         console.log("start " + path);
         console.log("response  " +  util.inspect(cres.headers));
@@ -59,31 +77,19 @@ app.get('*', function(req, res) {
 
             //console.log("end  " +  util.inspect(cres));
             //console.log(cres.body);
-            var sendString = "";
-            var isGzip = cres.headers['content-encoding'] == "gzip";
+            var result;
             var buffer = Buffer.concat(chunks);
-            if (isGzip) {
-                zlib.unzip(buffer, function(err, decoded) {
-                    console.log("decoding...");
-                    if (!err) {
-                        console.log("decoded");
-                        sendString = decoded.toString();
-                        res.send(sendString);
-                    } else {
-                        console.log("error " + util.inspect(err));
-                    }
-                });
-            } else {
-                var isImage = cres.headers['content-type'] == "image/jpeg" || cres.headers['content-type'] == "image/gif";
+            handleGzip(cres, buffer, function(data) {
+                var isImage = cres.headers['content-type'] == "image/jpeg" || cres.headers['content-type'] == "image/gif" || cres.headers['content-type'] == "image/png";
                 if (isImage) {
                     console.log("image detected");
-                    sendString = buffer;
+                    result = data;
                 } else {
-                    sendString = buffer.toString();
+                    result = data.toString();
                 }
 
-                res.send(sendString);
-            }
+                res.send(result);
+            });
         });
 
     }).on('error', function(e) {
