@@ -8,7 +8,6 @@ var url = require('url');
 const zlib = require('zlib');
 const gzip = zlib.createGzip();
 
-/* your app config here */
 
 app.get('*', function(req, res) {
     var reqUrl = url.parse(req.url);
@@ -43,23 +42,16 @@ app.get('*', function(req, res) {
         console.log("start " + path);
         console.log("response  " +  util.inspect(cres.headers));
 
-        // set encoding
-        //cres.setEncoding('utf8');
         res.header("Content-Type", cres.headers['content-type']);
 
-        // wait for data
         var chunks = [];
         cres.on('data', function(chunk){
-            //res.write(chunk);
             chunks.push(chunk);
             //console.log(chunk);
         });
 
         cres.on('close', function(){
             // closed, let's end client request as well
-            //res.writeHead(cres.statusCode);
-            //res.send(data);
-            //console.log(data);
         });
 
         cres.on('end', function(){
@@ -103,12 +95,6 @@ app.get('*', function(req, res) {
 
     creq.end();
 });
-
-// app.use(express.static('./dist'));
-// app.get('/mmm', function (req, res) {
-//     res.header("Content-Type", "text/html");
-//     res.send("override");
-// });
 
 app.listen(8080, function () {
 
