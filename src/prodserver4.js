@@ -1,6 +1,4 @@
 const fs = require('fs');
-var express = require('express');
-var app = express();
 var http = require('http');
 var https = require('https');
 var util = require('util');
@@ -8,26 +6,19 @@ var url = require('url');
 const zlib = require('zlib');
 const gzip = zlib.createGzip();
 
+// server
 
-function handleGzip(cres, buffer, completion) {
-    var isGzip = cres.headers['content-encoding'] == "gzip";
-    if (isGzip) {
-        zlib.unzip(buffer, function(err, decoded) {
-            console.log("decoding...");
-            if (!err) {
-                console.log("decoded");
-                completion(decoded, undefined);
-            } else {
-                console.log("error " + util.inspect(err));
-                completion(undefined, err);
-            }
-        });
-    } else {
-        completion(buffer, undefined)
-    }
-}
+const server = http.createServer(function(req, res) {
+    handleRequest(req, res);
+});
 
-app.get('*', function(req, res) {
+server.listen(8080, function () {
+
+});
+
+// request
+
+function handleRequest(req, res) {
     var reqUrl = url.parse(req.url);
     var redirectHost = 'news360.com';
     console.log("host  " + reqUrl.host);
@@ -60,7 +51,9 @@ app.get('*', function(req, res) {
         console.log("start " + path);
         console.log("response  " +  util.inspect(cres.headers));
 
-        res.header("Content-Type", cres.headers['content-type']);
+        res.writeHead(200, {
+            "Content-Type": cres.headers['content-type']}
+        );
 
         var chunks = [];
         cres.on('data', function(chunk){
@@ -73,8 +66,6 @@ app.get('*', function(req, res) {
         });
 
         cres.on('end', function(){
-            res.header("Content-Type", cres.headers['content-type']);
-
             //console.log("end  " +  util.inspect(cres));
             //console.log(cres.body);
             var result;
@@ -88,7 +79,8 @@ app.get('*', function(req, res) {
                     result = data.toString();
                 }
 
-                res.send(result);
+                res.write(result, "utf8");
+                res.end();
             });
         });
 
@@ -100,8 +92,22 @@ app.get('*', function(req, res) {
     });
 
     creq.end();
-});
+}
 
-app.listen(8080, function () {
-
-});
+function handleGzip(cres, buffer, completion) {
+    var isGzip = cres.headers['content-encoding'] == "gzip";
+    if (isGzip) {
+        zlib.unzip(buffer, function(err, decoded) {
+            console.log("decoding...");
+            if (!err) {
+                console.log("decoded");
+                completion(decoded, undefined);
+            } else {
+                console.log("error " + util.inspect(err));
+                completion(undefined, err);
+            }
+        });
+    } else {
+        completion(buffer, undefined)
+    }
+}
