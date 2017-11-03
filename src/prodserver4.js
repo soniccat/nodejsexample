@@ -22,10 +22,17 @@ function handleRequest(originalRequest, originalResponse) {
     var options = getRequestOptions(originalRequest);
 
     var creq = https.request(options, function(cres) {
-        console.log("from  " +  originalRequest.url);
-        console.log("response  " +  util.inspect(cres.headers));
+        console.log("send  " + util.inspect(originalRequest.headers));
+        console.log("from  " + originalRequest.url);
+        console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
 
-        originalResponse.writeHead(200, cres.headers);
+        var headers = cres.headers;
+        if (cres.headers["content-type"]) {
+            headers["Content-Type"] = cres.headers["content-type"];
+        }
+        //delete headers["content-encoding"];
+
+        originalResponse.writeHead(cres.statusCode , headers);
 
         var chunks = [];
         cres.on('data', function(chunk){
@@ -47,21 +54,48 @@ function handleRequest(originalRequest, originalResponse) {
         originalResponse.end();
     });
 
-    creq.end();
+    //console.log("path " + originalRequest.method);
+    if (originalRequest.method == "POST") {
+        //console.log("### body " + util.inspect(originalRequest));
+        var sendPost = [];
+        originalRequest.on('data', function(chunk){
+            sendPost.push(chunk);
+        });
+
+        originalRequest.on('end', function() {
+            var buffer = Buffer.concat(sendPost);
+            console.log("post data " + buffer);
+            creq.write(buffer);
+            creq.end();
+        });
+
+    } else {
+        creq.end();
+    }
 }
 
 function getRequestOptions(req) {
     var reqUrl = url.parse(req.url);
     var redirectHost = 'news360.com';
-    console.log("host  " + reqUrl.host);
     var needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
     var host = needRedirect ? redirectHost : reqUrl.host;
     var path = reqUrl.path;
-    var defaultHeaders = {
-        "Accept": "*/*"
-    };
+    //var defaultHeaders = {
+    //    "Accept": "*/*"
+    //};
+    var defaultHeaders = req.headers;
+    defaultHeaders["accept-encoding"] = "";
+    delete defaultHeaders["if-modified-since"];
+    delete defaultHeaders["if-none-match"];
+    // delete defaultHeaders["host"];
+    // delete defaultHeaders["referer"];
+    // delete defaultHeaders["connection"];
+    // delete defaultHeaders["Accept"];
+    // delete defaultHeaders["accept"];
+    //defaultHeaders["Accept"]  = "*/*";
+    //delete defaultHeaders["accept-encoding"];
+
     var headers = needRedirect ? defaultHeaders : req.headers;
-    //console.log("send  " + util.inspect(req.headers));
 
     var options = {
         // host to forward to
@@ -74,8 +108,8 @@ function getRequestOptions(req) {
         method: req.method,
         // headers to send
         headers: headers,
-        rejectUnauthorized: false,
-        gzip: true
+        rejectUnauthorized: false//,
+        //gzip: true
     };
     return options;
 }
@@ -89,9 +123,10 @@ function handleRequestEnd(request, buffer, out) {
             result = data;
         } else {
             result = data.toString();
+            //console.log("result " + result);
         }
 
-        out.write(result, "utf8");
+        out.write(result);
         out.end();
     });
 }
