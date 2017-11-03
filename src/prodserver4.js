@@ -85,6 +85,9 @@ function getRequestOptions(req) {
     //};
     var defaultHeaders = req.headers;
     defaultHeaders["accept-encoding"] = "";
+    if (needRedirect) {
+        defaultHeaders["host"] = redirectHost;
+    }
     delete defaultHeaders["if-modified-since"];
     delete defaultHeaders["if-none-match"];
     // delete defaultHeaders["host"];
