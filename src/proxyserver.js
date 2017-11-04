@@ -144,3 +144,20 @@ function handleGzip(cres, buffer, completion) {
         completion(buffer, undefined)
     }
 }
+
+var Client = require('mariasql');
+
+var c = new Client({
+    host: '127.0.0.1',
+    user: 'alexeyglushkov',
+    password: 'pass'
+});
+
+c.query('SHOW DATABASES', function(err, rows) {
+    if (err) {
+        throw err;
+    }
+    console.dir(rows);
+});
+
+c.end();
