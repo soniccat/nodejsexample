@@ -111,7 +111,7 @@ function getRequestOptions(req) {
         method: req.method,
         headers: headers
     };
-    
+
     return options;
 }
 
