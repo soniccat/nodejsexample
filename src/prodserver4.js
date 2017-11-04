@@ -22,15 +22,14 @@ function handleRequest(originalRequest, originalResponse) {
     var options = getRequestOptions(originalRequest);
 
     var creq = https.request(options, function(cres) {
-        console.log("send  " + util.inspect(originalRequest.headers));
         console.log("from  " + originalRequest.url);
+        console.log("send  " + util.inspect(originalRequest.headers));
         console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
 
         var headers = cres.headers;
         if (cres.headers["content-type"]) {
             headers["Content-Type"] = cres.headers["content-type"];
         }
-        //delete headers["content-encoding"];
 
         originalResponse.writeHead(cres.statusCode , headers);
 
@@ -40,11 +39,15 @@ function handleRequest(originalRequest, originalResponse) {
         });
 
         cres.on('close', function(){
+            originalResponse.end();
         });
 
         cres.on('end', function(){
             var buffer = Buffer.concat(chunks);
-            handleRequestEnd(cres, buffer, originalResponse);
+            handleRequestEnd(cres, buffer, function(data) {
+                originalResponse.write(data);
+                originalResponse.end();
+            });
         });
 
     }).on('error', function(e) {
@@ -55,7 +58,7 @@ function handleRequest(originalRequest, originalResponse) {
     });
 
     //console.log("path " + originalRequest.method);
-    if (originalRequest.method == "POST") {
+    if (originalRequest.method === "POST") {
         //console.log("### body " + util.inspect(originalRequest));
         var sendPost = [];
         originalRequest.on('data', function(chunk){
@@ -110,27 +113,17 @@ function getRequestOptions(req) {
         // request method
         method: req.method,
         // headers to send
-        headers: headers,
-        rejectUnauthorized: false//,
+        headers: headers//,
+        //rejectUnauthorized: true//,
         //gzip: true
     };
     return options;
 }
 
-function handleRequestEnd(request, buffer, out) {
+function handleRequestEnd(request, buffer, callback) {
     handleGzip(request, buffer, function (data) {
-        var result = "";
-        var isImage = request.headers['content-type'] == "image/jpeg" || request.headers['content-type'] == "image/gif" || request.headers['content-type'] == "image/png";
-        if (isImage) {
-            console.log("image detected");
-            result = data;
-        } else {
-            result = data.toString();
-            //console.log("result " + result);
-        }
 
-        out.write(result);
-        out.end();
+        callback(data);
     });
 }
 
@@ -156,3 +149,5 @@ function handleGzip(cres, buffer, completion) {
         completion(buffer, undefined)
     }
 }
+
+//console.log("out " + mime.extension('image/jpeg')) ;
