@@ -26,11 +26,7 @@ function handleRequest(originalRequest, originalResponse) {
         console.log("send  " + util.inspect(originalRequest.headers));
         console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
 
-        var headers = cres.headers;
-        if (cres.headers["content-type"]) {
-            headers["Content-Type"] = cres.headers["content-type"];
-        }
-
+        var headers = buildPoxyHeaders(cres);
         originalResponse.writeHead(cres.statusCode , headers);
 
         var chunks = [];
@@ -51,7 +47,6 @@ function handleRequest(originalRequest, originalResponse) {
         });
 
     }).on('error', function(e) {
-        // we got an error, return 500 error to client and log error
         console.log(e.message);
         originalResponse.writeHead(500);
         originalResponse.end();
@@ -59,16 +54,8 @@ function handleRequest(originalRequest, originalResponse) {
 
     //console.log("path " + originalRequest.method);
     if (originalRequest.method === "POST") {
-        //console.log("### body " + util.inspect(originalRequest));
-        var sendPost = [];
-        originalRequest.on('data', function(chunk){
-            sendPost.push(chunk);
-        });
-
-        originalRequest.on('end', function() {
-            var buffer = Buffer.concat(sendPost);
-            console.log("post data " + buffer);
-            creq.write(buffer);
+        readPostBody(originalRequest, function (body) {
+            creq.write(body);
             creq.end();
         });
 
@@ -77,46 +64,54 @@ function handleRequest(originalRequest, originalResponse) {
     }
 }
 
+function buildPoxyHeaders(cres) {
+    var headers = cres.headers;
+    if (cres.headers["content-type"]) {
+        headers["Content-Type"] = cres.headers["content-type"];
+    }
+    return headers;
+}
+
+function readPostBody(originalRequest, callback) {
+    //console.log("### body " + util.inspect(originalRequest));
+    var sendPost = [];
+    originalRequest.on('data', function (chunk) {
+        sendPost.push(chunk);
+    });
+
+    originalRequest.on('end', function () {
+        var buffer = Buffer.concat(sendPost);
+        console.log("post data " + buffer);
+        callback(buffer);
+    });
+}
+
+
 function getRequestOptions(req) {
     var reqUrl = url.parse(req.url);
     var redirectHost = 'news360.com';
     var needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
     var host = needRedirect ? redirectHost : reqUrl.host;
     var path = reqUrl.path;
-    //var defaultHeaders = {
-    //    "Accept": "*/*"
-    //};
     var defaultHeaders = req.headers;
+
     defaultHeaders["accept-encoding"] = "";
     if (needRedirect) {
         defaultHeaders["host"] = redirectHost;
     }
     delete defaultHeaders["if-modified-since"];
     delete defaultHeaders["if-none-match"];
-    // delete defaultHeaders["host"];
-    // delete defaultHeaders["referer"];
-    // delete defaultHeaders["connection"];
-    // delete defaultHeaders["Accept"];
-    // delete defaultHeaders["accept"];
-    //defaultHeaders["Accept"]  = "*/*";
-    //delete defaultHeaders["accept-encoding"];
 
     var headers = needRedirect ? defaultHeaders : req.headers;
 
     var options = {
-        // host to forward to
         host: host,
-        // port to forward to
         port: 443,
-        // path to forward to
         path: path,
-        // request method
         method: req.method,
-        // headers to send
-        headers: headers//,
-        //rejectUnauthorized: true//,
-        //gzip: true
+        headers: headers
     };
+    
     return options;
 }
 
@@ -149,5 +144,3 @@ function handleGzip(cres, buffer, completion) {
         completion(buffer, undefined)
     }
 }
-
-//console.log("out " + mime.extension('image/jpeg')) ;
