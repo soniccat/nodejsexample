@@ -26,7 +26,7 @@ function handleRequest(originalRequest, originalResponse) {
                 originalResponse.write(responseInfo.response);
             }
             originalResponse.end();
-            //writeRequestRow(sendRequestInfo, responseInfo);
+            writeRequestRow(sendRequestInfo, responseInfo);
         })
     });
 }
@@ -194,3 +194,56 @@ c.query('SHOW DATABASES', function(err, rows) {
 });
 
 c.end();
+
+function writeRequestRow(requestInfo, responseInfo) {
+    //INSERT INTO main VALUES(NULL, 1, NOW(), "testurl", 80, 1, '{"type":"test_type", "h2":"h2data"}', 200,'{"response_type":"res_type"}', '{}', "lololo", null);
+    var tableName = "main";
+    var session_id = 1;
+
+    var query = "INSERT INTO main VALUES(null";
+    query += "," + session_id;
+    query += ", NOW()";
+    query += ", " + requestInfo.options.host + requestInfo.options.url;
+    query += ", " + requestInfo.options.port;
+    query += ", " + getHttpMethodCode(equestInfo.options.method);
+    query += ", " + JSON.stringify(requestInfo.options.headers);
+
+    var body_json = "NULL";
+    var body_string = "NULL";
+    var body_data = "NULL";
+    if (requestInfo.body) {
+
+        try {
+            if (JSON.parse(requestInfo.body)){
+                body_json = requestInfo.body;
+            }
+        } catch (ex) {
+            if (typeof requestInfo.body === "string" || requestInfo instanceof String) {
+                body_string = requestInfo.body;
+            } else {
+                // TODO: need to support blobs
+                //body_data = requestInfo.body;
+            }
+        }
+
+        query += ", " + body_json + ", " + body_string + ", " + body_data;
+    }
+
+
+    c.query('SHOW DATABASES', function(err, rows) {
+        if (err) {
+            throw err;
+        }
+        console.dir(rows);
+    });
+
+    c.end();
+}
+
+function getHttpMethodCode(name) {
+    switch(name){
+        case "GET": return 1;
+        case "POST": return 2;
+        default: return 0;
+    }
+}
