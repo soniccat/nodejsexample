@@ -10,10 +10,13 @@ const gzip = zlib.createGzip();
 
 var Client = require('mariasql');
 
+var database_user   = process.env.DB_USER;
+var database_pass   = process.env.DB_PASS;
+
 var database = new Client({
     host: '127.0.0.1',
-    user: 'alexeyglushkov',
-    password: 'pass',
+    user: database_user,
+    password: database_pass,
     db: "db_requests"
 });
 
