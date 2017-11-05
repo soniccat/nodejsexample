@@ -6,14 +6,36 @@ var url = require('url');
 const zlib = require('zlib');
 const gzip = zlib.createGzip();
 
+// database
+
+var Client = require('mariasql');
+
+var database = new Client({
+    host: '127.0.0.1',
+    user: 'alexeyglushkov',
+    password: 'pass',
+    db: "db_requests"
+});
+
 // server
 
 const server = http.createServer(function(req, res) {
     handleRequest(req, res);
 });
 
-server.listen(8080, function () {
+server.on('error', function (e) {
+    console.log("server error " + e);
+    database.end();
+    throw err;
+});
 
+server.listen(8080, function () {
+});
+
+process.on('uncaughtException', function(err){
+    console.log(err);
+    database.end();
+    throw err;
 });
 
 // request
@@ -21,6 +43,9 @@ server.listen(8080, function () {
 function handleRequest(originalRequest, originalResponse) {
     prepareSendRequestInfo(originalRequest, function (sendRequestInfo) {
         prepareResponseInfo(sendRequestInfo, function (responseInfo) {
+            console.log("send  " + util.inspect(sendRequestInfo));
+            console.log("response  " + util.inspect(responseInfo));
+
             originalResponse.writeHead(responseInfo.statusCode , responseInfo.headers);
             if (responseInfo.response) {
                 originalResponse.write(responseInfo.response);
@@ -53,15 +78,11 @@ function prepareSendRequestInfo(originalRequest, callback) {
 
 function prepareResponseInfo(sendRequestInfo, callback) {
     // is used to build a db insert query
-    // contains headers, statusCode and response keys
+    // contains headers, statusCode and body keys
     var responseInfo = {
     };
 
     var creq = https.request(sendRequestInfo.options, function(cres) {
-        console.log("from  " + sendRequestInfo.options.host + sendRequestInfo.options.path);
-        console.log("send  " + util.inspect(sendRequestInfo.options.headers));
-        console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
-
         var headers = buildPoxyHeaders(cres);
         responseInfo.headers = headers;
         responseInfo.statusCode = cres.statusCode;
@@ -78,7 +99,7 @@ function prepareResponseInfo(sendRequestInfo, callback) {
         cres.on('end', function(){
             var buffer = Buffer.concat(chunks);
             handleRequestEnd(cres, buffer, function(data) {
-                responseInfo.response = data;
+                responseInfo.body = data;
                 callback(responseInfo);
             });
         });
@@ -178,22 +199,7 @@ function handleGzip(cres, buffer, completion) {
     }
 }
 
-var Client = require('mariasql');
-
-var c = new Client({
-    host: '127.0.0.1',
-    user: 'alexeyglushkov',
-    password: 'pass'
-});
-
-c.query('SHOW DATABASES', function(err, rows) {
-    if (err) {
-        throw err;
-    }
-    console.dir(rows);
-});
-
-c.end();
+// work with database
 
 function writeRequestRow(requestInfo, responseInfo) {
     //INSERT INTO main VALUES(NULL, 1, NOW(), "testurl", 80, 1, '{"type":"test_type", "h2":"h2data"}', 200,'{"response_type":"res_type"}', '{}', "lololo", null);
@@ -203,41 +209,86 @@ function writeRequestRow(requestInfo, responseInfo) {
     var query = "INSERT INTO main VALUES(null";
     query += "," + session_id;
     query += ", NOW()";
-    query += ", " + requestInfo.options.host + requestInfo.options.url;
+    query += ", " + wrapString(getUrlString(requestInfo));
     query += ", " + requestInfo.options.port;
-    query += ", " + getHttpMethodCode(equestInfo.options.method);
-    query += ", " + JSON.stringify(requestInfo.options.headers);
+    query += ", " + getHttpMethodCode(requestInfo.options.method);
+    query += ", " + (requestInfo.options.headers ? wrapString(JSON.stringify(requestInfo.options.headers)) : "NULL");
 
     var body_json = "NULL";
     var body_string = "NULL";
     var body_data = "NULL";
+
+    var isBodyString = requestInfo.body && isValidUTF8(requestInfo.body);
     if (requestInfo.body) {
+        if (isBodyString && isJsonString(requestInfo.body.toString())) {
+            body_json = wrapString(requestInfo.body.toString());
 
-        try {
-            if (JSON.parse(requestInfo.body)){
-                body_json = requestInfo.body;
-            }
-        } catch (ex) {
-            if (typeof requestInfo.body === "string" || requestInfo instanceof String) {
-                body_string = requestInfo.body;
-            } else {
-                // TODO: need to support blobs
-                //body_data = requestInfo.body;
-            }
+        }else if (isBodyString) {
+            body_string = wrapString(requestInfo.body.toString());
+
+        } else {
+            // TODO: need to support blobs
+            //body_data = requestInfo.body;
         }
-
-        query += ", " + body_json + ", " + body_string + ", " + body_data;
     }
+    query += ", " + body_json + ", " + body_string + ", " + body_data;
 
+    query += ", " + responseInfo.statusCode;
+    query += ", " + (responseInfo.header ? wrapString(JSON.stringify(responseInfo.header)) : "NULL");
 
-    c.query('SHOW DATABASES', function(err, rows) {
-        if (err) {
-            throw err;
+    var response_json = "NULL";
+    var response_string = "NULL";
+    var response_data = "NULL";
+
+    var isResponseBodyString = responseInfo.body && isValidUTF8(responseInfo.body);
+    if (responseInfo.body) {
+        if (isResponseBodyString && isJsonString(responseInfo.body.toString())){
+            response_json = wrapString(responseInfo.body.toString());
+        } else if (isResponseBodyString) {
+            response_string = wrapString(responseInfo.body.toString());
+        } else {
+            // TODO: need to support blobs
+            //response_data = responseInfo.body;
         }
-        console.dir(rows);
+    }
+    query += ", " + response_json + ", " + response_string + ", " + response_data;
+
+    query += ");";
+
+
+    database.query(query, function(err, rows) {
+        if (err) {
+            console.log("insert error " + err);
+            console.log("query " + query);
+            throw err;
+        } else {
+            console.log("data inserted");
+        }
     });
 
-    c.end();
+    database.end();
+}
+
+function getUrlString(requestInfo) {
+    var scheme = requestInfo.port == 443 ? "https://" : "http://";
+    return scheme + requestInfo.options.host + (requestInfo.options.path ? requestInfo.options.path : "");
+}
+
+function wrapString(value) {
+    return "\"" + Client.escape(value) + "\"";
+}
+
+function isValidUTF8(buf){
+    return Buffer.compare(new Buffer(buf.toString(),'utf8') , buf) === 0;
+}
+
+function isJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
 }
 
 function getHttpMethodCode(name) {
