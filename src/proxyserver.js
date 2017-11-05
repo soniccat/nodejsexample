@@ -19,48 +19,65 @@ server.listen(8080, function () {
 // request
 
 function handleRequest(originalRequest, originalResponse) {
-    var options = getRequestOptions(originalRequest);
 
-    var creq = https.request(options, function(cres) {
-        console.log("from  " + originalRequest.url);
-        console.log("send  " + util.inspect(originalRequest.headers));
-        console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
+    prepareSendRequestInfo(originalRequest, function (sendRequestInfo) {
+        var creq = https.request(sendRequestInfo.options, function(cres) {
+            console.log("from  " + originalRequest.url);
+            console.log("send  " + util.inspect(originalRequest.headers));
+            console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
 
-        var headers = buildPoxyHeaders(cres);
-        originalResponse.writeHead(cres.statusCode , headers);
+            var headers = buildPoxyHeaders(cres);
+            originalResponse.writeHead(cres.statusCode , headers);
 
-        var chunks = [];
-        cres.on('data', function(chunk){
-            chunks.push(chunk);
-        });
+            var chunks = [];
+            cres.on('data', function(chunk){
+                chunks.push(chunk);
+            });
 
-        cres.on('close', function(){
+            cres.on('close', function(){
+                originalResponse.end();
+            });
+
+            cres.on('end', function(){
+                var buffer = Buffer.concat(chunks);
+                handleRequestEnd(cres, buffer, function(data) {
+                    //writeRequestRow(cres, data);
+                    originalResponse.write(data);
+                    originalResponse.end();
+                });
+            });
+
+        }).on('error', function(e) {
+            console.log(e.message);
+            originalResponse.writeHead(500);
             originalResponse.end();
         });
 
-        cres.on('end', function(){
-            var buffer = Buffer.concat(chunks);
-            handleRequestEnd(cres, buffer, function(data) {
-                originalResponse.write(data);
-                originalResponse.end();
-            });
-        });
+        if (sendRequestInfo.body) {
+            creq.write(sendRequestInfo.body);
+        }
 
-    }).on('error', function(e) {
-        console.log(e.message);
-        originalResponse.writeHead(500);
-        originalResponse.end();
+        creq.end();
     });
+}
+
+function prepareSendRequestInfo(originalRequest, callback) {
+    var options = getRequestOptions(originalRequest);
+
+    // is used to build a db insert query
+    // contains options and body keys
+    var sendData = {
+        options: options
+    };
 
     //console.log("path " + originalRequest.method);
     if (originalRequest.method === "POST") {
         readPostBody(originalRequest, function (body) {
-            creq.write(body);
-            creq.end();
+            sendData.body = body;
+            callback(sendData);
         });
-
     } else {
-        creq.end();
+        callback(sendData);
     }
 }
 
@@ -99,6 +116,8 @@ function getRequestOptions(req) {
     if (needRedirect) {
         defaultHeaders["host"] = redirectHost;
     }
+
+    // to avoid caching
     delete defaultHeaders["if-modified-since"];
     delete defaultHeaders["if-none-match"];
 
