@@ -160,6 +160,8 @@ function getRequestOptions(req) {
     // to avoid caching
     delete defaultHeaders["if-modified-since"];
     delete defaultHeaders["if-none-match"];
+    delete defaultHeaders["origin"];
+    delete defaultHeaders["referer"];
 
     var headers = needRedirect ? defaultHeaders : req.headers;
 
