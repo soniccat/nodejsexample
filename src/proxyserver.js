@@ -22,6 +22,8 @@ var database = new Client({
 
 // server
 
+var sever_port   = process.env.SERVER_PORT;
+
 const server = http.createServer(function(req, res) {
     handleRequest(req, res);
 });
@@ -32,7 +34,7 @@ server.on('error', function (e) {
     throw err;
 });
 
-server.listen(8080, function () {
+server.listen(sever_port, function () {
 });
 
 process.on('uncaughtException', function(err){
