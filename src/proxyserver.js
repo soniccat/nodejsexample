@@ -19,45 +19,15 @@ server.listen(8080, function () {
 // request
 
 function handleRequest(originalRequest, originalResponse) {
-
     prepareSendRequestInfo(originalRequest, function (sendRequestInfo) {
-        var creq = https.request(sendRequestInfo.options, function(cres) {
-            console.log("from  " + originalRequest.url);
-            console.log("send  " + util.inspect(originalRequest.headers));
-            console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
-
-            var headers = buildPoxyHeaders(cres);
-            originalResponse.writeHead(cres.statusCode , headers);
-
-            var chunks = [];
-            cres.on('data', function(chunk){
-                chunks.push(chunk);
-            });
-
-            cres.on('close', function(){
-                originalResponse.end();
-            });
-
-            cres.on('end', function(){
-                var buffer = Buffer.concat(chunks);
-                handleRequestEnd(cres, buffer, function(data) {
-                    //writeRequestRow(cres, data);
-                    originalResponse.write(data);
-                    originalResponse.end();
-                });
-            });
-
-        }).on('error', function(e) {
-            console.log(e.message);
-            originalResponse.writeHead(500);
+        prepareResponseInfo(sendRequestInfo, function (responseInfo) {
+            originalResponse.writeHead(responseInfo.statusCode , responseInfo.headers);
+            if (responseInfo.response) {
+                originalResponse.write(responseInfo.response);
+            }
             originalResponse.end();
-        });
-
-        if (sendRequestInfo.body) {
-            creq.write(sendRequestInfo.body);
-        }
-
-        creq.end();
+            //writeRequestRow(sendRequestInfo, responseInfo);
+        })
     });
 }
 
@@ -79,6 +49,50 @@ function prepareSendRequestInfo(originalRequest, callback) {
     } else {
         callback(sendData);
     }
+}
+
+function prepareResponseInfo(sendRequestInfo, callback) {
+    // is used to build a db insert query
+    // contains headers, statusCode and response keys
+    var responseInfo = {
+    };
+
+    var creq = https.request(sendRequestInfo.options, function(cres) {
+        console.log("from  " + sendRequestInfo.options.host + sendRequestInfo.options.path);
+        console.log("send  " + util.inspect(sendRequestInfo.options.headers));
+        console.log("response  " + cres.statusCode + " " + util.inspect(cres.headers));
+
+        var headers = buildPoxyHeaders(cres);
+        responseInfo.headers = headers;
+        responseInfo.statusCode = cres.statusCode;
+
+        var chunks = [];
+        cres.on('data', function(chunk){
+            chunks.push(chunk);
+        });
+
+        cres.on('close', function(){
+            callback(responseInfo);
+        });
+
+        cres.on('end', function(){
+            var buffer = Buffer.concat(chunks);
+            handleRequestEnd(cres, buffer, function(data) {
+                responseInfo.response = data;
+                callback(responseInfo);
+            });
+        });
+
+    }).on('error', function(e) {
+        responseInfo.statusCode = 500;
+        callback(responseInfo);
+    });
+
+    if (sendRequestInfo.body) {
+        creq.write(sendRequestInfo.body);
+    }
+
+    creq.end();
 }
 
 function buildPoxyHeaders(cres) {
