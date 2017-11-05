@@ -43,15 +43,16 @@ process.on('uncaughtException', function(err){
 function handleRequest(originalRequest, originalResponse) {
     prepareSendRequestInfo(originalRequest, function (sendRequestInfo) {
         prepareResponseInfo(sendRequestInfo, function (responseInfo) {
-            console.log("send  " + util.inspect(sendRequestInfo));
-            console.log("response  " + util.inspect(responseInfo));
+            logRequest(sendRequestInfo, responseInfo);
+            if(needWriteRequestRow(sendRequestInfo, responseInfo)) {
+                writeRequestRow(sendRequestInfo, responseInfo);
+            }
 
             originalResponse.writeHead(responseInfo.statusCode , responseInfo.headers);
-            if (responseInfo.response) {
-                originalResponse.write(responseInfo.response);
+            if (responseInfo.body) {
+                originalResponse.write(responseInfo.body);
             }
             originalResponse.end();
-            writeRequestRow(sendRequestInfo, responseInfo);
         })
     });
 }
@@ -138,7 +139,6 @@ function readPostBody(originalRequest, callback) {
     });
 }
 
-
 function getRequestOptions(req) {
     var reqUrl = url.parse(req.url);
     var redirectHost = 'news360.com';
@@ -199,7 +199,17 @@ function handleGzip(cres, buffer, completion) {
     }
 }
 
+function logRequest(sendRequestInfo, responseInfo) {
+    console.log("send  " + util.inspect(sendRequestInfo));
+    console.log("response  " + util.inspect(responseInfo));
+}
+
+
 // work with database
+
+function needWriteRequestRow(requestInfo, responseInfo) {
+    return requestInfo.options.path && requestInfo.options.path.indexOf("/api/") != -1;
+}
 
 function writeRequestRow(requestInfo, responseInfo) {
     //INSERT INTO main VALUES(NULL, 1, NOW(), "testurl", 80, 1, '{"type":"test_type", "h2":"h2data"}', 200,'{"response_type":"res_type"}', '{}', "lololo", null);
