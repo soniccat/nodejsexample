@@ -277,7 +277,7 @@ function writeRequestRow(requestInfo, responseInfo) {
         if (err) {
             console.log("insert error " + err);
             console.log("query " + query);
-            throw err;
+            //throw err;
         } else {
             console.log("data inserted");
         }
