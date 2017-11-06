@@ -5,7 +5,8 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-      main: './src/app.js',
+      main: './src/react-app.jsx',
+      //test: './src/app.js',
       vendor: [
           "path"
       ]
@@ -36,13 +37,21 @@ module.exports = {
             use: [
                 {loader: "file-loader"}
             ]
-      }
+      }, {
+            test: /\.jsx$/,
+            exclude: /(node_modules)/,
+            use: {
+                loader: 'babel-loader'
+            }
+        }
     ]
   },
   plugins: [
     new CleanWebpackPlugin(['dist']),
   	new HtmlWebpackPlugin({
-        title: 'Output Management'
+        title: 'Output Management',
+        inject: true,
+        template: 'public/index.html'
     }),
       new webpack.HashedModuleIdsPlugin(),
       new webpack.optimize.CommonsChunkPlugin({

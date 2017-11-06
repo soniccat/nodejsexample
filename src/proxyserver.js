@@ -146,7 +146,7 @@ function readPostBody(originalRequest, callback) {
 
 function getRequestOptions(req) {
     var reqUrl = url.parse(req.url);
-    var redirectHost = 'news360.com';
+    var redirectHost = 'quizlet.com';
     var needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
     var host = needRedirect ? redirectHost : reqUrl.host;
     var path = reqUrl.path;
@@ -207,6 +207,7 @@ function handleGzip(cres, buffer, completion) {
 }
 
 function logRequest(sendRequestInfo, responseInfo) {
+    console.log("for " + getUrlString(sendRequestInfo));
     console.log("send  " + util.inspect(sendRequestInfo));
     console.log("response  " + util.inspect(responseInfo));
 }
@@ -215,7 +216,8 @@ function logRequest(sendRequestInfo, responseInfo) {
 // work with database
 
 function needWriteRequestRow(requestInfo, responseInfo) {
-    return requestInfo.options.path && requestInfo.options.path.indexOf("/api/") != -1;
+    //return requestInfo.options.path && requestInfo.options.path.indexOf("/api/") != -1;
+    return requestInfo.options.path && requestInfo.options.path.indexOf("/webapi/") != -1;
 }
 
 function writeRequestRow(requestInfo, responseInfo) {
