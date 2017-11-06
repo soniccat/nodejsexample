@@ -6,7 +6,7 @@ const webpack = require('webpack');
 module.exports = {
   entry: {
       main: './src/react-app.jsx',
-      //test: './src/app.js',
+      test: './src/app.js',
       vendor: [
           "path"
       ]
@@ -51,7 +51,9 @@ module.exports = {
   	new HtmlWebpackPlugin({
         title: 'Output Management',
         inject: true,
-        template: 'public/index.html'
+        template: 'public/index.html',
+        chunks: ['main', 'mychunk', 'mychunk2', 'vendor'],
+        filename: 'index.html'
     }),
       new webpack.HashedModuleIdsPlugin(),
       new webpack.optimize.CommonsChunkPlugin({
