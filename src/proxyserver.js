@@ -216,8 +216,7 @@ function logRequest(sendRequestInfo, responseInfo) {
 // work with database
 
 function needWriteRequestRow(requestInfo, responseInfo) {
-    //return requestInfo.options.path && requestInfo.options.path.indexOf("/api/") != -1;
-    return requestInfo.options.path && requestInfo.options.path.indexOf("/webapi/") != -1;
+    return requestInfo.options.path && requestInfo.options.path.indexOf("api") != -1;
 }
 
 function writeRequestRow(requestInfo, responseInfo) {
