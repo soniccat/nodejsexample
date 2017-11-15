@@ -6,7 +6,7 @@ require.ensure([], function(require) {
     bar()
 });
 
-var image = require('./screen.png');
+var image = require('../assets/screen.png');
 
 function addElement() {
     var element = document.createElement('div');

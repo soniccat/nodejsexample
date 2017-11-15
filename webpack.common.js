@@ -1,8 +1,6 @@
 const path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
@@ -55,11 +53,9 @@ module.exports = {
         inject: true,
         template: 'public/index.html',
         hash: true,
-        //css: ['./my.css'],
         chunks: ['main', 'mychunk', 'mychunk2', 'vendor'],
         filename: 'index.html'
     }),
-    //new HtmlWebpackIncludeAssetsPlugin({ assets: ['./my.css'], append: true }),
     new HtmlWebpackPlugin({
         title: 'Test app',
         inject: true,
