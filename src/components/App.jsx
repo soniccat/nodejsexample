@@ -1,14 +1,15 @@
 import React from 'react';
-import RequestRow from '../elements/RequestRow.jsx'
+import RequestRow from 'Elements/RequestRow';
 
 class App extends React.Component {
     render() {
         return (
             <div>
                 <RequestRow />
+                <RequestRow />
             </div>
         );
     }
 }
 
-export default App
+export default App;

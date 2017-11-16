@@ -10,4 +10,4 @@ class RequestRow extends React.Component {
     }
 }
 
-export default RequestRow
+export default RequestRow;
