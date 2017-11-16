@@ -1,7 +1,7 @@
-const path = require('path');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const webpack = require('webpack');
+let path = require('path');
+let HtmlWebpackPlugin = require('html-webpack-plugin');
+let CleanWebpackPlugin = require('clean-webpack-plugin');
+let webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -38,7 +38,7 @@ module.exports = {
                 {loader: "file-loader"}
             ]
       }, {
-            test: /\.jsx$/,
+            test: /\.jsx?$/,
             exclude: /(node_modules)/,
             use: {
                 loader: 'babel-loader'
@@ -50,7 +50,8 @@ module.exports = {
       extensions: ['.js', '.jsx'],
       alias: {
           Components: path.resolve(__dirname, 'src/components/'),
-          Elements: path.resolve(__dirname, 'src/elements/')
+          Elements: path.resolve(__dirname, 'src/elements/'),
+          Utils: path.resolve(__dirname, 'src/utils/')
       }
   },
   plugins: [
