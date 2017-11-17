@@ -6,6 +6,9 @@ var url = require('url');
 const zlib = require('zlib');
 const gzip = zlib.createGzip();
 
+const host = "aglushkov.com";
+const apiPath = "__api__";
+
 // database
 
 var Client = require('mariasql');
@@ -25,7 +28,12 @@ var database = new Client({
 var sever_port   = process.env.SERVER_PORT;
 
 const server = http.createServer(function(req, res) {
-    handleRequest(req, res);
+    if (isApiRequest(req)) {
+        handleApiRequest(req, res);
+
+    } else {
+        handleRequest(req, res);
+    }
 });
 
 server.on('error', function (e) {
@@ -42,6 +50,69 @@ process.on('uncaughtException', function(err){
     database.end();
     throw err;
 });
+
+// api
+
+function isApiRequest(req) {
+    const reqUrl = url.parse(req.url);
+    const isHostValid = reqUrl.host == undefined || reqUrl.host == "localhost" || reqUrl.host == host;
+    const path = reqUrl.path.length > 0 ? reqUrl.path.substr(1) : ""; // remove starting '/'
+    const isPathValid = path.startsWith(apiPath);
+    return isHostValid && isPathValid;
+}
+
+function handleApiRequest(req, res) {
+    const reqUrl = url.parse(req.url);
+    const path = reqUrl.path.substr(apiPath.length + 2); // +2 for double '/' at the beginning and end
+    const components = path.split('/');
+
+    readPostBody(req, function (body) {
+        handleApiComponents(components, body, res, function() {
+            res.end();
+        });
+    });
+}
+
+function handleApiComponents(components, body, res, callback) {
+    if (components[0] == "requests") {
+        handleRequests(body, res, function () {
+            callback();
+        });
+
+    } else {
+        fillNotFoundResponse(res);
+        callback();
+    }
+}
+
+function handleRequests(body, res, callback) {
+    let options = JSON.parse(body.toString());
+    loadRequests(options, function (err, rows) {
+        console.dir(body);
+        console.dir(rows);
+
+        var code;
+        var body;
+        if (err == undefined ) {
+            code = 200;
+            body = JSON.stringify(rows);
+
+        } else {
+            code = 500;
+        }
+
+        res.writeHead(code);
+        if (body) {
+            res.write(body);
+        }
+
+        callback()
+    })
+}
+
+function fillNotFoundResponse(res) {
+    res.writeHead(404);
+}
 
 // request
 
@@ -72,14 +143,19 @@ function prepareSendRequestInfo(originalRequest, callback) {
     };
 
     //console.log("path " + originalRequest.method);
-    if (originalRequest.method === "POST") {
-        readPostBody(originalRequest, function (body) {
-            sendData.body = body;
-            callback(sendData);
-        });
-    } else {
+    // if (originalRequest.method === "POST") {
+    //     readPostBody(originalRequest, function (body) {
+    //         sendData.body = body;
+    //         callback(sendData);
+    //     });
+    // } else {
+    //     callback(sendData);
+    // }
+
+    readPostBody(originalRequest, function (body) {
+        sendData.body = body;
         callback(sendData);
-    }
+    });
 }
 
 function prepareResponseInfo(sendRequestInfo, callback) {
@@ -132,6 +208,10 @@ function buildPoxyHeaders(cres) {
 
 function readPostBody(originalRequest, callback) {
     //console.log("### body " + util.inspect(originalRequest));
+    if (originalRequest.method !== "POST") {
+        callback(undefined);
+    }
+
     var sendPost = [];
     originalRequest.on('data', function (chunk) {
         sendPost.push(chunk);
@@ -282,6 +362,40 @@ function writeRequestRow(requestInfo, responseInfo) {
         } else {
             console.log("data inserted");
         }
+    });
+
+    database.end();
+}
+
+function loadRequests(options, callback) {
+    var fields = "*";
+    if (options.fields) {
+        fields = options.fields.join(',');
+    }
+
+    var wherePart = "";
+    var urlRegexp = "";
+    if (options.urlRegexp) {
+        urlRegexp = options.urlRegexp;
+        wherePart += "url REGEXP " + "\"" + urlRegexp + "\"";
+    }
+
+    if (options.onlyNotNull && options.fields) {
+        for (i = 0; i < options.fields.length; i++) {
+            if (wherePart.length > 0) {
+                wherePart += " AND "
+            }
+            wherePart += options.fields[i] +" IS NOT NULL ";
+        }
+    }
+
+    var query = "select " + fields + " from main";
+    if (wherePart.length) {
+        query += " where " + wherePart;
+    }
+
+    database.query(query, function(err, rows) {
+        callback(err, rows);
     });
 
     database.end();
