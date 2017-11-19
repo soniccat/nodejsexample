@@ -32,7 +32,8 @@ const server = http.createServer(function(req, res) {
         handleApiRequest(req, res);
 
     } else {
-        handleRequest(req, res);
+        //handleRequest(req, res);
+        res.end();
     }
 });
 
@@ -66,11 +67,22 @@ function handleApiRequest(req, res) {
     const path = reqUrl.path.substr(apiPath.length + 2); // +2 for double '/' at the beginning and end
     const components = path.split('/');
 
-    readPostBody(req, function (body) {
-        handleApiComponents(components, body, res, function() {
-            res.end();
+    // allow Cross-Origin Resource Sharing preflight request
+    if (req.method == "OPTIONS") {
+        res.writeHeader(200, {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers": "X-PINGOTHER, Content-Type"
         });
-    });
+        res.end();
+
+    } else {
+        readPostBody(req, function (body) {
+            handleApiComponents(components, body, res, function () {
+                res.end();
+            });
+        });
+    }
 }
 
 function handleApiComponents(components, body, res, callback) {
@@ -101,7 +113,10 @@ function handleRequests(body, res, callback) {
             code = 500;
         }
 
-        res.writeHead(code);
+        res.writeHead(code, {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json"
+        });
         if (body) {
             res.write(body);
         }
@@ -142,7 +157,7 @@ function prepareSendRequestInfo(originalRequest, callback) {
         options: options
     };
 
-    //console.log("path " + originalRequest.method);
+    // console.log("path " + originalRequest.method);
     // if (originalRequest.method === "POST") {
     //     readPostBody(originalRequest, function (body) {
     //         sendData.body = body;
@@ -153,7 +168,10 @@ function prepareSendRequestInfo(originalRequest, callback) {
     // }
 
     readPostBody(originalRequest, function (body) {
-        sendData.body = body;
+        if (body) {
+            sendData.body = body;
+        }
+
         callback(sendData);
     });
 }
@@ -210,18 +228,19 @@ function readPostBody(originalRequest, callback) {
     //console.log("### body " + util.inspect(originalRequest));
     if (originalRequest.method !== "POST") {
         callback(undefined);
+
+    } else {
+        var sendPost = [];
+        originalRequest.on('data', function (chunk) {
+            sendPost.push(chunk);
+        });
+
+        originalRequest.on('end', function () {
+            var buffer = Buffer.concat(sendPost);
+            console.log("post data " + buffer);
+            callback(buffer);
+        });
     }
-
-    var sendPost = [];
-    originalRequest.on('data', function (chunk) {
-        sendPost.push(chunk);
-    });
-
-    originalRequest.on('end', function () {
-        var buffer = Buffer.concat(sendPost);
-        console.log("post data " + buffer);
-        callback(buffer);
-    });
 }
 
 function getRequestOptions(req) {
