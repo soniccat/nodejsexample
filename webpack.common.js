@@ -47,11 +47,12 @@ module.exports = {
     ]
   },
   resolve: {
-      extensions: ['.js', '.jsx'],
+      extensions: ['.js', '.jsx', '.scss'],
       alias: {
           Components: path.resolve(__dirname, 'src/components/'),
           Elements: path.resolve(__dirname, 'src/elements/'),
-          Utils: path.resolve(__dirname, 'src/utils/')
+          Utils: path.resolve(__dirname, 'src/utils/'),
+          CSS: path.resolve(__dirname, 'css/'),
       }
   },
   plugins: [

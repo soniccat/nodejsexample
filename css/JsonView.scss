@@ -1,0 +1,20 @@
+.json_view {
+
+}
+
+.json_key {
+    display: inline-block;
+}
+
+.json_value {
+    display: inline-block;
+}
+
+.json_delimiter {
+    min-width: 10px;
+    display: inline-block;
+
+    &::after {
+        content: ':';
+    }
+}

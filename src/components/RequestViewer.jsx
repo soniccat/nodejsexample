@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import RequestRow from 'Elements/RequestRow';
 import loadRequest from 'Utils/loadRequest'
 import {buildRequestOptions} from 'Utils/RequestOptions';
+import handleRequestResponse from 'Utils/handleRequestResponse'
 
 class RequestViewer extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {requestOptions: {
-                                fields: ["id", "url", "body_json"],
+                                fields: ["id", "url", "method", "header", "body_json"],
                                 urlRegexp: ".*v4.*",
                                 onlyNotNull: true
                             },
@@ -27,7 +28,7 @@ class RequestViewer extends React.Component {
         let options = buildRequestOptions(this.state.requestOptions);
 
         let that = this;
-        loadRequest(options, function (err, response) {
+        loadRequest(options, handleRequestResponse(function (err, response) {
             if (err != undefined) {
                 that.setState({
                     error: err
@@ -37,13 +38,16 @@ class RequestViewer extends React.Component {
                     rows: response.data
                 })
             }
-        })
+        }))
     }
 
     render() {
         console.dir(this.state.rows);
         let rows = this.state.rows.map(function(row) {
-                return <RequestRow key={row.id} url={row.url}/>
+                return <RequestRow key={row.id}
+                                   url={row.url}
+                                   method={row.method}
+                                   header={row.header}/>
             }
         );
 

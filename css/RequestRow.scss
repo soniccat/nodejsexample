@@ -1,0 +1,22 @@
+.request_row {
+  padding: 5px;
+
+  .request_method {
+    padding: 5px;
+    display: inline-block;
+  }
+
+  .request_url {
+    padding: 5px;
+    display: inline-block;
+  }
+
+  .request_row_extra {
+    padding: 5px;
+  }
+
+  .json_view {
+    display: inline-block;
+    font-size: 10px;
+  }
+}
