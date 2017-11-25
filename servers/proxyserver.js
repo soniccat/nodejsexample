@@ -413,6 +413,7 @@ function loadRequests(options, callback) {
         query += " where " + wherePart;
     }
 
+    console.log("query " + query);
     database.query(query, function(err, rows) {
         callback(err, rows);
     });

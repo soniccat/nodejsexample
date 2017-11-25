@@ -11,12 +11,32 @@
     display: inline-block;
   }
 
+  .request_response_status {
+    padding: 5px;
+    display: inline-block;
+  }
+
+  .request_header {
+    display: inline-block;
+    font-size: 10px;
+    vertical-align: top;
+    max-height: 200px;
+    overflow: scroll;
+  }
+
+  .request_body {
+    display: inline-block;
+    font-size: 10px;
+    vertical-align: top;
+    max-height: 200px;
+    overflow: scroll;
+  }
+
   .request_row_extra {
     padding: 5px;
   }
 
-  .json_view {
-    display: inline-block;
-    font-size: 10px;
+  .json_row {
+    padding-left: 10px;
   }
 }
