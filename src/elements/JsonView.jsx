@@ -25,7 +25,7 @@ class JsonView extends React.Component {
             cells.push(<div key={'' + key + '_delimeter'} className={"json_delimiter" + (isSubJson ? " sub_json" : "")}/>);
 
             let bodyKey = '' + key + '_value';
-            cells.push(isSubJson ? <JsonView key={bodyKey} obj={obj}/> : <div key={bodyKey} className="json_value">{obj}</div>);
+            cells.push(isSubJson ? <div key={bodyKey}><JsonView obj={obj}/></div> : <div key={bodyKey} className="json_value">{obj}</div>);
         }
 
         return <div className="json_view">
