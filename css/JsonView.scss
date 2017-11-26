@@ -1,18 +1,21 @@
 .json_view {
+}
 
+.json_row {
+    display: flex;
 }
 
 .json_key {
-    display: inline-block;
+    flex: 0 0;
 }
 
 .json_value {
-    display: inline-block;
+    flex: 0 0;
 }
 
 .json_delimiter {
     min-width: 10px;
-    display: inline-block;
+    flex: 0 0;
 
     &::after {
         content: ':';
