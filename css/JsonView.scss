@@ -1,21 +1,25 @@
 .json_view {
-}
-
-.json_row {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto;
+    justify-content: start;
 }
 
 .json_key {
-    flex: 0 0;
+    grid-column-start: 1;
+    align-self: start;
 }
 
 .json_value {
-    flex: 0 0;
+    grid-column-start: 3;
 }
 
 .json_delimiter {
-    min-width: 10px;
-    flex: 0 0;
+    grid-column-start: 2;
+    align-self: start;
+
+    padding-left: 5px;
+    padding-right: 5px;
 
     &::after {
         content: ':';

@@ -38,7 +38,16 @@
     padding: 5px;
   }
 
-  .json_row {
-    padding-left: 10px;
+  .json_view {
+    padding-left: 0;
+    background-color: rgba(0, 0, 255, 0.2);
+
+    .json_key.sub_json {
+      background-color: rgba(0, 0, 255, 0.2);
+    }
+
+    .json_delimiter.sub_json {
+      background-color: rgba(0, 0, 255, 0.2);
+    }
   }
 }

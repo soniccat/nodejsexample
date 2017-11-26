@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {isObject} from "Utils/Tools"
+import {isObject, isEmptyArray} from "Utils/Tools"
 
 import style from 'CSS/JsonView'
 
@@ -13,16 +13,23 @@ class JsonView extends React.Component {
 
     render() {
         let that = this;
-        let rows = Object.keys(that.state.obj).map(function(key) {
-            return <div key={key} className="json_row">
-                <div className="json_key">{key}</div>
-                <div className="json_delimiter"/>
-                {isObject(that.state.obj[key]) ? <JsonView obj={that.state.obj[key]}/> : <div className="json_value">{that.state.obj[key]}</div>}
-            </div>
-        });
+
+        var cells = [];
+        let keys = Object.keys(that.state.obj);
+        for (var i = 0; i < keys.length; ++i) {
+            let key = keys[i];
+            let obj = that.state.obj[key];
+            let isSubJson = isObject(obj) && !isEmptyArray(obj);
+
+            cells.push(<div key={'' + key + '_key'} className={"json_key" + (isSubJson ? " sub_json" : "")}>{key}</div>);
+            cells.push(<div key={'' + key + '_delimeter'} className={"json_delimiter" + (isSubJson ? " sub_json" : "")}/>);
+
+            let bodyKey = '' + key + '_value';
+            cells.push(isSubJson ? <JsonView key={bodyKey} obj={obj}/> : <div key={bodyKey} className="json_value">{obj}</div>);
+        }
 
         return <div className="json_view">
-            {rows}
+            {cells}
         </div>
     }
 }
