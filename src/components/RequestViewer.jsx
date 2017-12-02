@@ -10,7 +10,9 @@ class RequestViewer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {requestOptions: {
-                                fields: ["id", "url", "method", "header", "body_json", "body_string", "response_status"],
+                                fields: ["id", "url", "method",
+                                    "header", "body_json", "body_string",
+                                    "response_status", "response_header", "response_json", "response_string"],
                                 urlRegexp: ".*v4.*",
                                 onlyNotNull: false
                             },
@@ -48,8 +50,11 @@ class RequestViewer extends React.Component {
                                    url={row.url}
                                    method={row.method}
                                    header={row.header}
+                                   body={row.body}
                                    responseStatus={row.responseStatus}
-                                   body={row.body}/>
+                                   responseHeader={row.responseHeader}
+                                   responseBody={row.responseBody}
+                                   />
             }
         );
 

@@ -30,6 +30,20 @@ function normalizeRequestResponse(request) {
     if (body) {
         request.body = body;
     }
+
+    request.responseHeader = JSON.parse(request.response_header);
+
+    var responseBody = undefined;
+    if (request.response_json) {
+        responseBody = JSON.parse(request.response_json);
+    } else if (request.response_string) {
+        responseBody = request.response_string;
+    }
+
+    if (responseBody) {
+        request.responseBody = responseBody;
+    }
+
 }
 
 export default handleRequestResponse;
