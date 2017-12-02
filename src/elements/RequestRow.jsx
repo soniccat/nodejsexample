@@ -76,8 +76,8 @@ class RequestRow extends React.Component {
                     </div>: undefined}
             </div>
 
-            <div className="request_received_data" onClick={this.onReceivedShortClicked}>
-                <div className="request_received_short">
+            <div className="request_received_data">
+                <div className="request_received_short" onClick={this.onReceivedShortClicked}>
                     {this.renderExpandedMark("received_expand_mark", this.state.isReceivedExpanded)}
                     <span>Received</span>
                 </div>
