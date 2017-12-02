@@ -9,6 +9,9 @@ class RequestViewer extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.onSearchChanged = this.onSearchChanged.bind(this);
+
         this.state = {requestOptions: {
                                 fields: ["id", "url", "method",
                                     "header", "body_json", "body_string",
@@ -60,9 +63,20 @@ class RequestViewer extends React.Component {
 
         return (
             <div>
+                <input id="searchField"
+                       type="text"
+                       value={this.state.requestOptions.urlRegexp}
+                       onChange={this.onSearchChanged}/>
                 {rows}
             </div>
         );
+    }
+
+    onSearchChanged(event) {
+        this.setState({requestOptions:{urlRegexp: event.target.value}}, function(prevState, props) {
+            console.log("regexp " + this.state.requestOptions.urlRegexp);
+            this.loadRequests();
+        });
     }
 }
 

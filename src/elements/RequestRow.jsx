@@ -134,7 +134,7 @@ RequestRow.propTypes = {
     body: PropTypes.any,
     responseStatus: PropTypes.number,
     responseHeader: PropTypes.object,
-    responseBody: PropTypes.object
+    responseBody: PropTypes.any
 };
 
 export default RequestRow;
