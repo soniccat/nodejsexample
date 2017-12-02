@@ -43,9 +43,11 @@ class RequestRow extends React.Component {
     renderExtra() {
         return <div className="request_row_extra">
             <div className="request_header">
+                <div>Header</div>
                 <JsonView obj={this.state.header}/>
             </div>
             <div className="request_body">
+                <div>Body</div>
                 {this.renderBodyContent()}
             </div>
         </div>;

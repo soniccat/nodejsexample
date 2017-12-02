@@ -86,7 +86,7 @@ function handleApiRequest(req, res) {
 }
 
 function handleApiComponents(components, body, res, callback) {
-    if (components[0] == "requests") {
+    if (components.length > 0 && components[0] == "requests") {
         handleRequests(body, res, function () {
             callback();
         });
