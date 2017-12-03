@@ -16,6 +16,7 @@ class JsonView extends React.Component {
             obj: props.obj,
             isEditable: true,
             editingKey: undefined,
+            editingKeyName: undefined,
             editingKeyValue: undefined}
     }
 
@@ -30,12 +31,12 @@ class JsonView extends React.Component {
             let isSubJson = isObject(obj) && !isEmptyArray(obj);
 
 
-            if (this.state.editingKey == key) {
+            if (this.state.editingKey == key && this.state.editingKeyValue == undefined) {
                 cells.push(<div key={'' + 'editing' + '_key'}>
-                    <input type="text" value={this.state.editingKeyValue} onChange={function (event) {
+                    <input type="text" value={this.state.editingKeyName} onChange={function (event) {
                         that.onKeyChanged(key, event.target.value);
                     }}
-                    onKeyPress={function(e) {
+                           onKeyPress={function(e) {
                         if (e.key === 'Enter') {
                             that.onFinishChanging();
                         }
@@ -59,7 +60,8 @@ class JsonView extends React.Component {
             cells.push(<div key={'' + key + '_delimeter'} className={"json_delimiter" + (isSubJson ? " sub_json" : "")}/>);
 
             let bodyKey = '' + key + '_value';
-            cells.push(isSubJson ? <div key={bodyKey} className="json_value"><JsonView obj={obj}/></div> : <div key={bodyKey} className="json_value">{obj}</div>);
+            cells.push(isSubJson ? <div key={bodyKey} className="json_value"><JsonView obj={obj}/></div> : this.renderJsonValue(key, bodyKey, obj)
+                );
         }
 
         return <div className="json_view">
@@ -67,10 +69,31 @@ class JsonView extends React.Component {
         </div>
     }
 
+    renderJsonValue(key, tagKey, value) {
+        let that = this;
+        if (this.state.editingKey == key && this.state.editingKeyValue != undefined) {
+            return <div key={'' + 'editing' + '_value'}>
+                    <input type="text" value={this.state.editingKeyValue} onChange={function (event) {
+                        //that.onValueChanged(key, event.target.value);
+                    }}
+                    onKeyPress={function(e) {
+                        if (e.key === 'Enter') {
+                              //that.onFinishChanging();
+                        }
+                    }}/>
+            </div>
+
+        } else {
+            return <div key={tagKey} className="json_value" onClick={function () {
+                that.onValueClicked(key);
+            }}>{value}</div>
+        }
+    }
+
     onKeyClicked(key) {
         this.setState({
             editingKey: key,
-            editingKeyValue: key
+            editingKeyName: key
         });
     }
 
@@ -82,7 +105,7 @@ class JsonView extends React.Component {
         this.setState({
             obj: newObj,
             editingKey: newKey,
-            editingKeyValue: newKey
+            editingKeyName: newKey
         });
     }
 
@@ -93,18 +116,21 @@ class JsonView extends React.Component {
         this.setState({
             obj: newObj,
             editingKey: undefined,
-            editingKeyValue: undefined
+            editingKeyName: undefined
         });
     }
 
     onValueClicked(key) {
-
+        this.setState({
+            editingKey: key,
+            editingKeyValue: this.state.obj[key]
+        });
     }
 
     onFinishChanging() {
         this.setState({
             editingKey: undefined,
-            editingKeyValue: undefined
+            editingKeyName: undefined
         });
     }
 }
