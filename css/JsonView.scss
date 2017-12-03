@@ -11,20 +11,19 @@
 }
 
 .json_value {
-    grid-column-start: 3;
+    grid-column-start: 4;
 
     // break work support
-    -ms-word-break: break-all;
-    word-break: break-all;
-    word-break: break-word; /* Non standard for WebKit */
-    -webkit-hyphens: auto;
-    -moz-hyphens: auto;
-    hyphens: auto;
-
+    //-ms-word-break: break-all;
+    //word-break: break-all;
+    //word-break: break-word; /* Non standard for WebKit */
+    //-webkit-hyphens: auto;
+    //-moz-hyphens: auto;
+    //hyphens: auto;
 }
 
 .json_delimiter {
-    grid-column-start: 2;
+    grid-column-start: 3;
     align-self: start;
 
     padding-left: 5px;
@@ -32,5 +31,17 @@
 
     &::after {
         content: ':';
+    }
+}
+
+.json_delete {
+    grid-column-start: 2;
+    align-self: start;
+
+    margin-left: 5px;
+    margin-right: 5px;
+
+    &::after {
+        content: '(del)';
     }
 }

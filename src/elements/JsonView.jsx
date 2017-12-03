@@ -10,7 +10,7 @@ class JsonView extends React.Component {
 
         this.onKeyClicked = this.onKeyClicked.bind(this);
         this.onValueClicked = this.onValueClicked.bind(this);
-        this.onFinishEditing = this.onFinishEditing.bind(this);
+        this.onFinishChanging = this.onFinishChanging.bind(this);
 
         this.state = {
             obj: props.obj,
@@ -37,7 +37,7 @@ class JsonView extends React.Component {
                     }}
                     onKeyPress={function(e) {
                         if (e.key === 'Enter') {
-                            that.onFinishEditing();
+                            that.onFinishChanging();
                         }
                     }}/>
                 </div>);
@@ -49,10 +49,17 @@ class JsonView extends React.Component {
                                 }}>{key}</div>);
             }
 
+            if (this.state.isEditable) {
+                cells.push(<div key={'' + key + '_delete_button'} className={"json_delete" + (isSubJson ? " sub_json" : "")}
+                onClick={function () {
+                    that.onKeyRemoved(key);
+                }}/>);
+            }
+
             cells.push(<div key={'' + key + '_delimeter'} className={"json_delimiter" + (isSubJson ? " sub_json" : "")}/>);
 
             let bodyKey = '' + key + '_value';
-            cells.push(isSubJson ? <div key={bodyKey}><JsonView obj={obj}/></div> : <div key={bodyKey} className="json_value">{obj}</div>);
+            cells.push(isSubJson ? <div key={bodyKey} className="json_value"><JsonView obj={obj}/></div> : <div key={bodyKey} className="json_value">{obj}</div>);
         }
 
         return <div className="json_view">
@@ -79,11 +86,22 @@ class JsonView extends React.Component {
         });
     }
 
+    onKeyRemoved(key) {
+        var newObj = this.state.obj;
+        delete newObj[key];
+
+        this.setState({
+            obj: newObj,
+            editingKey: undefined,
+            editingKeyValue: undefined
+        });
+    }
+
     onValueClicked(key) {
 
     }
 
-    onFinishEditing() {
+    onFinishChanging() {
         this.setState({
             editingKey: undefined,
             editingKeyValue: undefined
