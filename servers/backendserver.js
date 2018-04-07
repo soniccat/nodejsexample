@@ -1,3 +1,6 @@
+//
+// webpack --config ./webpack.server.dev.js && node ./serverDist/main.js
+
 const fs = require('fs');
 var http = require('http');
 var https = require('https');

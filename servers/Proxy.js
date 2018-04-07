@@ -10,9 +10,8 @@ class Proxy {
     // callback
     //
     handleRequest(originalRequest, originalResponse, callback) {
-        let caller = this;
-        this.prepareSendRequestInfo(originalRequest, function (sendRequestInfo) {
-            caller.prepareResponseInfo(sendRequestInfo, function (responseInfo) {
+        this.prepareSendRequestInfo(originalRequest,  sendRequestInfo => {
+            this.prepareResponseInfo(sendRequestInfo, responseInfo => {
                 logRequest(sendRequestInfo, responseInfo);
                 originalResponse.writeHead(responseInfo.statusCode , responseInfo.headers);
                 if (responseInfo.body) {
@@ -23,7 +22,7 @@ class Proxy {
                 if (callback) {
                     callback(sendRequestInfo, responseInfo)
                 }
-            })
+            });
         });
     }
 
@@ -36,7 +35,7 @@ class Proxy {
             options: options
         };
 
-        readPostBody(originalRequest, function (body) {
+        readPostBody(originalRequest, body => {
             if (body) {
                 sendData.body = body;
             }
@@ -51,30 +50,29 @@ class Proxy {
         var responseInfo = {
         };
 
-        let caller = this;
-        var creq = https.request(sendRequestInfo.options, function(cres) {
-            var headers = caller.buildPoxyHeaders(cres);
+        var creq = https.request(sendRequestInfo.options, cres => {
+            var headers = this.buildPoxyHeaders(cres);
             responseInfo.headers = headers;
             responseInfo.statusCode = cres.statusCode;
 
             var chunks = [];
-            cres.on('data', function(chunk){
+            cres.on('data', chunk => {
                 chunks.push(chunk);
             });
 
-            cres.on('close', function(){
+            cres.on('close', () => {
                 callback(responseInfo);
             });
 
-            cres.on('end', function() {
+            cres.on('end', () => {
                 var buffer = Buffer.concat(chunks);
-                caller.handleRequestEnd(cres, buffer, function(data) {
+                this.handleRequestEnd(cres, buffer, data => {
                     responseInfo.body = data;
                     callback(responseInfo);
                 });
             });
 
-        }).on('error', function(e) {
+        }).on('error', e => {
             responseInfo.statusCode = 500;
             callback(responseInfo);
         });
@@ -127,7 +125,7 @@ class Proxy {
     }
 
     handleRequestEnd(request, buffer, callback) {
-        this.handleGzip(request, buffer, function (data) {
+        this.handleGzip(request, buffer, data => {
             callback(data);
         });
     }
@@ -137,7 +135,7 @@ class Proxy {
         if (contentEncoding) {
             var isGzip = contentEncoding.indexOf("gzip") != -1 || contentEncoding.indexOf("deflate") != -1;
             if (isGzip) {
-                zlib.unzip(buffer, function (err, decoded) {
+                zlib.unzip(buffer, (err, decoded) => {
                     console.log("decoding...");
                     if (!err) {
                         console.log("decoded");
