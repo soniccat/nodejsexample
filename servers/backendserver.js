@@ -3,11 +3,18 @@ var http = require('http');
 var https = require('https');
 var util = require('util');
 var url = require('url');
+
+import Proxy from "./proxy.js"
+import {readPostBody, getUrlString} from "./requesttools.js"
+
 const zlib = require('zlib');
 const gzip = zlib.createGzip();
 
 const host = "aglushkov.com";
 const apiPath = "__api__";
+
+
+var proxy = new Proxy();
 
 // database
 
@@ -32,8 +39,11 @@ const server = http.createServer(function(req, res) {
         handleApiRequest(req, res);
 
     } else {
-        //handleRequest(req, res);
-        res.end();
+        proxy.handleRequest(req, res, function (sendInfo, responseInfo) {
+            if(needWriteRequestRow(sendInfo, responseInfo)) {
+                writeRequestRow(sendInfo, responseInfo);
+            }
+        });
     }
 });
 
@@ -129,189 +139,6 @@ function fillNotFoundResponse(res) {
     res.writeHead(404);
 }
 
-// request
-
-function handleRequest(originalRequest, originalResponse) {
-    prepareSendRequestInfo(originalRequest, function (sendRequestInfo) {
-        prepareResponseInfo(sendRequestInfo, function (responseInfo) {
-            logRequest(sendRequestInfo, responseInfo);
-            if(needWriteRequestRow(sendRequestInfo, responseInfo)) {
-                writeRequestRow(sendRequestInfo, responseInfo);
-            }
-
-            originalResponse.writeHead(responseInfo.statusCode , responseInfo.headers);
-            if (responseInfo.body) {
-                originalResponse.write(responseInfo.body);
-            }
-            originalResponse.end();
-        })
-    });
-}
-
-function prepareSendRequestInfo(originalRequest, callback) {
-    var options = getRequestOptions(originalRequest);
-
-    // is used to build a db insert query
-    // contains options and body keys
-    var sendData = {
-        options: options
-    };
-
-    // console.log("path " + originalRequest.method);
-    // if (originalRequest.method === "POST") {
-    //     readPostBody(originalRequest, function (body) {
-    //         sendData.body = body;
-    //         callback(sendData);
-    //     });
-    // } else {
-    //     callback(sendData);
-    // }
-
-    readPostBody(originalRequest, function (body) {
-        if (body) {
-            sendData.body = body;
-        }
-
-        callback(sendData);
-    });
-}
-
-function prepareResponseInfo(sendRequestInfo, callback) {
-    // is used to build a db insert query
-    // contains headers, statusCode and body keys
-    var responseInfo = {
-    };
-
-    var creq = https.request(sendRequestInfo.options, function(cres) {
-        var headers = buildPoxyHeaders(cres);
-        responseInfo.headers = headers;
-        responseInfo.statusCode = cres.statusCode;
-
-        var chunks = [];
-        cres.on('data', function(chunk){
-            chunks.push(chunk);
-        });
-
-        cres.on('close', function(){
-            callback(responseInfo);
-        });
-
-        cres.on('end', function(){
-            var buffer = Buffer.concat(chunks);
-            handleRequestEnd(cres, buffer, function(data) {
-                responseInfo.body = data;
-                callback(responseInfo);
-            });
-        });
-
-    }).on('error', function(e) {
-        responseInfo.statusCode = 500;
-        callback(responseInfo);
-    });
-
-    if (sendRequestInfo.body) {
-        creq.write(sendRequestInfo.body);
-    }
-
-    creq.end();
-}
-
-function buildPoxyHeaders(cres) {
-    var headers = cres.headers;
-    if (cres.headers["content-type"]) {
-        headers["Content-Type"] = cres.headers["content-type"];
-    }
-    return headers;
-}
-
-function readPostBody(originalRequest, callback) {
-    //console.log("### body " + util.inspect(originalRequest));
-    if (originalRequest.method !== "POST") {
-        callback(undefined);
-
-    } else {
-        var sendPost = [];
-        originalRequest.on('data', function (chunk) {
-            sendPost.push(chunk);
-        });
-
-        originalRequest.on('end', function () {
-            var buffer = Buffer.concat(sendPost);
-            console.log("post data " + buffer);
-            callback(buffer);
-        });
-    }
-}
-
-function getRequestOptions(req) {
-    var reqUrl = url.parse(req.url);
-    var redirectHost = 'quizlet.com';
-    var needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
-    var host = needRedirect ? redirectHost : reqUrl.host;
-    var path = reqUrl.path;
-    var defaultHeaders = req.headers;
-
-    defaultHeaders["accept-encoding"] = "";
-    if (needRedirect) {
-        defaultHeaders["host"] = redirectHost;
-    }
-
-    // to avoid caching
-    delete defaultHeaders["if-modified-since"];
-    delete defaultHeaders["if-none-match"];
-    delete defaultHeaders["origin"];
-    delete defaultHeaders["referer"];
-
-    var headers = needRedirect ? defaultHeaders : req.headers;
-
-    var options = {
-        host: host,
-        port: 443,
-        path: path,
-        method: req.method,
-        headers: headers
-    };
-
-    return options;
-}
-
-function handleRequestEnd(request, buffer, callback) {
-    handleGzip(request, buffer, function (data) {
-
-        callback(data);
-    });
-}
-
-function handleGzip(cres, buffer, completion) {
-    var contentEncoding = cres.headers['content-encoding'];
-    if (contentEncoding) {
-        var isGzip = contentEncoding.indexOf("gzip") != -1 || contentEncoding.indexOf("deflate") != -1;
-        if (isGzip) {
-            zlib.unzip(buffer, function (err, decoded) {
-                console.log("decoding...");
-                if (!err) {
-                    console.log("decoded");
-                    completion(decoded, undefined);
-                } else {
-                    console.log("error " + util.inspect(err));
-                    completion(undefined, err);
-                }
-            });
-        } else {
-            completion(buffer, undefined)
-        }
-    } else {
-        completion(buffer, undefined)
-    }
-}
-
-function logRequest(sendRequestInfo, responseInfo) {
-    console.log("for " + getUrlString(sendRequestInfo));
-    console.log("send  " + util.inspect(sendRequestInfo));
-    console.log("response  " + util.inspect(responseInfo));
-}
-
-
 // work with database
 
 function needWriteRequestRow(requestInfo, responseInfo) {
@@ -373,6 +200,7 @@ function writeRequestRow(requestInfo, responseInfo) {
     query += ");";
 
 
+    console.log("start inserting ");
     database.query(query, function(err, rows) {
         if (err) {
             console.log("insert error " + err);
@@ -419,11 +247,6 @@ function loadRequests(options, callback) {
     });
 
     database.end();
-}
-
-function getUrlString(requestInfo) {
-    var scheme = requestInfo.port == 443 ? "https://" : "http://";
-    return scheme + requestInfo.options.host + (requestInfo.options.path ? requestInfo.options.path : "");
 }
 
 function wrapString(value) {
