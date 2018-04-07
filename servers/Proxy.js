@@ -1,6 +1,9 @@
 import {readPostBody, logRequest} from "./requesttools.js"
 import https from 'https'
 import url from 'url'
+import zlib from 'zlib'
+
+let gzip = zlib.createGzip();
 
 class Proxy {
 
