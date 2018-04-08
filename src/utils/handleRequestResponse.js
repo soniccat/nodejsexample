@@ -21,8 +21,8 @@ function normalizeRequestResponse(request) {
     request.responseStatus = parseInt(request.response_status);
 
     var body = undefined;
-    if (request.body_json) {
-        body = JSON.parse(request.body_json);
+    if (request.body_string_is_json) {
+        body = JSON.parse(request.body_string);
     } else if (request.body_string) {
         body = request.body_string;
     }
@@ -34,8 +34,8 @@ function normalizeRequestResponse(request) {
     request.responseHeader = JSON.parse(request.response_header);
 
     var responseBody = undefined;
-    if (request.response_json) {
-        responseBody = JSON.parse(request.response_json);
+    if (request.response_string_is_json) {
+        responseBody = JSON.parse(request.response_string);
     } else if (request.response_string) {
         responseBody = request.response_string;
     }

@@ -161,9 +161,6 @@ function loadRequests(options, callback) {
     }
 
     console.log("query " + query);
-    database.query(query, function(err, rows) {
-        callback(err, rows);
-    });
-
-    database.end();
+    
+    requestDb.performQuery(query, callback);
 }

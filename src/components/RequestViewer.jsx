@@ -14,8 +14,8 @@ class RequestViewer extends React.Component {
 
         this.state = {requestOptions: {
                                 fields: ["id", "url", "method",
-                                    "header", "body_json", "body_string",
-                                    "response_status", "response_header", "response_json", "response_string"],
+                                    "header", "body_string", "body_string_is_json",
+                                    "response_status", "response_header", "response_string", "response_string_is_json"],
                                 urlRegexp: ".*v4.*",
                                 onlyNotNull: false
                             },

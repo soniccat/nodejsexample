@@ -76,7 +76,7 @@ class RequestResponseDb {
 
 
         console.log("start inserting ");
-        database.query(query, function(err, rows) {
+        database.query(query, (err, rows) => {
             if (err) {
                 console.log("insert error " + err);
                 console.log("query " + query);
@@ -84,6 +84,14 @@ class RequestResponseDb {
             } else {
                 console.log("data inserted");
             }
+        });
+
+        database.end();
+    }
+
+    performQuery(query, callback) {
+        database.query(query, (err, rows) => {
+            callback(err, rows);
         });
 
         database.end();
