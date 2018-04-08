@@ -19,13 +19,14 @@ class RequestResponseDb {
         var tableName = "main";
         var session_id = 1;
 
-        var query = "INSERT INTO main VALUES(null";
-        query += "," + session_id;
-        query += ", NOW()";
-        query += ", " + this.wrapString(getUrlString(requestInfo));
-        query += ", " + requestInfo.options.port;
-        query += ", " + this.getHttpMethodCode(requestInfo.options.method);
-        query += ", " + (requestInfo.options.headers ? this.wrapString(JSON.stringify(requestInfo.options.headers)) : "NULL");
+        // SQL
+        var query = `INSERT INTO ${tableName} VALUES(null,
+        ${session_id}, 
+        NOW(), 
+        ${this.wrapString(getUrlString(requestInfo))},
+        ${requestInfo.options.port},
+        ${this.getHttpMethodCode(requestInfo.options.method)},
+        ${(requestInfo.options.headers ? this.wrapString(JSON.stringify(requestInfo.options.headers)) : "NULL")},`;
 
         var body_json = "NULL";
         var body_string = "NULL";
@@ -44,10 +45,13 @@ class RequestResponseDb {
                 //body_data = requestInfo.body;
             }
         }
-        query += ", " + body_json + ", " + body_string + ", " + body_data;
 
-        query += ", " + responseInfo.statusCode;
-        query += ", " + (responseInfo.header ? this.wrapString(JSON.stringify(responseInfo.header)) : "NULL");
+        // SQL
+        query += `${body_json}, 
+        ${body_string}, 
+        ${body_data},
+        ${responseInfo.statusCode},
+        ${(responseInfo.header ? this.wrapString(JSON.stringify(responseInfo.header)) : "NULL")},`;
 
         var response_json = "NULL";
         var response_string = "NULL";
@@ -64,9 +68,12 @@ class RequestResponseDb {
                 //response_data = responseInfo.body;
             }
         }
-        query += ", " + response_json + ", " + response_string + ", " + response_data;
 
-        query += ");";
+        // SQL
+        query += `${response_json}, 
+        ${response_string}, 
+        ${response_data}
+        );`;
 
 
         console.log("start inserting ");
