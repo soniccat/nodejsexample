@@ -2,8 +2,9 @@ import {readPostBody, logRequest} from "./requesttools.js"
 import https from 'https'
 import url from 'url'
 import zlib from 'zlib'
-
 let gzip = zlib.createGzip();
+
+const proxyRedirectHost = 'news360.com';
 
 class Proxy {
 
@@ -44,7 +45,7 @@ class Proxy {
 
     getRequestOptions(req) {
         let reqUrl = url.parse(req.url);
-        let redirectHost = 'news360.com';
+        let redirectHost = proxyRedirectHost;
         let needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
         let host = needRedirect ? redirectHost : reqUrl.host;
         let path = reqUrl.path;

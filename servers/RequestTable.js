@@ -2,26 +2,11 @@ import {getUrlString} from "./requesttools";
 
 var Client = require('mariasql');
 
-var database_user   = process.env.DB_USER;
-var database_pass   = process.env.DB_PASS;
 
-class RequestResponseDb {
+class RequestTable {
 
-    constructor() {
-        this.database = new Client({
-            host: '127.0.0.1',
-            user: database_user,
-            password: database_pass,
-            db: "db_requests"
-        })
-    }
-
-    connect(callback) {
-        this.database.connect(callback);
-    }
-
-    close(callback) {
-        this.database.end(callback);
+    constructor(connection) {
+        this.dbConnection = connection;
     }
 
     writeRequestRow(requestInfo, responseInfo) {
@@ -86,7 +71,7 @@ class RequestResponseDb {
 
 
         console.log("start inserting ");
-        this.database.query(query, (err, rows) => {
+        this.dbConnection.query(query, (err, rows) => {
             if (err) {
                 console.log("insert error " + err);
                 console.log("query " + query);
@@ -94,12 +79,6 @@ class RequestResponseDb {
             } else {
                 console.log("data inserted");
             }
-        });
-    }
-
-    performQuery(query, callback) {
-        this.database.query(query, (err, rows) => {
-            callback(err, rows);
         });
     }
 
@@ -129,4 +108,4 @@ class RequestResponseDb {
     }
 }
 
-export default RequestResponseDb;
+export default RequestTable;
