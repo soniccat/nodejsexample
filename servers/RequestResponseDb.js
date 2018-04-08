@@ -15,7 +15,6 @@ var database = new Client({
 class RequestResponseDb {
 
     writeRequestRow(requestInfo, responseInfo) {
-        //INSERT INTO main VALUES(NULL, 1, NOW(), "testurl", 80, 1, '{"type":"test_type", "h2":"h2data"}', 200,'{"response_type":"res_type"}', '{}', "lololo", null);
         var tableName = "main";
         var session_id = 1;
 
@@ -28,18 +27,17 @@ class RequestResponseDb {
         ${this.getHttpMethodCode(requestInfo.options.method)},
         ${(requestInfo.options.headers ? this.wrapString(JSON.stringify(requestInfo.options.headers)) : "NULL")},`;
 
-        var body_json = "NULL";
         var body_string = "NULL";
+        var body_string_is_json = 0;
         var body_data = "NULL";
 
         var isBodyString = requestInfo.body && this.isValidUTF8(requestInfo.body);
         if (requestInfo.body) {
-            if (isBodyString && this.isJsonString(requestInfo.body.toString())) {
-                body_json = this.wrapString(requestInfo.body.toString());
+            if (isBodyString){
+                let bodyString = requestInfo.body.toString();
 
-            }else if (isBodyString) {
-                body_string = this.wrapString(requestInfo.body.toString());
-
+                body_string_is_json = this.isJsonString(bodyString);
+                body_string = this.wrapString(bodyString);
             } else {
                 // TODO: need to support blobs
                 //body_data = requestInfo.body;
@@ -47,22 +45,23 @@ class RequestResponseDb {
         }
 
         // SQL
-        query += `${body_json}, 
-        ${body_string}, 
-        ${body_data},
-        ${responseInfo.statusCode},
+        query += `${body_string}, 
+        ${body_string_is_json}, 
+        ${body_data}, 
+        ${responseInfo.statusCode}, 
         ${(responseInfo.header ? this.wrapString(JSON.stringify(responseInfo.header)) : "NULL")},`;
 
-        var response_json = "NULL";
         var response_string = "NULL";
+        var response_string_is_json = 0;
         var response_data = "NULL";
 
         var isResponseBodyString = responseInfo.body && this.isValidUTF8(responseInfo.body);
         if (responseInfo.body) {
-            if (isResponseBodyString && this.isJsonString(responseInfo.body.toString())){
-                response_json = this.wrapString(responseInfo.body.toString());
-            } else if (isResponseBodyString) {
-                response_string = this.wrapString(responseInfo.body.toString());
+            if (isResponseBodyString) {
+                let responseString = responseInfo.body.toString();
+
+                response_string_is_json = this.isJsonString(responseString);
+                response_string = this.wrapString(responseString);
             } else {
                 // TODO: need to support blobs
                 //response_data = responseInfo.body;
@@ -70,8 +69,8 @@ class RequestResponseDb {
         }
 
         // SQL
-        query += `${response_json}, 
-        ${response_string}, 
+        query += `${response_string}, 
+        ${response_string_is_json}, 
         ${response_data}
         );`;
 
