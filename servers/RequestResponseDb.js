@@ -5,14 +5,24 @@ var Client = require('mariasql');
 var database_user   = process.env.DB_USER;
 var database_pass   = process.env.DB_PASS;
 
-var database = new Client({
-    host: '127.0.0.1',
-    user: database_user,
-    password: database_pass,
-    db: "db_requests"
-});
-
 class RequestResponseDb {
+
+    constructor() {
+        this.database = new Client({
+            host: '127.0.0.1',
+            user: database_user,
+            password: database_pass,
+            db: "db_requests"
+        })
+    }
+
+    connect(callback) {
+        this.database.connect(callback);
+    }
+
+    close(callback) {
+        this.database.end(callback);
+    }
 
     writeRequestRow(requestInfo, responseInfo) {
         var tableName = "main";
@@ -76,7 +86,7 @@ class RequestResponseDb {
 
 
         console.log("start inserting ");
-        database.query(query, (err, rows) => {
+        this.database.query(query, (err, rows) => {
             if (err) {
                 console.log("insert error " + err);
                 console.log("query " + query);
@@ -85,20 +95,16 @@ class RequestResponseDb {
                 console.log("data inserted");
             }
         });
-
-        database.end();
     }
 
     performQuery(query, callback) {
-        database.query(query, (err, rows) => {
+        this.database.query(query, (err, rows) => {
             callback(err, rows);
         });
-
-        database.end();
     }
 
     wrapString(value) {
-        return "\"" + Client.escape(value) + "\"";
+        return `"${Client.escape(value, true)}"`;
     }
 
     isValidUTF8(buf){

@@ -37,17 +37,23 @@ const server = http.createServer(function(req, res) {
 
 server.on('error', function (e) {
     console.log("server error " + e);
-    database.end();
+    requestDb.close();
     throw err;
-});
-
-server.listen(sever_port, function () {
 });
 
 process.on('uncaughtException', function(err){
     console.log(err);
-    database.end();
+    requestDb.end();
     throw err;
+});
+
+requestDb.connect(err => {
+    if (err) {
+        throw err;
+    }
+
+    server.listen(sever_port, function () {
+    });
 });
 
 // api
@@ -161,6 +167,6 @@ function loadRequests(options, callback) {
     }
 
     console.log("query " + query);
-    
+
     requestDb.performQuery(query, callback);
 }
