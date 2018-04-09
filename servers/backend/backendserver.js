@@ -2,10 +2,9 @@
 // to run:
 // webpack --config ./webpack.server.dev.js && node ./serverDist/main.js
 
-const fs = require('fs');
-var http = require('http');
-var https = require('https');
-var url = require('url');
+import http from'http'
+import https from 'https'
+import url from 'url'
 
 import Proxy from "./Proxy"
 import DbConnection from "./DbConnection"
@@ -16,19 +15,19 @@ const host = "aglushkov.com";
 const apiPath = "__api__";
 
 
-var proxy = new Proxy();
-var dbConnection = new DbConnection();
-var requestDb = new RequestTable(dbConnection);
-var apiHandler = new ApiHandler(dbConnection, apiPath);
+const proxy = new Proxy();
+const dbConnection = new DbConnection();
+const requestDb = new RequestTable(dbConnection);
+const apiHandler = new ApiHandler(dbConnection, apiPath);
 
-var sever_port   = process.env.SERVER_PORT;
+let sever_port = process.env.SERVER_PORT;
 
-const server = http.createServer(function(req, res) {
+const server = http.createServer((req, res) => {
     if (isApiRequest(req)) {
         apiHandler.handleRequest(req, res);
 
     } else {
-        proxy.handleRequest(req, res, function (sendInfo, responseInfo) {
+        proxy.handleRequest(req, res, (sendInfo, responseInfo) => {
             if(needWriteRequestRow(sendInfo, responseInfo)) {
                 requestDb.writeRequestRow(sendInfo, responseInfo);
             }
@@ -42,7 +41,7 @@ server.on('error', function (e) {
     throw err;
 });
 
-process.on('uncaughtException', function(err){
+process.on('uncaughtException', (err) => {
     console.log(err);
     requestDb.end();
     throw err;

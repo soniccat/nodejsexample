@@ -16,7 +16,7 @@ fs.readdirSync('node_modules')
 
 module.exports = {
   entry: {
-      main: './servers/backendserver.js'
+      main: './servers/backend/backendserver.js'
   },
   output: {
     filename: '[name].js',
