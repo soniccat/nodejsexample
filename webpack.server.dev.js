@@ -3,5 +3,5 @@ const common = require('./webpack.server.common.js');
 
 module.exports = merge(common, {
     mode: 'development',
-    devtool: 'cheap-eval-source-map'
+    devtool: 'eval-source-map'
 });
