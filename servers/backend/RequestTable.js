@@ -1,8 +1,5 @@
 import {getUrlString} from "./requesttools";
 
-var Client = require('mariasql');
-
-
 class RequestTable {
 
     constructor(connection) {
@@ -82,8 +79,8 @@ class RequestTable {
         });
     }
 
-    wrapString(value) {
-        return `"${Client.escape(value, true)}"`;
+    wrapString(str) {
+        return this.dbConnection.wrapString(str);
     }
 
     isValidUTF8(buf){

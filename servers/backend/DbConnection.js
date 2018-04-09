@@ -27,6 +27,10 @@ class DbConnection {
             callback(err, rows);
         });
     }
+
+    wrapString(value) {
+        return `${Client.escape(value, true)}`;
+    }
 }
 
 export default DbConnection
