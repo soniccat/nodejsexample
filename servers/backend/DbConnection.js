@@ -1,16 +1,16 @@
 
-var Client = require('mariasql');
+var Client = require('mysql');
 
 var database_user   = process.env.DB_USER;
 var database_pass   = process.env.DB_PASS;
 
 class DbConnection {
     constructor() {
-        this.database = new Client({
+        this.database = new Client.createConnection({
             host: '127.0.0.1',
             user: database_user,
             password: database_pass,
-            db: "db_requests"
+            database: "db_requests"
         })
     }
 
