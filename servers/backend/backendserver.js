@@ -37,13 +37,13 @@ const server = http.createServer((req, res) => {
 
 server.on('error', function (e) {
     console.log("server error " + e);
-    requestDb.close();
+    dbConnection.close();
     throw err;
 });
 
 process.on('uncaughtException', (err) => {
     console.log(err);
-    requestDb.end();
+    dbConnection.close();
     throw err;
 });
 

@@ -3,6 +3,7 @@ const common = require('./webpack.server.common.js');
 const webpack = require('webpack');
 
 module.exports = merge(common, {
+    mode: 'development',
     devtool: 'source-map',
     plugins: [
         new webpack.BannerPlugin({

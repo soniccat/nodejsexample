@@ -55,6 +55,11 @@ module.exports = {
           CSS: path.resolve(__dirname, 'css/'),
       }
   },
+  optimization: {
+      splitChunks: {
+          chunks: 'all'
+      }
+  },
   plugins: [
     new CleanWebpackPlugin(['dist']),
   	new HtmlWebpackPlugin({
@@ -62,22 +67,16 @@ module.exports = {
         inject: true,
         template: 'public/index.html',
         hash: true,
-        chunks: ['main', 'mychunk', 'mychunk2', 'vendor'],
+        excludeChunks: ['test'],
         filename: 'index.html'
     }),
     new HtmlWebpackPlugin({
         title: 'Test app',
         inject: true,
         template: 'public/index.html',
-        chunks: ['test', 'mychunk', 'mychunk2', 'vendor'],
+        excludeChunks: ['main'],
         filename: 'test.html'
     }),
-    new webpack.HashedModuleIdsPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-        name: 'vendor'
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-        name: 'mychunk'
-    })
+    new webpack.HashedModuleIdsPlugin()
   ]
 };
