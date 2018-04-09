@@ -9,7 +9,7 @@ var ManifestPlugin = require('webpack-manifest-plugin');
           filename: '[name].[hash].js',
           chunkFilename: '[name].[chunkhash].bundle.js'
       },
-      devtool: 'inline-source-map',
+      devtool: 'cheap-eval-source-map',
       devServer: {
           contentBase: './dist',
           hot: true
