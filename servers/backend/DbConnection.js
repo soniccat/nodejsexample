@@ -1,16 +1,13 @@
 
-var Client = require('mysql');
-
-var database_user   = process.env.DB_USER;
-var database_pass   = process.env.DB_PASS;
+import Client from 'mysql';
 
 class DbConnection {
-    constructor() {
+    constructor(user, pass, name) {
         this.database = new Client.createConnection({
             host: '127.0.0.1',
-            user: database_user,
-            password: database_pass,
-            database: "db_requests"
+            user: user,
+            password: pass,
+            database: name
         })
     }
 

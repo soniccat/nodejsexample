@@ -25,37 +25,8 @@ module.exports = {
   },
   target: 'node',
   externals: nodeModules,
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [
-          {loader: "style-loader"},
-          {loader: "css-loader" }
-        ]
-      }, {
-        test: /\.scss$/,
-        use: [
-            {loader: "style-loader"},
-            {loader: "css-loader"},
-            {loader: "sass-loader"}
-        ]
-      }, {
-            test: /\.png$/,
-            use: [
-                {loader: "file-loader"}
-            ]
-      }, {
-            test: /\.jsx?$/,
-            exclude: /(node_modules)/,
-            use: {
-                loader: 'babel-loader'
-            }
-        }
-    ]
-  },
   resolve: {
-      extensions: ['.js', '.jsx', '.scss']
+      extensions: ['.js']
   },
   plugins: [
     new CleanWebpackPlugin(['serverDist'])

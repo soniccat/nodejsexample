@@ -13,16 +13,21 @@ export function readPostBody(originalRequest, callback) {
 
         originalRequest.on('end', function () {
             var buffer = Buffer.concat(sendPost);
-            console.log("post data " + buffer);
+            //console.log("post data " + buffer);
             callback(buffer);
         });
     }
 }
 
-export function logRequest(sendRequestInfo, responseInfo) {
-    console.log("for " + getUrlString(sendRequestInfo));
-    console.log("send  " + util.inspect(sendRequestInfo));
-    console.log("response  " + util.inspect(responseInfo));
+export function logRequest(sendRequestInfo, responseInfo, logger) {
+    if (typeof logger.logRequest === "function") {
+        logger.logRequest(sendRequestInfo, responseInfo);
+
+    } else {
+        logger.log("for " + getUrlString(sendRequestInfo));
+        logger.log("send  " + util.inspect(sendRequestInfo));
+        logger.log("response  " + util.inspect(responseInfo));
+    }
 }
 
 export function getUrlString(requestInfo) {

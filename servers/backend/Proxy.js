@@ -7,11 +7,15 @@ let gzip = zlib.createGzip();
 const proxyRedirectHost = 'news360.com';
 
 class Proxy {
+    constructor(logger) {
+        this.logger = logger;
+    }
 
     handleRequest(originalRequest, originalResponse, callback) {
         this.prepareRequestInfo(originalRequest, sendRequestInfo => {
             this.prepareResponseInfo(sendRequestInfo, responseInfo => {
-                logRequest(sendRequestInfo, responseInfo);
+                logRequest(sendRequestInfo, responseInfo, this.logger);
+
                 originalResponse.writeHead(responseInfo.statusCode , responseInfo.headers);
                 if (responseInfo.body) {
                     originalResponse.write(responseInfo.body);
@@ -46,7 +50,7 @@ class Proxy {
     getRequestOptions(req) {
         let reqUrl = url.parse(req.url);
         let redirectHost = proxyRedirectHost;
-        let needRedirect = reqUrl.host == undefined || reqUrl.host == "localhost";
+        let needRedirect = reqUrl.host == null || reqUrl.host === "localhost";
         let host = needRedirect ? redirectHost : reqUrl.host;
         let path = reqUrl.path;
         let defaultHeaders = req.headers;
@@ -132,15 +136,15 @@ class Proxy {
     handleGzip(cres, buffer, completion) {
         let contentEncoding = cres.headers['content-encoding'];
         if (contentEncoding) {
-            let isGzip = contentEncoding.indexOf("gzip") != -1 || contentEncoding.indexOf("deflate") != -1;
+            let isGzip = contentEncoding.indexOf("gzip") !== -1 || contentEncoding.indexOf("deflate") !== -1;
             if (isGzip) {
                 zlib.unzip(buffer, (err, decoded) => {
-                    console.log("decoding...");
+                    this.logger.log("decoding...");
                     if (!err) {
-                        console.log("decoded");
+                        this.logger.log("decoded");
                         completion(decoded, undefined);
                     } else {
-                        console.log("error " + util.inspect(err));
+                        this.logger.log("error " + err);
                         completion(undefined, err);
                     }
                 });

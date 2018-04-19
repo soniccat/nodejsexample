@@ -1,10 +1,12 @@
 import {readPostBody} from "./requesttools";
 import url from 'url'
+import util from "util";
 
 class ApiHandler {
-    constructor(dbConnection, apiPath) {
+    constructor(dbConnection, apiPath, logger) {
         this.dbConnection = dbConnection;
         this.apiPath = apiPath;
+        this.logger = logger;
     }
 
     handleRequest(req, res) {
@@ -13,7 +15,8 @@ class ApiHandler {
         const components = path.split('/');
 
         // allow Cross-Origin Resource Sharing preflight request
-        if (req.method == "OPTIONS") {
+        this.logger.log("url: " + req.url + " method: " + req.method);
+        if (req.method === "OPTIONS") {
             res.writeHeader(200, {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
@@ -31,7 +34,7 @@ class ApiHandler {
     }
 
     handleComponents(components, body, res, callback) {
-        if (components.length > 0 && components[0] == "requests") {
+        if (components.length > 0 && components[0] === "requests") {
             this.handleRequests(body, res, () => {
                 callback();
             });
@@ -45,23 +48,21 @@ class ApiHandler {
     handleRequests(body, res, callback) {
         let options = JSON.parse(body.toString());
         this.loadRequests(options, (err, rows) => {
-            console.dir(body);
-            console.dir(rows);
-
-            var code;
-            var body;
-            if (err == undefined ) {
-                code = 200;
-                body = JSON.stringify(rows);
+            let code;
+            let body;
+            if (err) {
+                code = 500;
 
             } else {
-                code = 500;
+                code = 200;
+                body = JSON.stringify(rows);
             }
 
             res.writeHead(code, {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/json"
             });
+
             if (body) {
                 res.write(body);
             }
@@ -75,13 +76,13 @@ class ApiHandler {
     }
 
     loadRequests(options, callback) {
-        var fields = "*";
+        let fields = "*";
         if (options.fields) {
             fields = options.fields.join(',');
         }
 
-        var wherePart = "";
-        var urlRegexp = "";
+        let wherePart = "";
+        let urlRegexp = "";
         if (options.urlRegexp) {
             urlRegexp = options.urlRegexp;
             wherePart += "url REGEXP " + "\"" + urlRegexp + "\"";
@@ -96,13 +97,12 @@ class ApiHandler {
             }
         }
 
-        var query = "select " + fields + " from main";
+        let query = "select " + fields + " from main";
         if (wherePart.length) {
             query += " where " + wherePart;
         }
 
-        console.log("query " + query);
-
+        this.logger.log("query " + query);
         this.dbConnection.query(query, callback);
     }
 }

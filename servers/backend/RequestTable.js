@@ -41,7 +41,7 @@ class RequestTable {
         ${body_string_is_json}, 
         ${body_data}, 
         ${responseInfo.statusCode}, 
-        ${(responseInfo.header ? this.wrapString(JSON.stringify(responseInfo.header)) : "NULL")},`;
+        ${(responseInfo.headers ? this.wrapString(JSON.stringify(responseInfo.headers)) : "NULL")},`;
 
         var response_string = "NULL";
         var response_string_is_json = 0;

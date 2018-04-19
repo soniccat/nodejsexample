@@ -8,8 +8,9 @@
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "buildDev": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "frontendserver": "NODE_ENV=production node ./servers/frontendserver.js",
-    "backendserver": "node ./serverDist/main.js"
+    "frontend": "NODE_ENV=production node ./servers/frontendserver.js",
+    "backend": "node ./serverDist/main.js",
+    "buildBackendDev": "webpack --config ./webpack.server.dev.js"
   },
   "devDependencies": {
     "axios": "^0.18.0",
