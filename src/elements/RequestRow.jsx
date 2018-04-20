@@ -13,6 +13,7 @@ class RequestRow extends React.Component {
         this.onRequestShortClicked = this.onRequestShortClicked.bind(this);
         this.onSentShortClicked = this.onSentShortClicked.bind(this);
         this.onReceivedShortClicked = this.onReceivedShortClicked.bind(this);
+        this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
 
         this.state = {
             isExpanded: false,
@@ -25,7 +26,7 @@ class RequestRow extends React.Component {
             responseStatus: props.responseStatus,
             responseHeader: props.responseHeader,
             responseBody: props.responseBody,
-            is_stub: false
+            isStub: false
         }
     }
 
@@ -44,6 +45,11 @@ class RequestRow extends React.Component {
                     <div className="request_response_status">
                         {this.state.responseStatus}
                     </div>
+                    {!this.state.isStub ?
+                        <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
+                            Create stub
+                        </div> : undefined
+                    }
                 </div>
                 {this.state.isExpanded ? this.renderExtra() : undefined}
             </div>
@@ -125,6 +131,10 @@ class RequestRow extends React.Component {
             isReceivedExpanded: !this.state.isReceivedExpanded
         })
     }
+
+    onCreateStubClicked() {
+        this.props.onCreateStubClicked();
+    }
 }
 
 RequestRow.propTypes = {
@@ -136,7 +146,9 @@ RequestRow.propTypes = {
     responseStatus: PropTypes.number,
     responseHeader: PropTypes.object,
     responseBody: PropTypes.any,
-    is_stub: PropTypes.bool
+    isStub: PropTypes.bool,
+
+    onCreateStubClicked: PropTypes.func
 };
 
 export default RequestRow;

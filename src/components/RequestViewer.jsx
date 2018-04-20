@@ -11,6 +11,7 @@ class RequestViewer extends React.Component {
         super(props);
 
         this.onSearchChanged = this.onSearchChanged.bind(this);
+        this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
 
         this.state = {requestOptions: {
                                 fields: ["id", "url", "method",
@@ -33,14 +34,13 @@ class RequestViewer extends React.Component {
     loadRequests() {
         let options = buildRequestOptions(this.state.requestOptions);
 
-        let that = this;
-        loadRequest(options, handleRequestResponse(function (err, response) {
-            if (err != undefined) {
-                that.setState({
+        loadRequest(options, handleRequestResponse((err, response) => {
+            if (err) {
+                this.setState({
                     error: err
                 })
             } else {
-                that.setState({
+                this.setState({
                     rows: response.data
                 })
             }
@@ -49,7 +49,7 @@ class RequestViewer extends React.Component {
 
     render() {
         console.dir(this.state.rows);
-        let rows = this.state.rows.map(function(row) {
+        let rows = this.state.rows.map(row => {
                 return <RequestRow key={row.id}
                                    url={row.url}
                                    method={row.method}
@@ -58,6 +58,9 @@ class RequestViewer extends React.Component {
                                    responseStatus={row.responseStatus}
                                    responseHeader={row.responseHeader}
                                    responseBody={row.responseBody}
+                                   isStub={row.isStub}
+
+                                   onCreateStubClicked={this.onCreateStubClicked}
                                    />
             }
         );
@@ -74,10 +77,14 @@ class RequestViewer extends React.Component {
     }
 
     onSearchChanged(event) {
-        this.setState({requestOptions:{urlRegexp: event.target.value}}, function(prevState, props) {
+        this.setState({requestOptions:{urlRegexp: event.target.value}}, (prevState, props) => {
             console.log("regexp " + this.state.requestOptions.urlRegexp);
             this.loadRequests();
         });
+    }
+
+    onCreateStubClicked() {
+        
     }
 }
 
