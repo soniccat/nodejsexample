@@ -6,7 +6,7 @@ class RequestTable {
         this.dbConnection = connection;
     }
 
-    writeRequestRow(requestInfo, responseInfo) {
+    writeRequestRow(requestInfo, responseInfo, isStub = false) {
         var tableName = "main";
         var session_id = 1;
 
@@ -63,7 +63,8 @@ class RequestTable {
         // SQL
         query += `${response_string}, 
         ${response_string_is_json}, 
-        ${response_data}
+        ${response_data},
+        ${isStub}
         );`;
 
 

@@ -19,6 +19,7 @@ function normalizeRequestResponse(request) {
     request.method = parseInt(request.method);
     request.header = JSON.parse(request.header);
     request.responseStatus = parseInt(request.response_status);
+    request.isStub = request.is_stub;
 
     var body = undefined;
     if (request.body_string_is_json) {

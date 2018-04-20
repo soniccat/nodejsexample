@@ -25,6 +25,7 @@ class RequestRow extends React.Component {
             responseStatus: props.responseStatus,
             responseHeader: props.responseHeader,
             responseBody: props.responseBody,
+            is_stub: false
         }
     }
 
@@ -134,7 +135,8 @@ RequestRow.propTypes = {
     body: PropTypes.any,
     responseStatus: PropTypes.number,
     responseHeader: PropTypes.object,
-    responseBody: PropTypes.any
+    responseBody: PropTypes.any,
+    is_stub: PropTypes.bool
 };
 
 export default RequestRow;
