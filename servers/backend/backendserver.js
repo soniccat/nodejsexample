@@ -76,5 +76,6 @@ function isApiRequest(req) {
     const isHostValid = reqUrl.host == null || reqUrl.host === "localhost" || reqUrl.host === host;
     const path = reqUrl.path.length > 0 ? reqUrl.path.substr(1) : ""; // remove starting '/'
     const isPathValid = path.startsWith(apiPath);
+
     return isHostValid && isPathValid;
 }
