@@ -1,6 +1,21 @@
 import {readPostBody} from "./requesttools";
+import RequestTable from "./RequestTable"
 import url from 'url'
 import util from "util";
+
+// spec:
+//
+// requests (POST)- fetch requests from db
+// params:
+//  fields      - required fields in a string array
+//  urlRegexp   - regexp for url to filter
+//  onlyNotNull - show only when every field is not null
+// response:
+//  list of db objects with the requested fields
+//
+// request  (POST)- create request
+// params:
+//  json representation of an object
 
 class ApiHandler {
     constructor(dbConnection, apiPath, logger) {
@@ -38,11 +53,38 @@ class ApiHandler {
             this.handleRequests(body, res, () => {
                 callback();
             });
+        } else if (components.length > 0 && components[0] === "request") {
+            this.handleCreateRequest(body, res, () => {
+                callback();
+            });
 
         } else {
             this.fillNotFoundResponse(res);
             callback();
         }
+    }
+
+    //
+    handleCreateRequest(body, res, callback) {
+        let requestTable = new RequestTable(this.dbConnection);
+
+        let obj = JSON.parse(body.toString());
+        requestTable.writeRequestRow(obj, (err) => {
+            let code;
+            if (err) {
+                code = 500;
+
+            } else {
+                code = 200;
+            }
+
+            res.writeHead(code, {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
+            });
+
+            callback()
+        })
     }
 
     handleRequests(body, res, callback) {
@@ -102,6 +144,7 @@ class ApiHandler {
             query += " where " + wherePart;
         }
 
+        // TODO: move query building in RequestTable
         this.logger.log("query " + query);
         this.dbConnection.query(query, callback);
     }

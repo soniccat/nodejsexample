@@ -1,3 +1,5 @@
+
+// TODO: remove it, send the result value on backend
 export function requestMethodToString(method) {
     switch (method) {
         case 1: return "GET";

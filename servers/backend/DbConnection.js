@@ -21,7 +21,12 @@ class DbConnection {
 
     query(query, callback) {
         this.database.query(query, (err, rows) => {
-            callback(err, rows);
+            console.log("DbConnection error: " + err);
+            console.log("DbConnection query: " + err.sql);
+
+            if (callback) {
+                callback(err, rows);
+            }
         });
     }
 

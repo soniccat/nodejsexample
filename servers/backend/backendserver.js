@@ -40,7 +40,7 @@ const server = http.createServer((req, res) => {
     } else {
         proxy.handleRequest(req, res, (sendInfo, responseInfo) => {
             if(needWriteRequestRow(sendInfo, responseInfo)) {
-                requestDb.writeRequestRow(sendInfo, responseInfo);
+                requestDb.writeRequestRowAsRequestInfo(sendInfo, responseInfo);
             }
         });
     }

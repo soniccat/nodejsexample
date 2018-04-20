@@ -6,85 +6,105 @@ class RequestTable {
         this.dbConnection = connection;
     }
 
-    writeRequestRow(requestInfo, responseInfo, isStub = false) {
-        var tableName = "main";
-        var session_id = 1;
+    writeRequestRowAsRequestInfo(requestInfo, responseInfo, callback) {
+        this.writeRequestRow({
+            url: getUrlString(requestInfo),
+            port: requestInfo.options.port,
+            method: requestInfo.options.method,
+            headers: requestInfo.options.headers,
+            body: requestInfo.body,
+            responseStatus: responseInfo.statusCode,
+            responseHeaders: responseInfo.headers,
+            responseBody: responseInfo.body,
+            isStub: false
+        }, callback)
+    }
+
+    writeRequestRow(obj, callback) {
+        let tableName = "main";
+        let session_id = 1;
 
         // SQL
-        var query = `INSERT INTO ${tableName} VALUES(null,
+        let query = `INSERT INTO ${tableName} VALUES(null,
         ${session_id}, 
         NOW(), 
-        ${this.wrapString(getUrlString(requestInfo))},
-        ${requestInfo.options.port},
-        ${this.getHttpMethodCode(requestInfo.options.method)},
-        ${(requestInfo.options.headers ? this.wrapString(JSON.stringify(requestInfo.options.headers)) : "NULL")},`;
+        ${this.wrapString(obj.url)},
+        ${obj.port},
+        ${this.getHttpMethodCode(obj.method)},
+        ${(obj.headers ? this.wrapString(JSON.stringify(obj.headers)) : "NULL")},`;
 
-        var body_string = "NULL";
-        var body_string_is_json = 0;
-        var body_data = "NULL";
+        let body_string = "NULL";
+        let body_string_is_json = 0;
+        let body_data = "NULL";
 
-        var isBodyString = requestInfo.body && this.isValidUTF8(requestInfo.body);
-        if (requestInfo.body) {
-            if (isBodyString){
-                let bodyString = requestInfo.body.toString();
-
-                body_string_is_json = this.isJsonString(bodyString);
-                body_string = this.wrapString(bodyString);
-            } else {
-                // TODO: need to support blobs
-                //body_data = requestInfo.body;
-            }
+        if (obj.body) {
+            const bodyInfo = this.getBodyInfo(obj.body);
+            body_string_is_json = bodyInfo.isJson;
+            body_string = bodyInfo.string;
         }
 
         // SQL
         query += `${body_string}, 
         ${body_string_is_json}, 
         ${body_data}, 
-        ${responseInfo.statusCode}, 
-        ${(responseInfo.headers ? this.wrapString(JSON.stringify(responseInfo.headers)) : "NULL")},`;
+        ${obj.responseStatus}, 
+        ${(obj.responseHeaders ? this.wrapString(JSON.stringify(obj.responseHeaders)) : "NULL")},`;
 
-        var response_string = "NULL";
-        var response_string_is_json = 0;
-        var response_data = "NULL";
+        let response_string = "NULL";
+        let response_string_is_json = 0;
+        let response_data = "NULL";
 
-        var isResponseBodyString = responseInfo.body && this.isValidUTF8(responseInfo.body);
-        if (responseInfo.body) {
-            if (isResponseBodyString) {
-                let responseString = responseInfo.body.toString();
-
-                response_string_is_json = this.isJsonString(responseString);
-                response_string = this.wrapString(responseString);
-            } else {
-                // TODO: need to support blobs
-                //response_data = responseInfo.body;
-            }
+        if (obj.responseBody) {
+            const bodyInfo = this.getBodyInfo(obj.responseBody);
+            response_string_is_json = bodyInfo.isJson;
+            response_string = bodyInfo.string;
         }
 
         // SQL
         query += `${response_string}, 
         ${response_string_is_json}, 
         ${response_data},
-        ${isStub}
+        ${obj.isStub}
         );`;
 
+        this.dbConnection.query(query, callback);
+    }
 
-        console.log("start inserting ");
-        this.dbConnection.query(query, (err, rows) => {
-            if (err) {
-                console.log("insert error " + err);
-                console.log("query " + query);
-                //throw err;
+    getBodyInfo(body) {
+        let result = {
+            isJson: false,
+            string: "NULL"
+        };
+
+        let isBufferResponse = body instanceof Buffer;
+        if (isBufferResponse) {
+            let isResponseBodyString = isBufferResponse && this.isValidUTF8Buffer(body);
+            if (isResponseBodyString) {
+                let responseString = body.toString();
+
+                result.isJson = this.isJsonString(responseString);
+                result.string = this.wrapString(responseString);
+
             } else {
-                console.log("data inserted");
+                // TODO: need to support blobs
+                //response_data = body;
             }
-        });
+
+        } else {
+            let isString = typeof body === "string";
+
+            result.isJson = isString ? this.isJsonString(responseString) : true;
+            result.string = isString ? body : this.wrapString(JSON.stringify(body));
+        }
+
+        return result;
     }
 
     wrapString(str) {
         return this.dbConnection.wrapString(str);
     }
 
-    isValidUTF8(buf){
+    isValidUTF8Buffer(buf) {
         return Buffer.compare(new Buffer(buf.toString(),'utf8') , buf) === 0;
     }
 

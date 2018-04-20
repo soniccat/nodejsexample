@@ -20,6 +20,7 @@ class RequestRow extends React.Component {
             isSentExpanded: true,
             isReceivedExpanded: true,
             url: props.url,
+            port: props.port,
             method: props.method,
             header: props.header,
             body: props.body,
@@ -133,13 +134,14 @@ class RequestRow extends React.Component {
     }
 
     onCreateStubClicked() {
-        this.props.onCreateStubClicked();
+        this.props.onCreateStubClicked(this.state);
     }
 }
 
 RequestRow.propTypes = {
     isExpanded: PropTypes.bool,
     url: PropTypes.string.isRequired,
+    port: PropTypes.number,
     method: PropTypes.number,
     header: PropTypes.object,
     body: PropTypes.any,
