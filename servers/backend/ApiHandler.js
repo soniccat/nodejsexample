@@ -146,6 +146,8 @@ class ApiHandler {
             query += " where " + wherePart;
         }
 
+        query += " order by date DESC";
+
         // TODO: move query building in RequestTable
         this.logger.log("query " + query);
         this.requestTable.queryRequests(query, callback);

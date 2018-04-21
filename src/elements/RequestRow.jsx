@@ -26,7 +26,7 @@ class RequestRow extends React.Component {
             responseStatus: props.responseStatus,
             responseHeaders: props.responseHeaders,
             responseBody: props.responseBody,
-            isStub: false
+            isStub: props.isStub
         }
     }
 
