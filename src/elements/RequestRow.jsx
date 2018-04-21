@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {requestMethodToString} from 'Utils/requestFormatter'
 import JsonView from 'Elements/JsonView'
 import {isObject} from "Utils/Tools"
 
@@ -38,7 +37,7 @@ class RequestRow extends React.Component {
                     {this.renderExpandedMark("request_expand_mark", this.state.isExpanded)}
 
                     <div className="request_method">
-                        {requestMethodToString(this.state.method)}
+                        {this.state.method}
                     </div>
                     <div className="request_url">
                         {this.state.url}
@@ -142,7 +141,7 @@ RequestRow.propTypes = {
     isExpanded: PropTypes.bool,
     url: PropTypes.string.isRequired,
     port: PropTypes.number,
-    method: PropTypes.number,
+    method: PropTypes.string,
     headers: PropTypes.object,
     body: PropTypes.any,
     responseStatus: PropTypes.number,

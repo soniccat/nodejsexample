@@ -1,8 +1,8 @@
 
-var server = 'http://localhost:' + 7777 + '/__api__/';
+let server = 'http://localhost:' + 7777 + '/__api__/';
 
 function buildApiOptions(options) {
-    var resultOptions = {
+    let resultOptions = {
         headers: {'Content-Type': 'application/json'},
         method: options.method,
         url: server + options.path,

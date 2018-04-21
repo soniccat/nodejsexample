@@ -22,6 +22,7 @@ class ApiHandler {
         this.dbConnection = dbConnection;
         this.apiPath = apiPath;
         this.logger = logger;
+        this.requestTable = new RequestTable(this.dbConnection);
     }
 
     handleRequest(req, res) {
@@ -66,12 +67,10 @@ class ApiHandler {
 
     //
     handleCreateRequest(body, res, callback) {
-        let requestTable = new RequestTable(this.dbConnection);
-
         let obj = JSON.parse(body.toString());
-        requestTable.writeRequestRow(obj, (err) => {
+        this.requestTable.writeRequestRow(obj, (err) => {
             if (!err) {
-                requestTable.getLastInsertedIndex((err, rows) => {
+                this.requestTable.getLastInsertedIndex((err, rows) => {
                     let code = undefined;
                     let body = undefined;
 
@@ -149,7 +148,7 @@ class ApiHandler {
 
         // TODO: move query building in RequestTable
         this.logger.log("query " + query);
-        this.dbConnection.query(query, callback);
+        this.requestTable.queryRequests(query, callback);
     }
 }
 

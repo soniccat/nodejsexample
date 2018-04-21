@@ -128,6 +128,61 @@ class RequestTable {
             default: return 0;
         }
     }
+
+    getHttpMethodName(code) {
+        switch(code) {
+            case 1: return "GET";
+            case 2: return "POST";
+            default: return "UNKNOWN";
+        }
+    }
+
+    queryRequests(query, callback) {
+        this.dbConnection.query(query, (err, rows) => {
+            if (rows) {
+                this.normalizeRequests(rows);
+            }
+
+            if (callback) {
+                callback(err, rows);
+            }
+        });
+    }
+
+    normalizeRequests(reqList) {
+        for (let i = 0; i < reqList.length; ++i) {
+            reqList[i] = this.normalizeRequest(reqList[i]);
+        }
+    }
+
+    normalizeRequest(request) {
+        let body = undefined;
+        if (request.body_string_is_json) {
+            body = JSON.parse(request.body_string);
+        } else if (request.body_string) {
+            body = request.body_string;
+        }
+
+        let responseBody = undefined;
+        if (request.response_string_is_json) {
+            responseBody = JSON.parse(request.response_string);
+        } else if (request.response_string) {
+            responseBody = request.response_string;
+        }
+
+        return {
+            id: request.id,
+            url: request.url,
+            port: parseInt(request.port),
+            method: this.getHttpMethodName(request.method),
+            headers: JSON.parse(request.headers),
+            body: body,
+            responseStatus: parseInt(request.response_status),
+            responseHeaders: JSON.parse(request.response_headers),
+            responseBody: responseBody,
+            isStub: request.is_stub !== 0
+        }
+    }
 }
 
 export default RequestTable;

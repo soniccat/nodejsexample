@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import RequestRow from 'Elements/RequestRow';
 import loadRequest from 'Utils/loadRequest'
 import {buildRequestsOptions, buildCreateRequestOptions} from 'Utils/RequestOptions';
-import handleRequestResponse from 'Utils/handleRequestResponse'
 
 class RequestViewer extends React.Component {
 
@@ -34,7 +33,7 @@ class RequestViewer extends React.Component {
     loadRequests() {
         let options = buildRequestsOptions(this.state.requestOptions);
 
-        loadRequest(options, handleRequestResponse((err, response) => {
+        loadRequest(options, (err, response) => {
             if (err) {
                 this.setState({
                     error: err
@@ -44,7 +43,7 @@ class RequestViewer extends React.Component {
                     rows: response.data
                 })
             }
-        }))
+        })
     }
 
     render() {
@@ -97,7 +96,7 @@ class RequestViewer extends React.Component {
             isStub: true
         });
 
-        loadRequest(options, handleRequestResponse((err, response) => {
+        loadRequest(options, (err, response) => {
             if (err) {
                 this.setState({
                     error: err
@@ -107,7 +106,7 @@ class RequestViewer extends React.Component {
                     rows: [response.data].concat(this.state.rows)
                 })
             }
-        }))
+        });
     }
 }
 
