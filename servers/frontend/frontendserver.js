@@ -1,7 +1,8 @@
 const fs = require('fs');
-var express = require('express');
-var app = express();
-//var content = fs.readFileSync('./dist/index.html');
+const express = require('express');
+
+const app = express();
+// var content = fs.readFileSync('./dist/index.html');
 
 app.use(express.static('./dist'));
 // app.get('/mmm', function (req, res) {
@@ -9,6 +10,6 @@ app.use(express.static('./dist'));
 //     res.send("override");
 // });
 
-app.listen(80, function () {
+app.listen(80, () => {
 
 });

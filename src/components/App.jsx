@@ -1,18 +1,18 @@
 import React from 'react';
-import RequestViewer from "Components/RequestViewer"
+import RequestViewer from 'Components/RequestViewer';
 
 class App extends React.Component {
-    constructor(props) {
-        super(props)
-    }
+  constructor(props) {
+    super(props);
+  }
 
-    render() {
-        return (
-            <div>
-                <RequestViewer />
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <RequestViewer />
+      </div>
+    );
+  }
 }
 
 export default App;

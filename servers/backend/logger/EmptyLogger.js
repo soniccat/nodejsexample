@@ -1,10 +1,10 @@
-import BaseLogger from "./BaseLogger";
+import BaseLogger from './BaseLogger';
 
-class EmptyLogger extends BaseLogger{
-    constructor() {
-        super(str => {
-        });
-    }
+class EmptyLogger extends BaseLogger {
+  constructor() {
+    super((str) => {
+    });
+  }
 }
 
 export default EmptyLogger;
