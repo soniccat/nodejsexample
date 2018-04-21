@@ -39,7 +39,6 @@ class ApiHandler {
         'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
       });
       res.end();
-
     } else {
       readPostBody(req, (body) => {
         this.handleComponents(components, body, res, () => {
@@ -58,7 +57,6 @@ class ApiHandler {
       this.handleCreateRequest(body, res, () => {
         callback();
       });
-
     } else {
       this.fillNotFoundResponse(res);
       callback();
@@ -78,7 +76,6 @@ class ApiHandler {
             const insertedId = rows[0]['LAST_INSERT_ID()'];
             resBody = JSON.stringify(Object.assign({ id: insertedId }, obj));
             code = 200;
-
           } else {
             code = 500;
           }
@@ -86,7 +83,6 @@ class ApiHandler {
           this.setResponseHeader(res, code, resBody);
           callback();
         });
-
       } else {
         this.setResponseHeader(res, 500);
       }
@@ -107,7 +103,7 @@ class ApiHandler {
   setResponseHeader(res, code, body) {
     res.writeHead(code, {
       'Access-Control-Allow-Origin': '*',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
 
     if (body) {
@@ -133,17 +129,17 @@ class ApiHandler {
     }
 
     if (options.onlyNotNull && options.fields) {
-      for (i = 0; i < options.fields.length; i++) {
+      for (let i = 0; i < options.fields.length; i++) {
         if (wherePart.length > 0) {
-          wherePart += ' AND '
+          wherePart += ' AND ';
         }
-        wherePart += options.fields[i] +' IS NOT NULL ';
+        wherePart += `${options.fields[i]} IS NOT NULL `;
       }
     }
 
-    let query = 'select ' + fields + ' from main';
+    let query = `select ${fields} from main`;
     if (wherePart.length) {
-      query += ' where ' + wherePart;
+      query += ` where ${wherePart}`;
     }
 
     query += ' order by date DESC';
