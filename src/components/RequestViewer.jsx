@@ -15,8 +15,8 @@ class RequestViewer extends React.Component {
 
         this.state = {requestOptions: {
                                 fields: ["id", "url", "port", "method",
-                                    "header", "body_string", "body_string_is_json",
-                                    "response_status", "response_header", "response_string", "response_string_is_json",
+                                    "headers", "body_string", "body_string_is_json",
+                                    "response_status", "response_headers", "response_string", "response_string_is_json",
                                     "is_stub"],
                                 urlRegexp: ".*v4.*",
                                 onlyNotNull: false
@@ -54,10 +54,10 @@ class RequestViewer extends React.Component {
                                    url={row.url}
                                    port={row.port}
                                    method={row.method}
-                                   header={row.header}
+                                   headers={row.headers}
                                    body={row.body}
                                    responseStatus={row.responseStatus}
-                                   responseHeader={row.responseHeader}
+                                   responseHeaders={row.responseHeaders}
                                    responseBody={row.responseBody}
                                    isStub={row.isStub}
 
@@ -89,10 +89,10 @@ class RequestViewer extends React.Component {
             url: row.url,
             port: row.port,
             method: row.method,
-            header: row.header,
+            headers: row.headers,
             body: row.body,
             responseStatus: row.responseStatus,
-            responseHeader: row.responseHeader,
+            responseHeaders: row.responseHeaders,
             responseBody: row.responseBody,
             isStub: true
         });

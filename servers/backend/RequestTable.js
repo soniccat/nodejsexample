@@ -70,6 +70,10 @@ class RequestTable {
         this.dbConnection.query(query, callback);
     }
 
+    getLastInsertedIndex(callback) {
+        this.dbConnection.query("SELECT LAST_INSERT_ID();", callback);
+    }
+
     getBodyInfo(body) {
         let result = {
             isJson: false,

@@ -1,7 +1,7 @@
 
 function handleRequestResponse(callback) {
     return function(err, response) {
-        if (err == undefined) {
+        if (!err) {
             normalizeRequestListResponse(response)
         }
 
@@ -10,18 +10,18 @@ function handleRequestResponse(callback) {
 }
 
 function normalizeRequestListResponse(response) {
-    for (var i = 0; i < response.data.length; ++i) {
+    for (let i = 0; i < response.data.length; ++i) {
         normalizeRequestResponse(response.data[i]);
     }
 }
 
 function normalizeRequestResponse(request) {
     request.method = parseInt(request.method);
-    request.header = JSON.parse(request.header);
+    request.headers = JSON.parse(request.headers);
     request.responseStatus = parseInt(request.response_status);
     request.isStub = request.is_stub !== 0;
 
-    var body = undefined;
+    let body = undefined;
     if (request.body_string_is_json) {
         body = JSON.parse(request.body_string);
     } else if (request.body_string) {
@@ -32,9 +32,9 @@ function normalizeRequestResponse(request) {
         request.body = body;
     }
 
-    request.responseHeader = JSON.parse(request.response_header);
+    request.responseHeaders = JSON.parse(request.response_headers);
 
-    var responseBody = undefined;
+    let responseBody = undefined;
     if (request.response_string_is_json) {
         responseBody = JSON.parse(request.response_string);
     } else if (request.response_string) {

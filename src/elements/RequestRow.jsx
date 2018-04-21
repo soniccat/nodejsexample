@@ -22,10 +22,10 @@ class RequestRow extends React.Component {
             url: props.url,
             port: props.port,
             method: props.method,
-            header: props.header,
+            headers: props.headers,
             body: props.body,
             responseStatus: props.responseStatus,
-            responseHeader: props.responseHeader,
+            responseHeaders: props.responseHeaders,
             responseBody: props.responseBody,
             isStub: false
         }
@@ -73,9 +73,9 @@ class RequestRow extends React.Component {
 
                 {this.state.isSentExpanded ?
                     <div className="request_sent_extra">
-                        <div className="request_header">
-                            <div>Header</div>
-                            <JsonView obj={this.state.header}/>
+                        <div className="request_headers">
+                            <div>Headers</div>
+                            <JsonView obj={this.state.headers}/>
                         </div>
                         <div className="request_body">
                             <div>Body</div>
@@ -92,9 +92,9 @@ class RequestRow extends React.Component {
 
                 {this.state.isReceivedExpanded ?
                     <div className="request_received_extra">
-                        {this.state.responseHeader ? <div className="request_header">
-                            <div>Header</div>
-                            <JsonView obj={this.state.responseHeader}/>
+                        {this.state.responseHeaders ? <div className="request_headers">
+                            <div>Headers</div>
+                            <JsonView obj={this.state.responseHeaders}/>
                         </div> : undefined}
                         {this.state.responseBody ? <div className="request_body">
                             <div>Body</div>
@@ -143,10 +143,10 @@ RequestRow.propTypes = {
     url: PropTypes.string.isRequired,
     port: PropTypes.number,
     method: PropTypes.number,
-    header: PropTypes.object,
+    headers: PropTypes.object,
     body: PropTypes.any,
     responseStatus: PropTypes.number,
-    responseHeader: PropTypes.object,
+    responseHeaders: PropTypes.object,
     responseBody: PropTypes.any,
     isStub: PropTypes.bool,
 
