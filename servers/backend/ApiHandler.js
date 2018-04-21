@@ -70,47 +70,50 @@ class ApiHandler {
 
         let obj = JSON.parse(body.toString());
         requestTable.writeRequestRow(obj, (err) => {
-            let code;
-            if (err) {
-                code = 500;
+            if (!err) {
+                requestTable.getLastInsertedIndex((err, rows) => {
+                    let code = undefined;
+                    let body = undefined;
+
+                    if (!err && rows.length && rows[0]["LAST_INSERT_ID()"]) {
+                        let insertedId = rows[0]["LAST_INSERT_ID()"];
+                        body = JSON.stringify(Object.assign({id: insertedId}, obj));
+                        code = 200;
+
+                    } else {
+                        code = 500;
+                    }
+
+                    this.setResponseHeader(res, code, body);
+                    callback()
+                });
 
             } else {
-                code = 200;
+                this.setResponseHeader(res, 500);
             }
-
-            res.writeHead(code, {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json"
-            });
-
-            callback()
         })
     }
 
     handleRequests(body, res, callback) {
         let options = JSON.parse(body.toString());
         this.loadRequests(options, (err, rows) => {
-            let code;
-            let body;
-            if (err) {
-                code = 500;
+            let code = err ? 500 : 200;
+            let body = err ? undefined : JSON.stringify(rows);
 
-            } else {
-                code = 200;
-                body = JSON.stringify(rows);
-            }
-
-            res.writeHead(code, {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json"
-            });
-
-            if (body) {
-                res.write(body);
-            }
-
+            this.setResponseHeader(res, code, body);
             callback()
         })
+    }
+
+    setResponseHeader(res, code, body) {
+        res.writeHead(code, {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json"
+        });
+
+        if (body) {
+            res.write(body);
+        }
     }
 
     fillNotFoundResponse(res) {

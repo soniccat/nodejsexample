@@ -98,8 +98,14 @@ class RequestViewer extends React.Component {
         });
 
         loadRequest(options, handleRequestResponse((err, response) => {
-            if (!err) {
-                this.loadRequests();
+            if (err) {
+                this.setState({
+                    error: err
+                })
+            } else {
+                this.setState({
+                    rows: [response.data].concat(this.state.rows)
+                })
             }
         }))
     }
