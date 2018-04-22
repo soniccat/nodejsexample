@@ -31,7 +31,7 @@ const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const apiHandler = new ApiHandler(dbConnection, apiPath, logger);
 
-const sever_port = process.env.SERVER_PORT;
+const severPort = process.env.SERVER_PORT;
 
 const server = http.createServer((req, res) => {
   if (isApiRequest(req)) {
@@ -45,8 +45,8 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.on('error', (e) => {
-  logger.log(`server error ${e}`);
+server.on('error', (err) => {
+  logger.log(`server error ${err}`);
   dbConnection.close();
   throw err;
 });
@@ -62,7 +62,7 @@ dbConnection.connect((err) => {
     throw err;
   }
 
-  server.listen(sever_port, () => {
+  server.listen(severPort, () => {
   });
 });
 

@@ -8,10 +8,6 @@ class JsonView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.onKeyClicked = this.onKeyClicked.bind(this);
-    this.onValueClicked = this.onValueClicked.bind(this);
-    this.onFinishChanging = this.onFinishChanging.bind(this);
-
     this.state = {
       obj: props.obj,
       isEditable: true,
@@ -22,13 +18,11 @@ class JsonView extends React.Component {
   }
 
   render() {
-    const that = this;
-
     const cells = [];
-    const keys = Object.keys(that.state.obj).sort();
+    const keys = Object.keys(this.state.obj).sort();
     for (let i = 0; i < keys.length; ++i) {
       const key = keys[i];
-      const obj = that.state.obj[key];
+      const obj = this.state.obj[key];
       const isSubJson = isObject(obj) && !isEmptyArray(obj);
 
 
@@ -38,11 +32,11 @@ class JsonView extends React.Component {
             type="text"
             value={this.state.editingKeyName}
             onChange={(event) => {
-                        that.onKeyChanged(key, event.target.value);
+                        this.onKeyChanged(key, event.target.value);
                     }}
             onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                            that.onFinishChanging();
+                            this.onFinishChanging();
                         }
                     }}
           />
@@ -52,7 +46,7 @@ class JsonView extends React.Component {
           key={`${key}_key`}
           className={`json_key${isSubJson ? ' sub_json' : ''}`}
           onClick={() => {
-                                    that.onKeyClicked(key);
+                                    this.onKeyClicked(key);
                                 }}
         >{key}
         </div>);
@@ -63,7 +57,7 @@ class JsonView extends React.Component {
           key={`${key}_delete_button`}
           className={`json_delete${isSubJson ? ' sub_json' : ''}`}
           onClick={() => {
-                    that.onKeyRemoved(key);
+                    this.onKeyRemoved(key);
                 }}
         />);
       }
@@ -80,18 +74,17 @@ class JsonView extends React.Component {
   }
 
   renderJsonValue(key, tagKey, value) {
-    const that = this;
     if (this.state.editingKey === key && this.state.editingKeyValue) {
       return (<div key={'' + 'editing' + '_value'}>
         <input
           type="text"
           value={this.state.editingKeyValue}
           onChange={(event) => {
-                        // that.onValueChanged(key, event.target.value);
+                        // this.onValueChanged(key, event.target.value);
                     }}
           onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                              // that.onFinishChanging();
+                              // this.onFinishChanging();
                         }
                     }}
         />
@@ -101,7 +94,7 @@ class JsonView extends React.Component {
       key={tagKey}
       className="json_value"
       onClick={() => {
-                that.onValueClicked(key);
+                this.onValueClicked(key);
             }}
     >{value}
     </div>);
@@ -152,8 +145,14 @@ class JsonView extends React.Component {
   }
 }
 
+JsonView.defaultProps = {
+};
+
 JsonView.propTypes = {
-  obj: PropTypes.object.isRequired,
+  obj: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+  ]).isRequired,
 };
 
 export default JsonView;
