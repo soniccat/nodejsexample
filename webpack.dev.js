@@ -5,10 +5,6 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 
 module.exports = merge(common, {
   mode: 'development',
-  output: {
-    filename: '[name].[hash].js',
-    chunkFilename: '[name].[chunkhash].bundle.js',
-  },
   devtool: 'source-map',
   devServer: {
     contentBase: './dist',
