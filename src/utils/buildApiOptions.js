@@ -1,5 +1,5 @@
 
-const server = `http://localhost:${7777}/__api__/`;
+const server = 'http://' + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH + '/';
 
 function buildApiOptions(options) {
   const resultOptions = {

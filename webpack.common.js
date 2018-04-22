@@ -1,82 +1,82 @@
-let path = require('path');
-let HtmlWebpackPlugin = require('html-webpack-plugin');
-let CleanWebpackPlugin = require('clean-webpack-plugin');
-let webpack = require('webpack');
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   entry: {
-      main: './src/react-app.jsx',
-      test: './src/app.js',
-      vendor: [
-          "path"
-      ]
+    main: './src/react-app.jsx',
+    test: './src/app.js',
+    vendor: [
+      'path',
+    ],
   },
   output: {
     filename: '[name].[chunkhash].js',
     chunkFilename: '[name].[chunkhash].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/'
+    publicPath: '/',
   },
   module: {
     rules: [
       {
         test: /\.css$/,
         use: [
-          {loader: "style-loader"},
-          {loader: "css-loader" }
-        ]
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+        ],
       }, {
         test: /\.scss$/,
         use: [
-            {loader: "style-loader"},
-            {loader: "css-loader"},
-            {loader: "sass-loader"}
-        ]
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          { loader: 'sass-loader' },
+        ],
       }, {
-            test: /\.png$/,
-            use: [
-                {loader: "file-loader"}
-            ]
+        test: /\.png$/,
+        use: [
+          { loader: 'file-loader' },
+        ],
       }, {
-            test: /\.jsx?$/,
-            exclude: /(node_modules)/,
-            use: {
-                loader: 'babel-loader'
-            }
-        }
-    ]
+        test: /\.jsx?$/,
+        exclude: /(node_modules)/,
+        use: {
+          loader: 'babel-loader',
+        },
+      },
+    ],
   },
   resolve: {
-      extensions: ['.js', '.jsx', '.scss'],
-      alias: {
-          Components: path.resolve(__dirname, 'src/components/'),
-          Elements: path.resolve(__dirname, 'src/elements/'),
-          Utils: path.resolve(__dirname, 'src/utils/'),
-          CSS: path.resolve(__dirname, 'css/'),
-      }
+    extensions: ['.js', '.jsx', '.scss'],
+    alias: {
+      Components: path.resolve(__dirname, 'src/components/'),
+      Elements: path.resolve(__dirname, 'src/elements/'),
+      Utils: path.resolve(__dirname, 'src/utils/'),
+      CSS: path.resolve(__dirname, 'css/'),
+    },
   },
   optimization: {
-      splitChunks: {
-          chunks: 'all'
-      }
+    splitChunks: {
+      chunks: 'all',
+    },
   },
   plugins: [
     new CleanWebpackPlugin(['dist']),
   	new HtmlWebpackPlugin({
-        title: 'React app',
-        inject: true,
-        template: 'public/index.html',
-        hash: true,
-        excludeChunks: ['test'],
-        filename: 'index.html'
+      title: 'React app',
+      inject: true,
+      template: 'public/index.html',
+      hash: true,
+      excludeChunks: ['test'],
+      filename: 'index.html',
     }),
     new HtmlWebpackPlugin({
-        title: 'Test app',
-        inject: true,
-        template: 'public/index.html',
-        excludeChunks: ['main'],
-        filename: 'test.html'
+      title: 'Test app',
+      inject: true,
+      template: 'public/index.html',
+      excludeChunks: ['main'],
+      filename: 'test.html',
     }),
-    new webpack.HashedModuleIdsPlugin()
-  ]
+    new webpack.HashedModuleIdsPlugin(),
+  ],
 };

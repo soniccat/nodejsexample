@@ -4,6 +4,15 @@ const webpack = require('webpack');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
-    mode: 'production',
-    devtool: 'source-map'
+  mode: 'production',
+  devtool: 'source-map',
+  plugins: [
+    new ManifestPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.DefinePlugin({
+      BACKEND_IP: '"104.236.31.29"',
+      BACKEND_PORT: 7777,
+      BACKEND_PATH: '"__api__"',
+    }),
+  ],
 });
