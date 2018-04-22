@@ -45,9 +45,7 @@ class JsonView extends React.Component {
         cells.push(<div
           key={`${key}_key`}
           className={`json_key${isSubJson ? ' sub_json' : ''}`}
-          onClick={() => {
-                                    this.onKeyClicked(key);
-                                }}
+          onClick={() => { this.onKeyClicked(key); }}
         >{key}
         </div>);
       }
@@ -56,9 +54,7 @@ class JsonView extends React.Component {
         cells.push(<div
           key={`${key}_delete_button`}
           className={`json_delete${isSubJson ? ' sub_json' : ''}`}
-          onClick={() => {
-                    this.onKeyRemoved(key);
-                }}
+          onClick={() => { this.onKeyRemoved(key); }}
         />);
       }
 
@@ -93,9 +89,7 @@ class JsonView extends React.Component {
     return (<div
       key={tagKey}
       className="json_value"
-      onClick={() => {
-                this.onValueClicked(key);
-            }}
+      onClick={() => { this.onValueClicked(key); }}
     >{value}
     </div>);
   }
