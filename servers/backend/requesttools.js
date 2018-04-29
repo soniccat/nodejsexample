@@ -17,6 +17,14 @@ export function readPostBody(request, callback) {
   }
 }
 
+export function readBodyPromise(request) {
+  return new Promise((resolve, reject) => {
+    readBody(request, (buffer) => {
+      resolve(buffer);
+    });
+  });
+}
+
 export function readBody(request, callback) {
   const sendPost = [];
   request.on('data', (chunk) => {

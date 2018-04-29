@@ -1,4 +1,4 @@
-import { readPostBodyPromise, readPostBody, readBody, logRequest } from './requesttools.js';
+import { readPostBodyPromise, readBodyPromise, readBody, logRequest } from './requesttools.js';
 import https from 'https';
 import url from 'url';
 import zlib from 'zlib';
@@ -14,7 +14,7 @@ class Proxy {
 
   handleRequest(originalRequest, originalResponse) {
     return this.prepareRequestInfo(originalRequest)
-      .then(sendRequestInfo => Promise.all([sendRequestInfo, this.prepareResponseInfoPromise.call(this, sendRequestInfo)]))
+      .then(sendRequestInfo => Promise.all([sendRequestInfo, this.prepareResponseInfoPromise(sendRequestInfo)]))
       .then(([sendRequestInfo, responseInfo]) => {
         logRequest(sendRequestInfo, responseInfo, this.logger);
         this.fillResponseInfo(originalResponse, responseInfo);
@@ -76,9 +76,14 @@ class Proxy {
 
   prepareResponseInfoPromise(sendRequestInfo) {
     return new Promise((resolve, reject) => {
-      this.prepareResponseInfo(sendRequestInfo, (responseInfo) => {
-        resolve(responseInfo);
+      this.prepareResponseInfo(sendRequestInfo, (responseInfo, body) => {
+        resolve([responseInfo, body]);
       });
+    }).then(([responseInfo, body]) => {
+      return Promise.all([responseInfo, this.handleGzipPromise(responseInfo, body)]);
+    }).then(([responseInfo, body]) => {
+      responseInfo.body = body;
+      return responseInfo;
     });
   }
 
@@ -94,18 +99,15 @@ class Proxy {
       responseInfo.statusCode = cres.statusCode;
 
       cres.on('close', () => {
-        callback(responseInfo);
+        callback(responseInfo, undefined);
       });
 
-      readBody(cres, (buffer) => {
-        this.handleRequestEnd(cres, buffer, (data) => {
-          responseInfo.body = data;
-          callback(responseInfo);
-        });
+      readBody(cres, (body) => {
+        callback(responseInfo, body);
       });
     }).on('error', (e) => {
       responseInfo.statusCode = 500;
-      callback(responseInfo);
+      callback(responseInfo, undefined);
     });
 
     if (sendRequestInfo.body) {
@@ -126,6 +128,18 @@ class Proxy {
   handleRequestEnd(request, buffer, callback) {
     this.handleGzip(request, buffer, (data) => {
       callback(data);
+    });
+  }
+
+  handleGzipPromise(cres, buffer) {
+    return new Promise((resolve, reject) => {
+      this.handleGzip(cres, buffer, (decoded, error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(decoded);
+        }
+      });
     });
   }
 
