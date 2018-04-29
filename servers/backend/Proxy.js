@@ -12,23 +12,14 @@ class Proxy {
     this.logger = logger;
   }
 
-  handleRequest(originalRequest, originalResponse, callback) {
-    readPostBodyPromise(originalRequest)
+  handleRequest(originalRequest, originalResponse) {
+    return readPostBodyPromise(originalRequest)
       .then(body => this.prepareRequestInfo.apply(this, [originalRequest, body]))
-      .then((sendRequestInfo) => {
-        this.prepareResponseInfo(sendRequestInfo, (responseInfo) => {
-          logRequest(sendRequestInfo, responseInfo, this.logger);
-
-          originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
-          if (responseInfo.body) {
-            originalResponse.write(responseInfo.body);
-          }
-          originalResponse.end();
-
-          if (callback) {
-            callback(sendRequestInfo, responseInfo);
-          }
-        });
+      .then(sendRequestInfo => Promise.all([sendRequestInfo, this.prepareResponseInfoPromise.call(this, sendRequestInfo)]))
+      .then(([sendRequestInfo, responseInfo]) => {
+        logRequest(sendRequestInfo, responseInfo, this.logger);
+        this.fillResponseInfo(originalResponse, responseInfo);
+        return [sendRequestInfo, responseInfo];
       });
   }
 
@@ -39,6 +30,14 @@ class Proxy {
       options: this.getRequestOptions(request),
       body: buffer,
     };
+  }
+
+  fillResponseInfo(originalResponse, responseInfo) {
+    originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
+    if (responseInfo.body) {
+      originalResponse.write(responseInfo.body);
+    }
+    originalResponse.end();
   }
 
   getRequestOptions(req) {
@@ -71,6 +70,14 @@ class Proxy {
     };
 
     return options;
+  }
+
+  prepareResponseInfoPromise(sendRequestInfo) {
+    return new Promise((resolve, reject) => {
+      this.prepareResponseInfo(sendRequestInfo, (responseInfo) => {
+        resolve(responseInfo);
+      });
+    });
   }
 
   prepareResponseInfo(sendRequestInfo, callback) {

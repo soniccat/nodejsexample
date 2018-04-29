@@ -37,11 +37,12 @@ const server = http.createServer((req, res) => {
   if (isApiRequest(req)) {
     apiHandler.handleRequest(req, res);
   } else {
-    proxy.handleRequest(req, res, (sendInfo, responseInfo) => {
-      if (needWriteRequestRow(sendInfo, responseInfo)) {
-        requestDb.writeRequestRowAsRequestInfo(sendInfo, responseInfo);
-      }
-    });
+    proxy.handleRequest(req, res)
+      .then(([sendInfo, responseInfo]) => {
+        if (needWriteRequestRow(sendInfo, responseInfo)) {
+          requestDb.writeRequestRowAsRequestInfo(sendInfo, responseInfo);
+        }
+      });
   }
 });
 
