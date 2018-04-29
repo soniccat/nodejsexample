@@ -13,8 +13,7 @@ class Proxy {
   }
 
   handleRequest(originalRequest, originalResponse) {
-    return readPostBodyPromise(originalRequest)
-      .then(body => this.prepareRequestInfo.apply(this, [originalRequest, body]))
+    return this.prepareRequestInfo(originalRequest)
       .then(sendRequestInfo => Promise.all([sendRequestInfo, this.prepareResponseInfoPromise.call(this, sendRequestInfo)]))
       .then(([sendRequestInfo, responseInfo]) => {
         logRequest(sendRequestInfo, responseInfo, this.logger);
@@ -23,13 +22,16 @@ class Proxy {
       });
   }
 
-  prepareRequestInfo(request, buffer) {
-    // is used to build a db insert query
-    // contains options and body keys
-    return {
-      options: this.getRequestOptions(request),
-      body: buffer,
-    };
+  prepareRequestInfo(request) {
+    return readPostBodyPromise(request)
+      .then((body) => {
+        // is used to build a db insert query
+        // contains options and body keys
+        return {
+          options: this.getRequestOptions(request),
+          body: body,
+        };
+      });
   }
 
   fillResponseInfo(originalResponse, responseInfo) {
