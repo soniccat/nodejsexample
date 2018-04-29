@@ -1,21 +1,29 @@
 import util from 'util';
 
-export function readPostBody(originalRequest, callback) {
+export function readPostBody(request, callback) {
   // console.log("### body " + util.inspect(originalRequest));
-  if (originalRequest.method !== 'POST') {
+  if (request.method !== 'POST') {
     callback(undefined);
   } else {
     const sendPost = [];
-    originalRequest.on('data', (chunk) => {
+    request.on('data', (chunk) => {
       sendPost.push(chunk);
     });
 
-    originalRequest.on('end', () => {
+    request.on('end', () => {
       const buffer = Buffer.concat(sendPost);
       // console.log("post data " + buffer);
       callback(buffer);
     });
   }
+}
+
+export function readPostBodyPromise(request) {
+  return new Promise((resolve, reject) => {
+    readPostBody(request, (buffer) => {
+      resolve([request, buffer]);
+    });
+  });
 }
 
 export function logRequest(sendRequestInfo, responseInfo, logger) {

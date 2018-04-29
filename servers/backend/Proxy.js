@@ -1,4 +1,4 @@
-import { readPostBody, logRequest } from './requesttools.js';
+import { readPostBodyPromise, logRequest } from './requesttools.js';
 import https from 'https';
 import url from 'url';
 import zlib from 'zlib';
@@ -13,39 +13,32 @@ class Proxy {
   }
 
   handleRequest(originalRequest, originalResponse, callback) {
-    this.prepareRequestInfo(originalRequest, (sendRequestInfo) => {
-      this.prepareResponseInfo(sendRequestInfo, (responseInfo) => {
-        logRequest(sendRequestInfo, responseInfo, this.logger);
+    readPostBodyPromise(originalRequest)
+      .then(this.prepareRequestInfo.bind(this))
+      .then((sendRequestInfo) => {
+        this.prepareResponseInfo(sendRequestInfo, (responseInfo) => {
+          logRequest(sendRequestInfo, responseInfo, this.logger);
 
-        originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
-        if (responseInfo.body) {
-          originalResponse.write(responseInfo.body);
-        }
-        originalResponse.end();
+          originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
+          if (responseInfo.body) {
+            originalResponse.write(responseInfo.body);
+          }
+          originalResponse.end();
 
-        if (callback) {
-          callback(sendRequestInfo, responseInfo);
-        }
+          if (callback) {
+            callback(sendRequestInfo, responseInfo);
+          }
+        });
       });
-    });
   }
 
-  prepareRequestInfo(originalRequest, callback) {
-    const options = this.getRequestOptions(originalRequest);
-
+  prepareRequestInfo([request, buffer]) {
     // is used to build a db insert query
     // contains options and body keys
-    const requestInfo = {
-      options,
+    return {
+      options: this.getRequestOptions(request),
+      body: buffer,
     };
-
-    readPostBody(originalRequest, (body) => {
-      if (body) {
-        requestInfo.body = body;
-      }
-
-      callback(requestInfo);
-    });
   }
 
   getRequestOptions(req) {
