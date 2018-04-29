@@ -1,4 +1,4 @@
-import { readPostBodyPromise, logRequest } from './requesttools.js';
+import { readPostBodyPromise, readPostBody, readBody, logRequest } from './requesttools.js';
 import https from 'https';
 import url from 'url';
 import zlib from 'zlib';
@@ -91,17 +91,11 @@ class Proxy {
       responseInfo.headers = headers;
       responseInfo.statusCode = cres.statusCode;
 
-      const chunks = [];
-      cres.on('data', (chunk) => {
-        chunks.push(chunk);
-      });
-
       cres.on('close', () => {
         callback(responseInfo);
       });
 
-      cres.on('end', () => {
-        const buffer = Buffer.concat(chunks);
+      readBody(cres, (buffer) => {
         this.handleRequestEnd(cres, buffer, (data) => {
           responseInfo.body = data;
           callback(responseInfo);
