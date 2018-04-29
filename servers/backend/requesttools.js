@@ -21,7 +21,7 @@ export function readPostBody(request, callback) {
 export function readPostBodyPromise(request) {
   return new Promise((resolve, reject) => {
     readPostBody(request, (buffer) => {
-      resolve([request, buffer]);
+      resolve(buffer);
     });
   });
 }

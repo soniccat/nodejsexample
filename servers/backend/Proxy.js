@@ -14,7 +14,7 @@ class Proxy {
 
   handleRequest(originalRequest, originalResponse, callback) {
     readPostBodyPromise(originalRequest)
-      .then(this.prepareRequestInfo.bind(this))
+      .then(body => this.prepareRequestInfo.apply(this, [originalRequest, body]))
       .then((sendRequestInfo) => {
         this.prepareResponseInfo(sendRequestInfo, (responseInfo) => {
           logRequest(sendRequestInfo, responseInfo, this.logger);
@@ -32,7 +32,7 @@ class Proxy {
       });
   }
 
-  prepareRequestInfo([request, buffer]) {
+  prepareRequestInfo(request, buffer) {
     // is used to build a db insert query
     // contains options and body keys
     return {
