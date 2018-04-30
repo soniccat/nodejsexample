@@ -1,9 +1,6 @@
-import { readPostBodyPromise, readBodyPromise, readBody, logRequest } from './requesttools.js';
+import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from './requesttools.js';
 import https from 'https';
 import url from 'url';
-import zlib from 'zlib';
-
-const gzip = zlib.createGzip();
 
 const proxyRedirectHost = 'news360.com';
 
@@ -80,7 +77,7 @@ class Proxy {
     return this.prepareOriginalResponseInfoPromise(sendRequestInfo)
       .then(this.handleOriginalResponseEndPromise.bind(this))
       .then((responseInfo) => {
-        if (this.isGzip(responseInfo.headers)) {
+        if (isZipContent(responseInfo.headers)) {
           this.logger.log('content decoded');
         }
 
@@ -136,8 +133,8 @@ class Proxy {
   }
 
   handleOriginalResponseEndPromise(responseInfo) {
-    if (this.isGzip(responseInfo.headers)) {
-      return this.handleUnzipPromise(responseInfo.originalBody)
+    if (isZipContent(responseInfo.headers)) {
+      return handleUnzipPromise(responseInfo.originalBody)
         .then((decoded) => {
           responseInfo.body = decoded;
           return responseInfo;
@@ -146,37 +143,6 @@ class Proxy {
 
     responseInfo.body = responseInfo.originalBody;
     return Promise.resolve(responseInfo);
-  }
-
-  handleUnzipPromise(buffer) {
-    return new Promise((resolve, reject) => {
-      this.unzip(buffer, (decoded, error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(decoded);
-        }
-      });
-    });
-  }
-
-  unzip(buffer, completion) {
-    zlib.unzip(buffer, (err, decoded) => {
-      if (!err) {
-        completion(decoded, undefined);
-      } else {
-        completion(undefined, err);
-      }
-    });
-  }
-
-  isGzip(headers) {
-    const contentEncoding = headers['content-encoding'];
-    let result = false;
-    if (contentEncoding) {
-      result = contentEncoding.indexOf('gzip') !== -1 || contentEncoding.indexOf('deflate') !== -1;
-    }
-    return result;
   }
 }
 

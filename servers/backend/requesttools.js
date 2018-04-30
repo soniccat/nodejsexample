@@ -1,4 +1,5 @@
 import util from 'util';
+import zlib from "zlib";
 
 export function readPostBodyPromise(request) {
   return new Promise((resolve, reject) => {
@@ -15,14 +16,6 @@ export function readPostBody(request, callback) {
   } else {
     readBody(request, callback);
   }
-}
-
-export function readBodyPromise(request) {
-  return new Promise((resolve, reject) => {
-    readBody(request, (buffer) => {
-      resolve(buffer);
-    });
-  });
 }
 
 export function readBody(request, callback) {
@@ -51,4 +44,35 @@ export function logRequest(sendRequestInfo, responseInfo, logger) {
 export function getUrlString(requestInfo) {
   const scheme = requestInfo.port == 443 ? 'https://' : 'http://';
   return scheme + requestInfo.options.host + (requestInfo.options.path ? requestInfo.options.path : '');
+}
+
+export function handleUnzipPromise(buffer) {
+  return new Promise((resolve, reject) => {
+    unzip(buffer, (decoded, error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(decoded);
+      }
+    });
+  });
+}
+
+export function unzip(buffer, completion) {
+  zlib.unzip(buffer, (err, decoded) => {
+    if (!err) {
+      completion(decoded, undefined);
+    } else {
+      completion(undefined, err);
+    }
+  });
+}
+
+export function isZipContent(headers) {
+  const contentEncoding = headers['content-encoding'];
+  let result = false;
+  if (contentEncoding) {
+    result = contentEncoding.indexOf('gzip') !== -1 || contentEncoding.indexOf('deflate') !== -1;
+  }
+  return result;
 }
