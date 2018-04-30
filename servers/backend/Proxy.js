@@ -1,4 +1,4 @@
-import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from './requesttools.js';
+import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody, getUrlString } from './requesttools.js';
 import https from 'https';
 import url from 'url';
 
@@ -22,15 +22,12 @@ class Proxy {
       });
   }
 
-  prepareRequestInfo(request) {
-    return readPostBodyPromise(request)
-      .then(body =>
-        // is used to build a db insert query
-        // contains options and body keys
-        ({
-          options: this.getRequestOptions(request),
-          body,
-        }));
+  async prepareRequestInfo(request) {
+    const body = await readPostBodyPromise(request);
+    return {
+      options: this.getRequestOptions(request),
+      body,
+    };
   }
 
   fillOriginalResponseInfo(originalResponse, responseInfo) {
@@ -73,19 +70,18 @@ class Proxy {
     return options;
   }
 
-  prepareResponseInfoPromise(sendRequestInfo) {
-    return this.prepareOriginalResponseInfoPromise(sendRequestInfo)
-      .then(this.handleOriginalResponseEndPromise.bind(this))
-      .then((responseInfo) => {
-        if (isZipContent(responseInfo.headers)) {
-          this.logger.log('content decoded');
-        }
+  async prepareResponseInfoPromise(sendRequestInfo) {
+    const originalResponseInfo = await this.prepareOriginalResponseInfoPromise(sendRequestInfo);
+    const responseInfo = await this.handleOriginalResponseEndPromise(originalResponseInfo);
 
-        return responseInfo;
-      });
+    if (isZipContent(responseInfo.headers)) {
+      this.logger.log(`content decoded for ${sendRequestInfo.options.path}`);
+    }
+
+    return responseInfo;
   }
 
-  prepareOriginalResponseInfoPromise(sendRequestInfo) {
+  async prepareOriginalResponseInfoPromise(sendRequestInfo) {
     return new Promise((resolve, reject) => {
       this.prepareOriginalResponseInfo(sendRequestInfo, (responseInfo) => {
         resolve(responseInfo);
@@ -132,17 +128,14 @@ class Proxy {
     return headers;
   }
 
-  handleOriginalResponseEndPromise(responseInfo) {
+  async handleOriginalResponseEndPromise(responseInfo) {
     if (isZipContent(responseInfo.headers)) {
       return handleUnzipPromise(responseInfo.originalBody)
-        .then((decoded) => {
-          responseInfo.body = decoded;
-          return responseInfo;
-        });
+        .then(decoded => Object.assign({ body: decoded }, responseInfo));
     }
 
-    responseInfo.body = responseInfo.originalBody;
-    return Promise.resolve(responseInfo);
+    const result = Object.assign({ body: responseInfo.originalBody }, responseInfo);
+    return Promise.resolve(result);
   }
 }
 

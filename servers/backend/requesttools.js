@@ -1,7 +1,7 @@
 import util from 'util';
 import zlib from "zlib";
 
-export function readPostBodyPromise(request) {
+export async function readPostBodyPromise(request) {
   return new Promise((resolve, reject) => {
     readPostBody(request, (buffer) => {
       resolve(buffer);
@@ -46,7 +46,7 @@ export function getUrlString(requestInfo) {
   return scheme + requestInfo.options.host + (requestInfo.options.path ? requestInfo.options.path : '');
 }
 
-export function handleUnzipPromise(buffer) {
+export async function handleUnzipPromise(buffer) {
   return new Promise((resolve, reject) => {
     unzip(buffer, (decoded, error) => {
       if (error) {
