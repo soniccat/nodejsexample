@@ -13,10 +13,13 @@ class Proxy {
   }
 
   handleRequest(originalRequest, originalResponse) {
+    this.logger.log(`start ${originalRequest.url}`);
+
     return this.prepareRequestInfo(originalRequest)
       .then(sendRequestInfo => Promise.all([sendRequestInfo, this.prepareResponseInfoPromise(sendRequestInfo)]))
       .then(([sendRequestInfo, responseInfo]) => {
-        logRequest(sendRequestInfo, responseInfo, this.logger);
+        this.logger.log(`end ${originalRequest.url}`);
+
         this.fillResponseInfo(originalResponse, responseInfo);
         return [sendRequestInfo, responseInfo];
       });
@@ -24,14 +27,13 @@ class Proxy {
 
   prepareRequestInfo(request) {
     return readPostBodyPromise(request)
-      .then((body) => {
+      .then(body =>
         // is used to build a db insert query
         // contains options and body keys
-        return {
+        ({
           options: this.getRequestOptions(request),
-          body: body,
-        };
-      });
+          body,
+        }));
   }
 
   fillResponseInfo(originalResponse, responseInfo) {
@@ -79,10 +81,12 @@ class Proxy {
       this.prepareResponseInfo(sendRequestInfo, (responseInfo, body) => {
         resolve([responseInfo, body]);
       });
-    }).then(([responseInfo, body]) => {
-      return Promise.all([responseInfo, this.handleGzipPromise(responseInfo, body)]);
-    }).then(([responseInfo, body]) => {
-      responseInfo.body = body;
+    }).then(([responseInfo, body]) => this.handleResponseEndPromise(responseInfo, body))
+      .then((responseInfo) => {
+      if (this.isGzip(responseInfo.headers)) {
+        this.logger.log('content decoded');
+      }
+
       return responseInfo;
     });
   }
@@ -125,15 +129,25 @@ class Proxy {
     return headers;
   }
 
-  handleRequestEnd(request, buffer, callback) {
-    this.handleGzip(request, buffer, (data) => {
-      callback(data);
+  handleResponseEndPromise(responseInfo, buffer) {
+    responseInfo.body = buffer;
+
+    return new Promise((resolve, reject) => {
+      if (this.isGzip(responseInfo.headers)) {
+        return this.handleUnzipPromise(buffer)
+          .then((decoded) => {
+            responseInfo.body = decoded;
+            return responseInfo;
+          });
+      } else {
+        resolve(responseInfo);
+      }
     });
   }
 
-  handleGzipPromise(cres, buffer) {
+  handleUnzipPromise(buffer) {
     return new Promise((resolve, reject) => {
-      this.handleGzip(cres, buffer, (decoded, error) => {
+      this.unzip(buffer, (decoded, error) => {
         if (error) {
           reject(error);
         } else {
@@ -143,27 +157,23 @@ class Proxy {
     });
   }
 
-  handleGzip(cres, buffer, completion) {
-    const contentEncoding = cres.headers['content-encoding'];
-    if (contentEncoding) {
-      const isGzip = contentEncoding.indexOf('gzip') !== -1 || contentEncoding.indexOf('deflate') !== -1;
-      if (isGzip) {
-        zlib.unzip(buffer, (err, decoded) => {
-          this.logger.log('decoding...');
-          if (!err) {
-            this.logger.log('decoded');
-            completion(decoded, undefined);
-          } else {
-            this.logger.log(`error ${err}`);
-            completion(undefined, err);
-          }
-        });
+  unzip(buffer, completion) {
+    zlib.unzip(buffer, (err, decoded) => {
+      if (!err) {
+        completion(decoded, undefined);
       } else {
-        completion(buffer, undefined);
+        completion(undefined, err);
       }
-    } else {
-      completion(buffer, undefined);
+    });
+  }
+
+  isGzip(headers) {
+    const contentEncoding = headers['content-encoding'];
+    let result = false;
+    if (contentEncoding) {
+      result = contentEncoding.indexOf('gzip') !== -1 || contentEncoding.indexOf('deflate') !== -1;
     }
+    return result;
   }
 }
 
