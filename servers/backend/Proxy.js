@@ -20,7 +20,7 @@ class Proxy {
       .then(([sendRequestInfo, responseInfo]) => {
         this.logger.log(`end ${originalRequest.url}`);
 
-        this.fillResponseInfo(originalResponse, responseInfo);
+        this.fillOriginalResponseInfo(originalResponse, responseInfo);
         return [sendRequestInfo, responseInfo];
       });
   }
@@ -36,10 +36,10 @@ class Proxy {
         }));
   }
 
-  fillResponseInfo(originalResponse, responseInfo) {
+  fillOriginalResponseInfo(originalResponse, responseInfo) {
     originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
-    if (responseInfo.body) {
-      originalResponse.write(responseInfo.body);
+    if (responseInfo.originalBody) {
+      originalResponse.write(responseInfo.originalBody);
     }
     originalResponse.end();
   }
@@ -52,7 +52,7 @@ class Proxy {
     const path = reqUrl.path;
     const defaultHeaders = req.headers;
 
-    defaultHeaders['accept-encoding'] = '';
+    defaultHeaders['accept-encoding'] = 'gzip';
     if (needRedirect) {
       defaultHeaders.host = redirectHost;
     }
@@ -77,21 +77,26 @@ class Proxy {
   }
 
   prepareResponseInfoPromise(sendRequestInfo) {
-    return new Promise((resolve, reject) => {
-      this.prepareResponseInfo(sendRequestInfo, (responseInfo, body) => {
-        resolve([responseInfo, body]);
-      });
-    }).then(([responseInfo, body]) => this.handleResponseEndPromise(responseInfo, body))
+    return this.prepareOriginalResponseInfoPromise(sendRequestInfo)
+      .then(this.handleOriginalResponseEndPromise.bind(this))
       .then((responseInfo) => {
-      if (this.isGzip(responseInfo.headers)) {
-        this.logger.log('content decoded');
-      }
+        if (this.isGzip(responseInfo.headers)) {
+          this.logger.log('content decoded');
+        }
 
-      return responseInfo;
+        return responseInfo;
+      });
+  }
+
+  prepareOriginalResponseInfoPromise(sendRequestInfo) {
+    return new Promise((resolve, reject) => {
+      this.prepareOriginalResponseInfo(sendRequestInfo, (responseInfo) => {
+        resolve(responseInfo);
+      });
     });
   }
 
-  prepareResponseInfo(sendRequestInfo, callback) {
+  prepareOriginalResponseInfo(sendRequestInfo, callback) {
     // is used to build a db insert query
     // contains headers, statusCode and body keys
     const responseInfo = {
@@ -103,15 +108,16 @@ class Proxy {
       responseInfo.statusCode = cres.statusCode;
 
       cres.on('close', () => {
-        callback(responseInfo, undefined);
+        callback(responseInfo);
       });
 
       readBody(cres, (body) => {
-        callback(responseInfo, body);
+        responseInfo.originalBody = body; // keep to return in originalResponse
+        callback(responseInfo);
       });
     }).on('error', (e) => {
       responseInfo.statusCode = 500;
-      callback(responseInfo, undefined);
+      callback(responseInfo);
     });
 
     if (sendRequestInfo.body) {
@@ -129,20 +135,17 @@ class Proxy {
     return headers;
   }
 
-  handleResponseEndPromise(responseInfo, buffer) {
-    responseInfo.body = buffer;
+  handleOriginalResponseEndPromise(responseInfo) {
+    if (this.isGzip(responseInfo.headers)) {
+      return this.handleUnzipPromise(responseInfo.originalBody)
+        .then((decoded) => {
+          responseInfo.body = decoded;
+          return responseInfo;
+        });
+    }
 
-    return new Promise((resolve, reject) => {
-      if (this.isGzip(responseInfo.headers)) {
-        return this.handleUnzipPromise(buffer)
-          .then((decoded) => {
-            responseInfo.body = decoded;
-            return responseInfo;
-          });
-      } else {
-        resolve(responseInfo);
-      }
-    });
+    responseInfo.body = responseInfo.originalBody;
+    return Promise.resolve(responseInfo);
   }
 
   handleUnzipPromise(buffer) {
