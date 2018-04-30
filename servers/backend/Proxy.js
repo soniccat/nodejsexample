@@ -1,4 +1,4 @@
-import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody, getUrlString } from './requesttools.js';
+import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from './requesttools.js';
 import https from 'https';
 import url from 'url';
 
@@ -9,23 +9,21 @@ class Proxy {
     this.logger = logger;
   }
 
-  handleRequest(originalRequest, originalResponse) {
+  async handleRequest(originalRequest, originalResponse) {
     this.logger.log(`start ${originalRequest.url}`);
 
-    return this.prepareRequestInfo(originalRequest)
-      .then(sendRequestInfo => Promise.all([sendRequestInfo, this.prepareResponseInfoPromise(sendRequestInfo)]))
-      .then(([sendRequestInfo, responseInfo]) => {
-        this.logger.log(`end ${originalRequest.url}`);
+    const sendRequestInfo = await this.prepareSendRequestInfo(originalRequest);
+    const responseInfo = await this.prepareResponseInfoPromise(sendRequestInfo);
+    this.logger.log(`end ${originalRequest.url}`);
 
-        this.fillOriginalResponseInfo(originalResponse, responseInfo);
-        return [sendRequestInfo, responseInfo];
-      });
+    this.fillOriginalResponseInfo(originalResponse, responseInfo);
+    return [sendRequestInfo, responseInfo];
   }
 
-  async prepareRequestInfo(request) {
+  async prepareSendRequestInfo(request) {
     const body = await readPostBodyPromise(request);
     return {
-      options: this.getRequestOptions(request),
+      options: this.getSendRequestOptions(request),
       body,
     };
   }
@@ -38,7 +36,7 @@ class Proxy {
     originalResponse.end();
   }
 
-  getRequestOptions(req) {
+  getSendRequestOptions(req) {
     const reqUrl = url.parse(req.url);
     const redirectHost = proxyRedirectHost;
     const needRedirect = reqUrl.host == null || reqUrl.host === 'localhost';
@@ -96,8 +94,7 @@ class Proxy {
     };
 
     const creq = https.request(sendRequestInfo.options, (cres) => {
-      const headers = this.buildPoxyHeaders(cres);
-      responseInfo.headers = headers;
+      responseInfo.headers = this.buildPoxyHeaders(cres);
       responseInfo.statusCode = cres.statusCode;
 
       cres.on('close', () => {
