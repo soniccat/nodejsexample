@@ -95,7 +95,7 @@ class Proxy {
 
   prepareOriginalResponseInfo(sendRequestInfo, callback) {
     // is used to build a db insert query
-    // contains headers, statusCode and body keys
+    // contains headers, statusCode, body and originalBody keys
     const responseInfo = {
     };
 
