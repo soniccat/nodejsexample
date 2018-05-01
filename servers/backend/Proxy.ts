@@ -1,9 +1,10 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from './requesttools.js';
 import * as https from 'https';
 import * as url from 'url';
+import * as http from 'http';
 
 interface Logger {
-    log(value: string);
+  log(value: string);
 }
 
 class SendInfo {
@@ -18,7 +19,7 @@ class SendInfo {
 
 // is used to build a db insert query
 class ResponseInfo {
-  headers: object;
+  headers: http.OutgoingHttpHeaders;
   statusCode: number;
   body: any;          // unzipped body
   originalBody: any;  // to return original gzipped body
@@ -36,23 +37,23 @@ class Proxy {
     this.logger = logger;
   }
 
-  async handleRequest(originalRequest, originalResponse) {
+  async handleRequest(originalRequest: http.IncomingMessage, originalResponse: http.ServerResponse) {
     this.logger.log(`start ${originalRequest.url}`);
 
     const sendRequestInfo: SendInfo = await this.prepareSendRequestInfo(originalRequest);
-    const responseInfo = await this.prepareResponseInfoPromise(sendRequestInfo);
+    const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendRequestInfo);
     this.logger.log(`end ${originalRequest.url}`);
 
     this.fillOriginalResponseInfo(originalResponse, responseInfo);
     return [sendRequestInfo, responseInfo];
   }
 
-  async prepareSendRequestInfo(request) {
+  async prepareSendRequestInfo(request: http.IncomingMessage): Promise<SendInfo> {
     const body = await readPostBodyPromise(request);
     return new SendInfo(this.getSendRequestOptions(request), body);
   }
 
-  fillOriginalResponseInfo(originalResponse, responseInfo) {
+  fillOriginalResponseInfo(originalResponse: http.ServerResponse, responseInfo: ResponseInfo) {
     originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
     if (responseInfo.originalBody) {
       originalResponse.write(responseInfo.originalBody);
@@ -83,14 +84,14 @@ class Proxy {
 
     return {
       host,
-      port: 443,
       path,
-      method: req.method,
       headers,
+      port: 443,
+      method: req.method,
     };
   }
 
-  async prepareResponseInfoPromise(sendRequestInfo: SendInfo) {
+  async prepareResponseInfoPromise(sendRequestInfo: SendInfo): Promise<ResponseInfo> {
     const originalResponseInfo: ResponseInfo = await this.prepareOriginalResponseInfoPromise(sendRequestInfo);
     const responseInfo: ResponseInfo = await this.handleOriginalResponseEndPromise(originalResponseInfo);
 
@@ -112,7 +113,7 @@ class Proxy {
   prepareOriginalResponseInfo(sendRequestInfo: SendInfo, callback: (responseInfo: ResponseInfo) => void) {
     const responseInfo: ResponseInfo = new ResponseInfo();
 
-    const creq = https.request(sendRequestInfo.options, (cres) => {
+    const creq = https.request(sendRequestInfo.options, (cres: http.IncomingMessage) => {
       responseInfo.headers = this.buildPoxyHeaders(cres);
       responseInfo.statusCode = cres.statusCode;
 
@@ -136,7 +137,7 @@ class Proxy {
     creq.end();
   }
 
-  buildPoxyHeaders(cres) {
+  buildPoxyHeaders(cres: http.IncomingMessage) {
     const headers = cres.headers;
     if (cres.headers['content-type']) {
       headers['Content-Type'] = cres.headers['content-type'];
