@@ -6,6 +6,24 @@ interface Logger {
     log(value: string);
 }
 
+class RequestOptions {
+    host: string;
+    port: number;
+    path: string;
+    method: string;
+    headers: object;
+}
+
+class SendInfo {
+  options: RequestOptions;
+  body: any;
+
+  constructor(options, body) {
+    this.options = options;
+    this.body = body;
+  }
+}
+
 // is used to build a db insert query
 class ResponseInfo {
   headers: object;
@@ -29,7 +47,7 @@ class Proxy {
   async handleRequest(originalRequest, originalResponse) {
     this.logger.log(`start ${originalRequest.url}`);
 
-    const sendRequestInfo = await this.prepareSendRequestInfo(originalRequest);
+    const sendRequestInfo: SendInfo = await this.prepareSendRequestInfo(originalRequest);
     const responseInfo = await this.prepareResponseInfoPromise(sendRequestInfo);
     this.logger.log(`end ${originalRequest.url}`);
 
@@ -39,10 +57,7 @@ class Proxy {
 
   async prepareSendRequestInfo(request) {
     const body = await readPostBodyPromise(request);
-    return {
-      options: this.getSendRequestOptions(request),
-      body,
-    };
+    return new SendInfo(this.getSendRequestOptions(request), body);
   }
 
   fillOriginalResponseInfo(originalResponse, responseInfo) {
@@ -53,7 +68,7 @@ class Proxy {
     originalResponse.end();
   }
 
-  getSendRequestOptions(req) {
+  getSendRequestOptions(req): RequestOptions {
     const reqUrl = url.parse(req.url);
     const redirectHost = proxyRedirectHost;
     const needRedirect = reqUrl.host == null || reqUrl.host === 'localhost';
@@ -74,20 +89,18 @@ class Proxy {
 
     const headers = needRedirect ? defaultHeaders : req.headers;
 
-    const options = {
+    return {
       host,
       port: 443,
       path,
       method: req.method,
       headers,
     };
-
-    return options;
   }
 
-  async prepareResponseInfoPromise(sendRequestInfo) {
-    const originalResponseInfo = await this.prepareOriginalResponseInfoPromise(sendRequestInfo);
-    const responseInfo = await this.handleOriginalResponseEndPromise(originalResponseInfo);
+  async prepareResponseInfoPromise(sendRequestInfo: SendInfo) {
+    const originalResponseInfo: ResponseInfo = await this.prepareOriginalResponseInfoPromise(sendRequestInfo);
+    const responseInfo: ResponseInfo = await this.handleOriginalResponseEndPromise(originalResponseInfo);
 
     if (isZipContent(responseInfo.headers)) {
       this.logger.log(`content decoded for ${sendRequestInfo.options.path}`);
@@ -96,18 +109,16 @@ class Proxy {
     return responseInfo;
   }
 
-  async prepareOriginalResponseInfoPromise(sendRequestInfo) {
+  async prepareOriginalResponseInfoPromise(sendRequestInfo: SendInfo) {
     return new Promise((resolve, reject) => {
-      this.prepareOriginalResponseInfo(sendRequestInfo, (responseInfo) => {
+      this.prepareOriginalResponseInfo(sendRequestInfo, (responseInfo: ResponseInfo) => {
         resolve(responseInfo);
       });
     });
   }
 
   prepareOriginalResponseInfo(sendRequestInfo, callback) {
-    // is used to build a db insert query
-    // contains headers, statusCode, body and originalBody keys
-    const responseInfo: ResponseInfo = new ResponseInfo();
+    const responseInfo = new ResponseInfo();
 
     const creq = https.request(sendRequestInfo.options, (cres) => {
       responseInfo.headers = this.buildPoxyHeaders(cres);
@@ -118,7 +129,7 @@ class Proxy {
       });
 
       readBody(cres, (body) => {
-        responseInfo.originalBody = body; // keep to return in originalResponse
+        responseInfo.originalBody = body;
         callback(responseInfo);
       });
     }).on('error', (e) => {
@@ -141,7 +152,7 @@ class Proxy {
     return headers;
   }
 
-  async handleOriginalResponseEndPromise(responseInfo) {
+  async handleOriginalResponseEndPromise(responseInfo: ResponseInfo) {
     if (isZipContent(responseInfo.headers)) {
       return handleUnzipPromise(responseInfo.originalBody)
         .then(decoded => Object.assign({ body: decoded }, responseInfo));
