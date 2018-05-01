@@ -7,12 +7,11 @@ interface Logger {
 }
 
 // is used to build a db insert query
-// contains headers, statusCode, body and originalBody keys
 class ResponseInfo {
   headers: object;
   statusCode: number;
-  body: any;
-  originalBody: any;
+  body: any;          // unzipped body
+  originalBody: any;  // to return original gzipped body
 
   constructor() {
   }
