@@ -1,10 +1,28 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from './requesttools.js';
-import https from 'https';
-import url from 'url';
+import * as https from 'https';
+import * as url from 'url';
+
+interface Logger {
+    log(value: string);
+}
+
+// is used to build a db insert query
+// contains headers, statusCode, body and originalBody keys
+class ResponseInfo {
+  headers: object;
+  statusCode: number;
+  body: any;
+  originalBody: any;
+
+  constructor() {
+  }
+}
 
 const proxyRedirectHost = 'news360.com';
 
 class Proxy {
+  logger: Logger;
+
   constructor(logger) {
     this.logger = logger;
   }
@@ -90,8 +108,7 @@ class Proxy {
   prepareOriginalResponseInfo(sendRequestInfo, callback) {
     // is used to build a db insert query
     // contains headers, statusCode, body and originalBody keys
-    const responseInfo = {
-    };
+    const responseInfo: ResponseInfo = new ResponseInfo();
 
     const creq = https.request(sendRequestInfo.options, (cres) => {
       responseInfo.headers = this.buildPoxyHeaders(cres);

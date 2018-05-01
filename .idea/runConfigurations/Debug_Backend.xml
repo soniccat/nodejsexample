@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Debug Backend" type="NodeJSConfigurationType" factoryName="Node.js" path-to-js-file="main.js" working-dir="$PROJECT_DIR$/serverDist">
+  <configuration default="false" name="Debug Backend" type="NodeJSConfigurationType" factoryName="Node.js" path-to-js-file="servers/backend/backendserver.js" working-dir="$PROJECT_DIR$">
     <EXTENSION ID="com.jetbrains.nodejs.run.NodeJSStartBrowserRunConfigurationExtension">
       <browser start="true" with-js-debugger="true" url="http://localhost:7777/" />
     </EXTENSION>
