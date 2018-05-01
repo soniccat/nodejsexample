@@ -4,6 +4,11 @@
     "target": "es6",
     "sourceMap": true,
 
+    "baseUrl": ".",
+    "paths": {
+      "main/*": ["servers/backend/*"]
+    },
+
     "lib": [
       "es6"
     ]

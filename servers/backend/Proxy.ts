@@ -1,4 +1,4 @@
-import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from './requesttools.js';
+import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'main/requesttools';
 import * as https from 'https';
 import * as url from 'url';
 import * as http from 'http';
@@ -9,7 +9,7 @@ interface Logger {
 
 class SendInfo {
   options: https.RequestOptions;
-  body?: any;
+  body?: string | object;
 
   constructor(options, body) {
     this.options = options;
@@ -21,8 +21,8 @@ class SendInfo {
 class ResponseInfo {
   headers: http.OutgoingHttpHeaders;
   statusCode: number;
-  body: any;          // unzipped body
-  originalBody: any;  // to return original gzipped body
+  body: string | object;          // unzipped body
+  originalBody: string | object;  // to return original gzipped body
 
   constructor() {
   }

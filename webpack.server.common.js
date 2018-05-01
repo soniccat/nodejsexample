@@ -34,6 +34,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.tsx', '.ts'],
+    alias: {
+      main: path.resolve(__dirname, 'servers/backend'),
+    },
   },
   plugins: [
     new CleanWebpackPlugin(['serverDist']),
