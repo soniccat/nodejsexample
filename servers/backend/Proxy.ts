@@ -6,17 +6,9 @@ interface Logger {
     log(value: string);
 }
 
-class RequestOptions {
-    host: string;
-    port: number;
-    path: string;
-    method: string;
-    headers: object;
-}
-
 class SendInfo {
-  options: RequestOptions;
-  body: any;
+  options: https.RequestOptions;
+  body?: any;
 
   constructor(options, body) {
     this.options = options;
@@ -68,7 +60,7 @@ class Proxy {
     originalResponse.end();
   }
 
-  getSendRequestOptions(req): RequestOptions {
+  getSendRequestOptions(req): https.RequestOptions {
     const reqUrl = url.parse(req.url);
     const redirectHost = proxyRedirectHost;
     const needRedirect = reqUrl.host == null || reqUrl.host === 'localhost';
@@ -109,16 +101,16 @@ class Proxy {
     return responseInfo;
   }
 
-  async prepareOriginalResponseInfoPromise(sendRequestInfo: SendInfo) {
-    return new Promise((resolve, reject) => {
+  async prepareOriginalResponseInfoPromise(sendRequestInfo: SendInfo): Promise<ResponseInfo> {
+    return new Promise<ResponseInfo>((resolve, reject) => {
       this.prepareOriginalResponseInfo(sendRequestInfo, (responseInfo: ResponseInfo) => {
         resolve(responseInfo);
       });
     });
   }
 
-  prepareOriginalResponseInfo(sendRequestInfo, callback) {
-    const responseInfo = new ResponseInfo();
+  prepareOriginalResponseInfo(sendRequestInfo: SendInfo, callback: (responseInfo: ResponseInfo) => void) {
+    const responseInfo: ResponseInfo = new ResponseInfo();
 
     const creq = https.request(sendRequestInfo.options, (cres) => {
       responseInfo.headers = this.buildPoxyHeaders(cres);
