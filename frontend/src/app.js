@@ -4,7 +4,7 @@ require.ensure([], require => require('./bar'), 'mychunk2').then((bar) => {
   bar();
 });
 
-const image = require('../assets/screen.png');
+const image = require('../assets/screen.jpg');
 
 function addElement() {
   const element = document.createElement('div');

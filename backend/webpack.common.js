@@ -14,11 +14,11 @@ fs.readdirSync('node_modules')
 
 module.exports = {
   entry: {
-    main: './servers/backend/backendserver.js',
+    main: './src/backendserver.js',
   },
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'serverDist'),
+    path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
   },
   target: 'node',
@@ -35,10 +35,10 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.tsx', '.ts'],
     alias: {
-      main: path.resolve(__dirname, 'servers/backend'),
+      main: path.resolve(__dirname, 'src'),
     },
   },
   plugins: [
-    new CleanWebpackPlugin(['serverDist']),
+    new CleanWebpackPlugin(['dist']),
   ],
 };

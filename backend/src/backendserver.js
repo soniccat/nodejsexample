@@ -1,6 +1,6 @@
 //
 // to run:
-// webpack --config ./webpack.server.dev.js && node ./serverDist/main.js
+// webpack --config ./webpack.dev.js && node ./dist/main.js
 
 import http from 'http';
 import https from 'https';

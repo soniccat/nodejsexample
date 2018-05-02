@@ -33,7 +33,7 @@ module.exports = {
           { loader: 'sass-loader' },
         ],
       }, {
-        test: /\.png$/,
+        test: /\.jpg$/,
         use: [
           { loader: 'file-loader' },
         ],
@@ -62,7 +62,7 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(['dist']),
-  	new HtmlWebpackPlugin({
+    new HtmlWebpackPlugin({
       title: 'React app',
       inject: true,
       template: 'public/index.html',

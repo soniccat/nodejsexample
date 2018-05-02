@@ -1,8 +1,7 @@
 
 
-.idea/workspace.xml
+backend/node_modules/
+backend/dist/
 
-node_modules/
-
-dist/
-serverDist/
+frontend/node_modules/
+frontend/dist/

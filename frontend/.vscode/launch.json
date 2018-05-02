@@ -5,14 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Debug Frontend",
+            "type": "chrome",
             "request": "launch",
-            "name": "Debug Backend",
-            "program": "${workspaceFolder}/serverDist/main.js",
-            "skipFiles": [
-                "${workspaceFolder}/node_modules/**/*.js"
-              ],
-            "preLaunchTask": "buildBackendDev"
-        },
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceRoot}",
+            "sourceMaps": true,
+            "trace": true
+        }
     ]
 }
