@@ -7,5 +7,9 @@ module.exports = {
                 config: 'webpack.dev.js'
             }
         }
+    },
+
+    "rules": {
+        "react/jsx-closing-tag-location": "off"
     }
 };

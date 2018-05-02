@@ -10,88 +10,11 @@ class JsonView extends React.Component {
 
     this.state = {
       obj: props.obj,
-      isEditable: true,
+      isEditable: props.isEditable,
       editingKey: undefined,
       editingKeyName: undefined,
       editingKeyValue: undefined,
     };
-  }
-
-  render() {
-    const cells = [];
-    const keys = Object.keys(this.state.obj).sort();
-    for (let i = 0; i < keys.length; ++i) {
-      const key = keys[i];
-      const obj = this.state.obj[key];
-      const isSubJson = isObject(obj) && !isEmptyArray(obj);
-
-
-      if (this.state.editingKey === key && !this.state.editingKeyValue) {
-        cells.push(<div key={'' + 'editing' + '_key'}>
-          <input
-            type="text"
-            value={this.state.editingKeyName}
-            onChange={(event) => {
-                        this.onKeyChanged(key, event.target.value);
-                    }}
-            onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                            this.onFinishChanging();
-                        }
-                    }}
-          />
-        </div>);
-      } else {
-        cells.push(<div
-          key={`${key}_key`}
-          className={`json_key${isSubJson ? ' sub_json' : ''}`}
-          onClick={() => { this.onKeyClicked(key); }}
-        >{key}
-        </div>);
-      }
-
-      if (this.state.isEditable) {
-        cells.push(<div
-          key={`${key}_delete_button`}
-          className={`json_delete${isSubJson ? ' sub_json' : ''}`}
-          onClick={() => { this.onKeyRemoved(key); }}
-        />);
-      }
-
-      cells.push(<div key={`${key}_delimeter`} className={`json_delimiter${isSubJson ? ' sub_json' : ''}`} />);
-
-      const bodyKey = `${key}_value`;
-      cells.push(isSubJson ? <div key={bodyKey} className="json_value"><JsonView obj={obj} /></div> : this.renderJsonValue(key, bodyKey, obj));
-    }
-
-    return (<div className="json_view">
-      {cells}
-            </div>);
-  }
-
-  renderJsonValue(key, tagKey, value) {
-    if (this.state.editingKey === key && this.state.editingKeyValue) {
-      return (<div key={'' + 'editing' + '_value'}>
-        <input
-          type="text"
-          value={this.state.editingKeyValue}
-          onChange={(event) => {
-                        // this.onValueChanged(key, event.target.value);
-                    }}
-          onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                              // this.onFinishChanging();
-                        }
-                    }}
-        />
-              </div>);
-    }
-    return (<div
-      key={tagKey}
-      className="json_value"
-      onClick={() => { this.onValueClicked(key); }}
-    >{value}
-    </div>);
   }
 
   onKeyClicked(key) {
@@ -137,9 +60,93 @@ class JsonView extends React.Component {
       editingKeyName: undefined,
     });
   }
+
+  renderJsonValue(key, tagKey, value) {
+    if (this.state.editingKey === key && this.state.editingKeyValue) {
+      return (<div key="editing_value">
+        <input
+          type="text"
+          value={this.state.editingKeyValue}
+          onChange={(event) => {
+                        // this.onValueChanged(key, event.target.value);
+                    }}
+          onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                              // this.onFinishChanging();
+                        }
+                    }}
+        />
+      </div>);
+    }
+    return (<div
+      key={tagKey}
+      className="json_value"
+      onClick={() => { this.onValueClicked(key); }}
+      onKeyPress={() => { this.onValueClicked(key); }}
+      role="textbox"
+      tabIndex="0">{value}
+    </div>);
+  }
+
+  render() {
+    const cells = [];
+    const keys = Object.keys(this.state.obj).sort();
+    for (let i = 0; i < keys.length; ++i) {
+      const key = keys[i];
+      const obj = this.state.obj[key];
+      const isSubJson = isObject(obj) && !isEmptyArray(obj);
+
+
+      if (this.state.editingKey === key && !this.state.editingKeyValue) {
+        cells.push(<div key={'' + 'editing' + '_key'}>
+          <input
+            type="text"
+            value={this.state.editingKeyName}
+            onChange={(event) => {
+                        this.onKeyChanged(key, event.target.value);
+                    }}
+            onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            this.onFinishChanging();
+                        }
+                    }}
+          />
+        </div>);
+      } else {
+        cells.push(<div
+          key={`${key}_key`}
+          className={`json_key${isSubJson ? ' sub_json' : ''}`}
+          onClick={() => { this.onKeyClicked(key); }}
+          role="textbox" 
+          tabIndex="0"
+        >{key}
+        </div>);
+      }
+
+      if (this.state.isEditable) {
+        cells.push(<div
+          key={`${key}_delete_button`}
+          className={`json_delete${isSubJson ? ' sub_json' : ''}`}
+          onClick={() => { this.onKeyRemoved(key); }}
+          role="textbox" 
+          tabIndex="0"
+        />);
+      }
+
+      cells.push(<div key={`${key}_delimeter`} className={`json_delimiter${isSubJson ? ' sub_json' : ''}`} />);
+
+      const bodyKey = `${key}_value`;
+      cells.push(isSubJson ? <div key={bodyKey} className="json_value"><JsonView obj={obj} /></div> : this.renderJsonValue(key, bodyKey, obj));
+    }
+
+    return (<div className="json_view">
+      {cells}
+    </div>);
+  }
 }
 
 JsonView.defaultProps = {
+  isEditable: true,
 };
 
 JsonView.propTypes = {
@@ -147,6 +154,7 @@ JsonView.propTypes = {
     PropTypes.object,
     PropTypes.array,
   ]).isRequired,
+  isEditable: PropTypes.bool,
 };
 
 export default JsonView;
