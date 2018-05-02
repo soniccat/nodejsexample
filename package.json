@@ -55,7 +55,6 @@
   "dependencies": {
     "@types/node": "^8.10.11",
     "axios": "^0.18.0",
-    "promise-map": "^1.2.0",
     "prop-types": "^15.6.1",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
