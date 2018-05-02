@@ -10,7 +10,6 @@ class RequestViewer extends React.Component {
 
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
-    console.dir('constructor');
 
     this.state = {
       requestOptions: this.props.requestOptions,
