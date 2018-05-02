@@ -10,24 +10,53 @@ class RequestViewer extends React.Component {
 
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
+    console.dir('constructor');
 
     this.state = {
-      requestOptions: {
-        fields: ['id', 'url', 'port', 'method',
-          'headers', 'body_string', 'body_string_is_json',
-          'response_status', 'response_headers', 'response_string', 'response_string_is_json',
-          'is_stub'],
-        urlRegexp: '.*v4.*',
-        onlyNotNull: false,
-      },
-      rows: [],
-      error: undefined,
+      requestOptions: this.props.requestOptions,
+      rows: this.props.rows,
     };
-    console.dir('constructor');
   }
+
+  // Events
 
   componentDidMount() {
     this.loadRequests();
+  }
+
+  onSearchChanged(event) {
+    this.setState({ requestOptions: { urlRegexp: event.target.value } }, (prevState, props) => {
+      console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
+      this.loadRequests();
+    });
+  }
+
+  onCreateStubClicked(row) {
+    const options = buildCreateRequestOptions({
+      url: row.url,
+      port: row.port,
+      method: row.method,
+      headers: row.headers,
+      body: row.body,
+      responseStatus: row.responseStatus,
+      responseHeaders: row.responseHeaders,
+      responseBody: row.responseBody,
+      isStub: true,
+    });
+
+    // Actions
+
+    loadRequest(options, (err, response) => {
+      if (err) {
+        this.setState({
+          error: err,
+        });
+      } else {
+        this.setState({
+          rows: [response.data].concat(this.state.rows),
+        });
+      }
+    });
   }
 
   loadRequests() {
@@ -75,43 +104,25 @@ class RequestViewer extends React.Component {
       </div>
     );
   }
-
-  onSearchChanged(event) {
-    this.setState({ requestOptions: { urlRegexp: event.target.value } }, (prevState, props) => {
-      console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
-      this.loadRequests();
-    });
-  }
-
-  onCreateStubClicked(row) {
-    const options = buildCreateRequestOptions({
-      url: row.url,
-      port: row.port,
-      method: row.method,
-      headers: row.headers,
-      body: row.body,
-      responseStatus: row.responseStatus,
-      responseHeaders: row.responseHeaders,
-      responseBody: row.responseBody,
-      isStub: true,
-    });
-
-    loadRequest(options, (err, response) => {
-      if (err) {
-        this.setState({
-          error: err,
-        });
-      } else {
-        this.setState({
-          rows: [response.data].concat(this.state.rows),
-        });
-      }
-    });
-  }
 }
 
-RequestViewer.propTypes = {
+RequestViewer.defaultProps = {
+  requestOptions: {
+    fields: ['id', 'url', 'port', 'method',
+      'headers', 'body_string', 'body_string_is_json',
+      'response_status', 'response_headers', 'response_string', 'response_string_is_json',
+      'is_stub'],
+    urlRegexp: '.*v4.*',
+    onlyNotNull: false,
+  },
+  rows: [],
+  error: undefined,
 };
 
+RequestViewer.propTypes = {
+  requestOptions: PropTypes.object,
+  rows: PropTypes.array,
+  error: PropTypes.any,
+};
 
 export default RequestViewer;
