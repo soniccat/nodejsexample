@@ -1,6 +1,8 @@
-import url from 'url';
+import * as url from 'url';
 import { readPostBody } from './requesttools';
 import RequestTable from './RequestTable';
+import DbConnection from 'main/DbConnection';
+import ILogger from 'main/logger/ILogger';
 
 // spec:
 //
@@ -17,7 +19,12 @@ import RequestTable from './RequestTable';
 //  json representation of an object
 
 class ApiHandler {
-  constructor(dbConnection, apiPath, logger) {
+  dbConnection: DbConnection;
+  apiPath: string;
+  logger: ILogger;
+  requestTable: RequestTable;
+
+  constructor(dbConnection: DbConnection, apiPath: string, logger: ILogger) {
     this.dbConnection = dbConnection;
     this.apiPath = apiPath;
     this.logger = logger;
@@ -84,7 +91,7 @@ class ApiHandler {
           callback();
         });
       } else {
-        this.setResponseHeader(res, 500);
+        this.setResponseHeader(res, 500, undefined);
       }
     });
   }
