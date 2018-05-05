@@ -1,11 +1,29 @@
-import { getUrlString } from './requesttools';
+import { getUrlString } from 'main/requesttools';
+import ResponseInfo from 'main/baseTypes/ResponseInfo';
+import SendInfo from 'main/baseTypes/SendInfo';
+import * as Client from 'mysql';
+import DbConnection from 'main/DbConnection';
+
+class RequestRow {
+  url: string;
+  port: number | string;
+  method: string;
+  headers: {[index: string]: any};
+  body: string | object;
+  responseStatus: number;
+  responseHeaders: {[index: string]: any};
+  responseBody: string | object;
+  isStub: boolean;
+}
 
 class RequestTable {
-  constructor(connection) {
+  dbConnection: DbConnection;
+
+  constructor(connection: DbConnection) {
     this.dbConnection = connection;
   }
 
-  writeRequestRowAsRequestInfo(requestInfo, responseInfo, callback) {
+  writeRequestRowAsRequestInfo(requestInfo: SendInfo, responseInfo: ResponseInfo, callback: Client.queryCallback) {
     this.writeRequestRow({
       url: getUrlString(requestInfo),
       port: requestInfo.options.port,
@@ -15,54 +33,54 @@ class RequestTable {
       responseStatus: responseInfo.statusCode,
       responseHeaders: responseInfo.headers,
       responseBody: responseInfo.body,
-      isStub: false,
-    }, callback);
+      isStub: false}, 
+      callback);
   }
 
-  writeRequestRow(obj, callback) {
+  writeRequestRow(obj: RequestRow, callback: Client.queryCallback) {
     const tableName = 'main';
-    const session_id = 1;
+    const sessionId = 1;
 
     // SQL
     let query = `INSERT INTO ${tableName} VALUES(null,
-        ${session_id}, 
+        ${sessionId}, 
         NOW(), 
         ${this.wrapString(obj.url)},
         ${obj.port},
         ${this.getHttpMethodCode(obj.method)},
         ${(obj.headers ? this.wrapString(JSON.stringify(obj.headers)) : 'NULL')},`;
 
-    let body_string = 'NULL';
-    let body_string_is_json = 0;
-    const body_data = 'NULL';
+    let bodyString = 'NULL';
+    let bodyStringIsJson = false;
+    const bodyData = 'NULL';
 
     if (obj.body) {
       const bodyInfo = this.getBodyInfo(obj.body);
-      body_string_is_json = bodyInfo.isJson;
-      body_string = bodyInfo.string;
+      bodyStringIsJson = bodyInfo.isJson;
+      bodyString = bodyInfo.string;
     }
 
     // SQL
-    query += `${body_string}, 
-        ${body_string_is_json}, 
-        ${body_data}, 
+    query += `${bodyString}, 
+        ${bodyStringIsJson}, 
+        ${bodyData}, 
         ${obj.responseStatus}, 
         ${(obj.responseHeaders ? this.wrapString(JSON.stringify(obj.responseHeaders)) : 'NULL')},`;
 
-    let response_string = 'NULL';
-    let response_string_is_json = 0;
-    const response_data = 'NULL';
+    let responseString = 'NULL';
+    let responseStringIsJson = false;
+    const responseData = 'NULL';
 
     if (obj.responseBody) {
       const bodyInfo = this.getBodyInfo(obj.responseBody);
-      response_string_is_json = bodyInfo.isJson;
-      response_string = bodyInfo.string;
+      responseStringIsJson = bodyInfo.isJson;
+      responseString = bodyInfo.string;
     }
 
     // SQL
-    query += `${response_string}, 
-        ${response_string_is_json}, 
-        ${response_data},
+    query += `${responseString}, 
+        ${responseStringIsJson}, 
+        ${responseData},
         ${obj.isStub}
         );`;
 
@@ -94,7 +112,7 @@ class RequestTable {
     } else {
       const isString = typeof body === 'string';
 
-      result.isJson = isString ? this.isJsonString(responseString) : true;
+      result.isJson = isString ? this.isJsonString(body) : true;
       result.string = isString ? body : this.wrapString(JSON.stringify(body));
     }
 
@@ -134,7 +152,7 @@ class RequestTable {
     }
   }
 
-  queryRequests(query, callback) {
+  queryRequests(query, callback: Client.queryCallback) {
     this.dbConnection.query(query, (err, rows) => {
       if (rows) {
         this.normalizeRequests(rows);
@@ -168,15 +186,15 @@ class RequestTable {
     }
 
     return {
+      body,
+      responseBody,
       id: request.id,
       url: request.url,
-      port: parseInt(request.port),
+      port: parseInt(request.port, 10),
       method: this.getHttpMethodName(request.method),
       headers: JSON.parse(request.headers),
-      body,
-      responseStatus: parseInt(request.response_status),
+      responseStatus: parseInt(request.response_status, 10),
       responseHeaders: JSON.parse(request.response_headers),
-      responseBody,
       isStub: request.is_stub !== 0,
     };
   }
