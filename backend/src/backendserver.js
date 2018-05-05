@@ -10,9 +10,9 @@ import Proxy from './Proxy';
 import DbConnection from './DbConnection';
 import RequestTable from './RequestTable';
 import ApiHandler from './ApiHandler';
-import ConsoleLogger from './logger/ConsoleLogger';
-import EmptyLogger from './logger/EmptyLogger';
-import RequestLoggerExtension from './logger/RequestLoggerExtension';
+import ConsoleLogger from 'main/logger/ConsoleLogger';
+import EmptyLogger from 'main/logger/EmptyLogger';
+import RequestLoggerExtension from 'main/logger/RequestLoggerExtension';
 import util from 'util';
 
 // Config
