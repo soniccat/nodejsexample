@@ -34,6 +34,7 @@
     "tslint-config-airbnb": "^5.8.0"
   },
   "dependencies": {
+    "@types/mysql": "^2.15.4",
     "mysql": "^2.15.0"
   }
 }

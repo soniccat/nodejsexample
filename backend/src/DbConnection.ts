@@ -1,25 +1,27 @@
 
-import Client from 'mysql';
+import * as Client from 'mysql';
 
 class DbConnection {
-  constructor(user, pass, name) {
-    this.database = new Client.createConnection({
-      host: '127.0.0.1',
+  database: Client.Connection;
+
+  constructor(user: string, pass: string, name: string) {
+    this.database = Client.createConnection({
       user,
+      host: '127.0.0.1',
       password: pass,
       database: name,
     });
   }
 
-  connect(callback) {
+  connect(callback: (err: Client.MysqlError, ...args: any[]) => void) {
     this.database.connect(callback);
   }
 
-  close(callback) {
+  close(callback: (err: Client.MysqlError, ...args: any[]) => void) {
     this.database.end(callback);
   }
 
-  query(query, callback) {
+  query(query, callback: (err: Client.MysqlError, ...args: any[]) => void) {
     this.database.query(query, (err, rows) => {
       if (err) {
         console.log(`DbConnection error: ${err}`);
@@ -32,7 +34,7 @@ class DbConnection {
     });
   }
 
-  wrapString(value) {
+  wrapString(value: string) {
     return `${Client.escape(value, true)}`;
   }
 }
