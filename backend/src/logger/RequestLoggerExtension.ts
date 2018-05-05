@@ -6,7 +6,7 @@ import { getUrlString } from 'main/requesttools';
 
 class RequestLogger extends LoggerExtension {
   log(...args: any[]): void {
-    if (this.canLog(args)) {
+    if (this.canLog.apply(args)) {
       const sendInfo: SendInfo = args[0];
       const responseInfo: ResponseInfo = args[1];
 

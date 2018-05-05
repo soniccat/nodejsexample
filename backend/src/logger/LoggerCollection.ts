@@ -9,8 +9,8 @@ class LoggerCollection implements ILogger {
 
   log(...args: any[]) {
     for (const logger of this.loggers) {
-      if (logger.canLog(args)) {
-        logger.log(args);
+      if (logger.canLog.apply(null, args)) {
+        logger.log.apply(null, args);
         break;
       }
     }
@@ -19,7 +19,7 @@ class LoggerCollection implements ILogger {
   canLog(...args: any[]): boolean {
     let canLog = false;
     for (const logger of this.loggers) {
-      if (logger.canLog(args)) {
+      if (logger.canLog.apply(null, args)) {
         canLog = true;
         break;
       }

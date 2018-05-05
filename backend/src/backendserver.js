@@ -13,6 +13,7 @@ import ApiHandler from './ApiHandler';
 import ConsoleLogger from 'main/logger/ConsoleLogger';
 import EmptyLogger from 'main/logger/EmptyLogger';
 import RequestLoggerExtension from 'main/logger/RequestLoggerExtension';
+import LoggerCollection from 'main/logger/LoggerCollection';
 import util from 'util';
 
 // Config
@@ -23,8 +24,9 @@ const databaseUser = process.env.DB_USER;
 const databasePass = process.env.DB_PASS;
 const databaseName = 'db_requests';
 
-// //
-const logger = new RequestLoggerExtension(new ConsoleLogger());
+//
+const consoleLogger = new ConsoleLogger();
+const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), consoleLogger]);
 
 const proxy = new Proxy(logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);

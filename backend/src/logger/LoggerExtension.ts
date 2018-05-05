@@ -8,13 +8,13 @@ class LoggerExtension implements ILogger {
   }
 
   log(...args: any[]) {
-    if (this.innerLogger.canLog(args)) {
-      this.innerLogger.log(args);
+    if (this.innerLogger.canLog.apply(null, args)) {
+      this.innerLogger.log.apply(null, args);
     }
   }
 
   canLog(...args: any[]): boolean {
-    return this.innerLogger.canLog(args);
+    return this.innerLogger.canLog.apply(null, args);
   }
 }
 
