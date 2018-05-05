@@ -1,39 +1,17 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'main/requesttools';
+import ResponseInfo from 'main/baseTypes/ResponseInfo';
+import SendInfo from 'main/baseTypes/SendInfo';
+import ILogger from 'main/logger/ILogger';
 import * as https from 'https';
 import * as url from 'url';
 import * as http from 'http';
 
-interface Logger {
-  log(value: string);
-}
-
-class SendInfo {
-  options: https.RequestOptions;
-  body?: string | object;
-
-  constructor(options, body) {
-    this.options = options;
-    this.body = body;
-  }
-}
-
-// is used to build a db insert query
-class ResponseInfo {
-  headers: http.OutgoingHttpHeaders;
-  statusCode: number;
-  body: string | object;          // unzipped body
-  originalBody: string | object;  // to return original gzipped body
-
-  constructor() {
-  }
-}
-
 const proxyRedirectHost = 'news360.com';
 
 class Proxy {
-  logger: Logger;
+  logger: ILogger;
 
-  constructor(logger) {
+  constructor(logger: ILogger) {
     this.logger = logger;
   }
 
