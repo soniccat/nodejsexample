@@ -13,15 +13,15 @@ class DbConnection {
     });
   }
 
-  connect(callback: (err: Client.MysqlError, ...args: any[]) => void) {
+  connect(callback?: (err: Client.MysqlError, ...args: any[]) => void) {
     this.database.connect(callback);
   }
 
-  close(callback: (err: Client.MysqlError, ...args: any[]) => void) {
+  close(callback?: (err: Client.MysqlError, ...args: any[]) => void) {
     this.database.end(callback);
   }
 
-  query(query, callback: (err: Client.MysqlError | null, ...args: any[]) => void) {
+  query(query, callback?: (err: Client.MysqlError | null, ...args: any[]) => void) {
     this.database.query(query, (err, rows) => {
       if (err) {
         console.log(`DbConnection error: ${err}`);

@@ -45,7 +45,7 @@ class RequestTable {
     this.dbConnection = connection;
   }
 
-  writeRequestRowAsRequestInfo(requestInfo: SendInfo, responseInfo: ResponseInfo, callback: Client.queryCallback) {
+  writeRequestRowAsRequestInfo(requestInfo: SendInfo, responseInfo: ResponseInfo, callback?: Client.queryCallback) {
     this.writeRequestRow({
       url: getUrlString(requestInfo),
       port: requestInfo.options.port,
@@ -59,7 +59,7 @@ class RequestTable {
       callback);
   }
 
-  writeRequestRow(obj: RequestRow, callback: Client.queryCallback) {
+  writeRequestRow(obj: RequestRow, callback?: Client.queryCallback) {
     const tableName = 'main';
     const sessionId = 1;
 

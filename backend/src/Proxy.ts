@@ -1,10 +1,11 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'main/requesttools';
 import ResponseInfo from 'main/baseTypes/ResponseInfo';
-import SendInfo from 'main/baseTypes/SendInfo';
+import SendInfo, { SendInfoOptions } from 'main/baseTypes/SendInfo';
 import ILogger from 'main/logger/ILogger';
 import * as https from 'https';
 import * as url from 'url';
 import * as http from 'http';
+import { RequestInfo } from 'main/baseTypes/RequestInfo';
 
 const proxyRedirectHost = 'news360.com';
 
@@ -15,15 +16,15 @@ class Proxy {
     this.logger = logger;
   }
 
-  async handleRequest(originalRequest: http.IncomingMessage, originalResponse: http.ServerResponse) {
+  async handleRequest(originalRequest: http.IncomingMessage, originalResponse: http.ServerResponse): Promise<RequestInfo> {
     this.logger.log(`start ${originalRequest.url}`);
 
-    const sendRequestInfo: SendInfo = await this.prepareSendRequestInfo(originalRequest);
-    const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendRequestInfo);
+    const sendInfo: SendInfo = await this.prepareSendRequestInfo(originalRequest);
+    const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendInfo);
     this.logger.log(`end ${originalRequest.url}`);
 
     this.fillOriginalResponseInfo(originalResponse, responseInfo);
-    return [sendRequestInfo, responseInfo];
+    return { sendInfo, responseInfo };
   }
 
   async prepareSendRequestInfo(request: http.IncomingMessage): Promise<SendInfo> {
@@ -39,9 +40,22 @@ class Proxy {
     originalResponse.end();
   }
 
-  getSendRequestOptions(req): https.RequestOptions {
+  getSendRequestOptions(req: http.IncomingMessage): SendInfoOptions {
+    if (req.url === undefined) {
+      throw new Error(`getSendRequestOptions: url is empty`);
+    }
+
     const reqUrl = url.parse(req.url);
     const redirectHost = proxyRedirectHost;
+
+    if (reqUrl.host === undefined) {
+      throw new Error(`getSendRequestOptions: url host is empty ${reqUrl}`);
+    }
+
+    if (reqUrl.path === undefined) {
+      throw new Error(`getSendRequestOptions: url path is empty ${reqUrl}`);
+    }
+
     const needRedirect = reqUrl.host == null || reqUrl.host === 'localhost';
     const host = needRedirect ? redirectHost : reqUrl.host;
     const path = reqUrl.path;
@@ -58,14 +72,15 @@ class Proxy {
     delete defaultHeaders.origin;
     delete defaultHeaders.referer;
 
-    const headers = needRedirect ? defaultHeaders : req.headers;
+    let headers = needRedirect ? defaultHeaders : req.headers;
+    headers = headers ? headers : {};
 
     return {
       host,
       path,
       headers,
       port: 443,
-      method: req.method,
+      method: (req.method ? req.method : 'unknown'),
     };
   }
 

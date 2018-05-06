@@ -1,10 +1,10 @@
 import * as https from 'https';
 
-class SendInfoOptions {
+export class SendInfoOptions {
   host: string;
   path: string;
   port: number;
-  headers: {[header: string]: string | number | undefined};
+  headers: {[header: string]: string | string[] | number | undefined};
   method: string;
 }
 
@@ -12,7 +12,7 @@ class SendInfo {
   options: SendInfoOptions;
   body?: string | Buffer | object;
 
-  constructor(options, body) {
+  constructor(options: SendInfoOptions, body?: string | Buffer | object) {
     this.options = options;
     this.body = body;
   }
