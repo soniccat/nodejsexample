@@ -3,6 +3,7 @@ import ResponseInfo from 'main/baseTypes/ResponseInfo';
 import SendInfo from 'main/baseTypes/SendInfo';
 import * as Client from 'mysql';
 import DbConnection from 'main/DbConnection';
+import { isString } from 'main/objectTools';
 
 class RequestRow {
   id?: number;
@@ -133,10 +134,10 @@ class RequestTable {
         // response_data = body;
       }
     } else {
-      const isString = typeof body === 'string';
+      const isStr = isString(body);
 
-      result.isJson = isString ? this.isJsonString(body as string) : true;
-      result.string = isString ? body as string : this.wrapString(JSON.stringify(body));
+      result.isJson = isStr ? this.isJsonString(body as string) : true;
+      result.string = isStr ? body as string : this.wrapString(JSON.stringify(body));
     }
 
     return result;

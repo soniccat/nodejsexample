@@ -124,8 +124,8 @@ class Proxy {
   }
 
   async handleOriginalResponseEndPromise(responseInfo: ResponseInfo) {
-    if (isZipContent(responseInfo.headers)) {
-      return handleUnzipPromise(responseInfo.originalBody)
+    if (responseInfo.originalBody && isZipContent(responseInfo.headers)) {
+      return handleUnzipPromise(responseInfo.originalBody as Buffer)
         .then(decoded => Object.assign({ body: decoded }, responseInfo));
     }
 

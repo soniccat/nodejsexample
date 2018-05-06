@@ -3,6 +3,7 @@ import { readPostBody } from './requesttools';
 import RequestTable from './RequestTable';
 import DbConnection from 'main/DbConnection';
 import ILogger from 'main/logger/ILogger';
+import * as http from 'http';
 
 // spec:
 //
@@ -31,7 +32,7 @@ class ApiHandler {
     this.requestTable = new RequestTable(this.dbConnection);
   }
 
-  handleRequest(req, res) {
+  handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
     const reqUrl = url.parse(req.url);
     const path = reqUrl.path.substr(this.apiPath.length + 2); // +2 for double '/' at the beginning and end
     const components = path.split('/');
@@ -40,7 +41,7 @@ class ApiHandler {
     this.logger.log(`url: ${req.url} method: ${req.method}`);
 
     if (req.method === 'OPTIONS') {
-      res.writeHeader(200, {
+      res.writeHead(200, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
         'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
@@ -55,7 +56,7 @@ class ApiHandler {
     }
   }
 
-  handleComponents(components, body, res, callback) {
+  handleComponents(components: string[], body, res, callback) {
     if (components.length > 0 && components[0] === 'requests') {
       this.handleRequests(body, res, () => {
         callback();
