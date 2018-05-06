@@ -93,7 +93,7 @@ class Proxy {
 
     const creq = https.request(sendRequestInfo.options, (cres: http.IncomingMessage) => {
       responseInfo.headers = this.buildPoxyHeaders(cres);
-      responseInfo.statusCode = cres.statusCode;
+      responseInfo.statusCode = cres.statusCode === undefined ? 500 : cres.statusCode;
 
       cres.on('close', () => {
         callback(responseInfo);

@@ -33,7 +33,16 @@ class ApiHandler {
   }
 
   handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+    if (req.url === undefined) {
+      throw new Error('handleRequest: request without url');
+    }
+
     const reqUrl = url.parse(req.url);
+
+    if (reqUrl.path === undefined) {
+      throw new Error(`handleRequest: request without url path ${reqUrl}`);
+    }
+
     const path = reqUrl.path.substr(this.apiPath.length + 2); // +2 for double '/' at the beginning and end
     const components = path.split('/');
 
