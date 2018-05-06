@@ -75,7 +75,7 @@ dbConnection.connect((err) => {
 });
 
 function needWriteRequestRow(requestInfo: RequestInfo) {
-  return requestInfo.sendInfo.options.path && requestInfo.sendInfo.options.path.indexOf('api') !== -1;
+  return requestInfo.sendInfo.path && requestInfo.sendInfo.path.indexOf('api') !== -1;
 }
 
 function isApiRequest(req: http.IncomingMessage) {

@@ -1,6 +1,6 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'main/requesttools';
 import ResponseInfo from 'main/baseTypes/ResponseInfo';
-import SendInfo, { SendInfoOptions } from 'main/baseTypes/SendInfo';
+import SendInfo from 'main/baseTypes/SendInfo';
 import ILogger from 'main/logger/ILogger';
 import * as https from 'https';
 import * as url from 'url';
@@ -28,8 +28,10 @@ class Proxy {
   }
 
   async prepareSendRequestInfo(request: http.IncomingMessage): Promise<SendInfo> {
-    const body = await readPostBodyPromise(request);
-    return new SendInfo(this.getSendRequestOptions(request), body);
+    const sendInfo = this.getSendInfo(request);
+    sendInfo.body = await readPostBodyPromise(request);
+
+    return sendInfo;
   }
 
   fillOriginalResponseInfo(originalResponse: http.ServerResponse, responseInfo: ResponseInfo) {
@@ -40,20 +42,20 @@ class Proxy {
     originalResponse.end();
   }
 
-  getSendRequestOptions(req: http.IncomingMessage): SendInfoOptions {
+  getSendInfo(req: http.IncomingMessage): SendInfo {
     if (req.url === undefined) {
-      throw new Error(`getSendRequestOptions: url is empty`);
+      throw new Error(`getSendInfo: url is empty`);
     }
 
     const reqUrl = url.parse(req.url);
     const redirectHost = proxyRedirectHost;
 
     if (reqUrl.host === undefined) {
-      throw new Error(`getSendRequestOptions: url host is empty ${reqUrl}`);
+      throw new Error(`getSendInfo: url host is empty ${reqUrl}`);
     }
 
     if (reqUrl.path === undefined) {
-      throw new Error(`getSendRequestOptions: url path is empty ${reqUrl}`);
+      throw new Error(`getSendInfo: url path is empty ${reqUrl}`);
     }
 
     const needRedirect = reqUrl.host == null || reqUrl.host === 'localhost';
@@ -84,29 +86,29 @@ class Proxy {
     };
   }
 
-  async prepareResponseInfoPromise(sendRequestInfo: SendInfo): Promise<ResponseInfo> {
-    const originalResponseInfo: ResponseInfo = await this.prepareOriginalResponseInfoPromise(sendRequestInfo);
+  async prepareResponseInfoPromise(sendInfo: SendInfo): Promise<ResponseInfo> {
+    const originalResponseInfo: ResponseInfo = await this.prepareOriginalResponseInfoPromise(sendInfo);
     const responseInfo: ResponseInfo = await this.handleOriginalResponseEndPromise(originalResponseInfo);
 
     if (isZipContent(responseInfo.headers)) {
-      this.logger.log(`content decoded for ${sendRequestInfo.options.path}`);
+      this.logger.log(`content decoded for ${sendInfo.path}`);
     }
 
     return responseInfo;
   }
 
-  async prepareOriginalResponseInfoPromise(sendRequestInfo: SendInfo): Promise<ResponseInfo> {
+  async prepareOriginalResponseInfoPromise(sendInfo: SendInfo): Promise<ResponseInfo> {
     return new Promise<ResponseInfo>((resolve, reject) => {
-      this.prepareOriginalResponseInfo(sendRequestInfo, (responseInfo: ResponseInfo) => {
+      this.prepareOriginalResponseInfo(sendInfo, (responseInfo: ResponseInfo) => {
         resolve(responseInfo);
       });
     });
   }
 
-  prepareOriginalResponseInfo(sendRequestInfo: SendInfo, callback: (responseInfo: ResponseInfo) => void) {
+  prepareOriginalResponseInfo(sendInfo: SendInfo, callback: (responseInfo: ResponseInfo) => void) {
     const responseInfo: ResponseInfo = new ResponseInfo();
 
-    const creq = https.request(sendRequestInfo.options, (cres: http.IncomingMessage) => {
+    const creq = https.request(sendInfo, (cres: http.IncomingMessage) => {
       responseInfo.headers = this.buildPoxyHeaders(cres);
       responseInfo.statusCode = cres.statusCode === undefined ? 500 : cres.statusCode;
 
@@ -123,8 +125,8 @@ class Proxy {
       callback(responseInfo);
     });
 
-    if (sendRequestInfo.body) {
-      creq.write(sendRequestInfo.body);
+    if (sendInfo.body) {
+      creq.write(sendInfo.body);
     }
 
     creq.end();

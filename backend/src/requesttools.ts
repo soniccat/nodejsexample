@@ -48,8 +48,8 @@ export function readBody(request: http.IncomingMessage, callback: (buffer: Buffe
 }
 
 export function getUrlString(requestInfo: SendInfo) {
-  const scheme = requestInfo.options.port === 443 ? 'https://' : 'http://';
-  return scheme + requestInfo.options.host + (requestInfo.options.path ? requestInfo.options.path : '');
+  const scheme = requestInfo.port === 443 ? 'https://' : 'http://';
+  return scheme + requestInfo.host + (requestInfo.path ? requestInfo.path : '');
 }
 
 export async function handleUnzipPromise(buffer: zlib.InputType): Promise<Buffer | null> {

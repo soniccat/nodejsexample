@@ -49,9 +49,9 @@ class RequestTable {
   writeRequestRowAsRequestInfo(requestInfo: RequestInfo, callback?: Client.queryCallback) {
     this.writeRequestRow({
       url: getUrlString(requestInfo.sendInfo),
-      port: requestInfo.sendInfo.options.port,
-      method: requestInfo.sendInfo.options.method,
-      headers: requestInfo.sendInfo.options.headers,
+      port: requestInfo.sendInfo.port,
+      method: requestInfo.sendInfo.method,
+      headers: requestInfo.sendInfo.headers,
       body: requestInfo.sendInfo.body,
       responseStatus: requestInfo.responseInfo.statusCode,
       responseHeaders: requestInfo.responseInfo.headers,
