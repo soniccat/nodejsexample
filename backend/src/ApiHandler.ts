@@ -1,9 +1,10 @@
 import * as url from 'url';
-import { readPostBody } from './requesttools';
-import RequestTable from './RequestTable';
+import { readPostBody, readPostBodyPromise } from './requesttools';
+import RequestTable, { RequestRow } from './RequestTable';
 import DbConnection from 'main/DbConnection';
 import ILogger from 'main/logger/ILogger';
 import * as http from 'http';
+import * as Client from 'mysql';
 
 // spec:
 //
@@ -19,6 +20,22 @@ import * as http from 'http';
 // params:
 //  json representation of an object
 
+class LoadRequestsOption {
+  fields: string[];
+  urlRegexp?: string;
+  onlyNotNull: boolean;
+
+  static checkType(arg: any): arg is LoadRequestsOption {
+    return arg.fields !== undefined && arg.onlyNotNull !== undefined;
+  }
+}
+
+class ApiRequestInfo {
+  components: string[];
+  method: string;
+  body?: object;
+}
+
 class ApiHandler {
   dbConnection: DbConnection;
   apiPath: string;
@@ -32,46 +49,64 @@ class ApiHandler {
     this.requestTable = new RequestTable(this.dbConnection);
   }
 
-  handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
-    if (req.url === undefined) {
-      throw new Error('handleRequest: request without url');
-    }
+  async handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
+    const apiRequestInfo = await this.extractRequestData(req);
 
-    const reqUrl = url.parse(req.url);
-
-    if (reqUrl.path === undefined) {
-      throw new Error(`handleRequest: request without url path ${reqUrl}`);
-    }
-
-    const path = reqUrl.path.substr(this.apiPath.length + 2); // +2 for double '/' at the beginning and end
-    const components = path.split('/');
-
-    // allow Cross-Origin Resource Sharing preflight request
-    this.logger.log(`url: ${req.url} method: ${req.method}`);
-
-    if (req.method === 'OPTIONS') {
-      res.writeHead(200, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
-      });
+    this.handleApiRequest(apiRequestInfo, res, () => {
       res.end();
-    } else {
-      readPostBody(req, (body) => {
-        this.handleComponents(components, body, res, () => {
-          res.end();
-        });
-      });
-    }
+    });
   }
 
-  handleComponents(components: string[], body, res, callback) {
-    if (components.length > 0 && components[0] === 'requests') {
-      this.handleRequests(body, res, () => {
+  async extractRequestData(req: http.IncomingMessage): Promise<ApiRequestInfo> {
+    const apiRequestInfo = await this.extractApiRequestInfo(req);
+    const body = await readPostBodyPromise(req);
+
+    if (body !== undefined) {
+      apiRequestInfo.body = JSON.parse(body.toString());
+    }
+
+    return apiRequestInfo;
+  }
+
+  async extractApiRequestInfo(req: http.IncomingMessage) {
+    return new Promise<ApiRequestInfo>((resolve, request) => {
+      if (req.url === undefined) {
+        throw new Error('handleRequest: request without url');
+      }
+  
+      if (req.method === undefined) {
+        throw new Error('handleRequest: request without method');
+      }
+  
+      const reqUrl = url.parse(req.url);
+      const method = req.method;
+  
+      if (reqUrl.path === undefined) {
+        throw new Error(`handleRequest: request without url path ${reqUrl}`);
+      }
+  
+      const path = reqUrl.path.substr(this.apiPath.length + 2); // +2 for double '/' at the beginning and end
+      const components = path.split('/');
+
+      resolve({
+        components,
+        method,
+      });
+    });
+  }
+
+  handleApiRequest(requestInfo: ApiRequestInfo, res: http.ServerResponse, callback: () => void) {
+    // allow Cross-Origin Resource Sharing preflight request
+    this.logger.log(`ApiHandler handle: ${requestInfo.components.join('/')} method: ${requestInfo.method}`);
+
+    if (requestInfo.method === 'OPTIONS') {
+      this.handleOptionsRequest(res, callback);
+    } else if (requestInfo.components.length > 0 && LoadRequestsOption.checkType(requestInfo.body) && requestInfo.components[0] === 'requests') {
+      this.handleRequests(requestInfo.body, res, () => {
         callback();
       });
-    } else if (components.length > 0 && components[0] === 'request') {
-      this.handleCreateRequest(body, res, () => {
+    } else if (requestInfo.components.length > 0 && requestInfo.body && requestInfo.components[0] === 'request') {
+      this.handleCreateRequest(requestInfo.body, res, () => {
         callback();
       });
     } else {
@@ -80,9 +115,17 @@ class ApiHandler {
     }
   }
 
-  //
-  handleCreateRequest(body, res, callback) {
-    const obj = JSON.parse(body.toString());
+  private handleOptionsRequest(res: any, callback: () => void) {
+    res.writeHead(200, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
+    });
+    callback();
+  }
+
+  private handleCreateRequest(body: object, res: http.ServerResponse, callback: () => void) {
+    const obj = body as RequestRow;
     this.requestTable.writeRequestRow(obj, (writeErr) => {
       if (!writeErr) {
         this.requestTable.getLastInsertedIndex((err, rows) => {
@@ -106,9 +149,8 @@ class ApiHandler {
     });
   }
 
-  handleRequests(body, res, callback) {
-    const options = JSON.parse(body.toString());
-    this.loadRequests(options, (err, rows) => {
+  private handleRequests(body: LoadRequestsOption, res: http.ServerResponse, callback: () => void) {
+    this.loadRequests(body, (err, rows) => {
       const code = err ? 500 : 200;
       const resBody = err ? undefined : JSON.stringify(rows);
 
@@ -117,7 +159,7 @@ class ApiHandler {
     });
   }
 
-  setResponseHeader(res, code, body) {
+  private setResponseHeader(res: http.ServerResponse, code: number, body?: string) {
     res.writeHead(code, {
       'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json',
@@ -128,21 +170,22 @@ class ApiHandler {
     }
   }
 
-  fillNotFoundResponse(res) {
+  private fillNotFoundResponse(res) {
     res.writeHead(404);
   }
 
-  loadRequests(options, callback) {
+  private loadRequests(options: LoadRequestsOption, callback: Client.queryCallback) {
     let fields = '*';
-    if (options.fields) {
-      fields = options.fields.join(',');
+    if (options.fields && options.fields.length) {
+      const wrappedFields = options.fields;// options.fields.map(v => this.dbConnection.wrapString(v));
+      fields = wrappedFields.join(',');
     }
 
     let wherePart = '';
     let urlRegexp = '';
     if (options.urlRegexp) {
       urlRegexp = options.urlRegexp;
-      wherePart += `url REGEXP '${urlRegexp}'`;
+      wherePart += `url REGEXP ${this.dbConnection.wrapString(urlRegexp)}`;
     }
 
     if (options.onlyNotNull && options.fields) {

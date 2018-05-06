@@ -6,7 +6,7 @@ import DbConnection from 'main/DbConnection';
 import { isString } from 'main/objectTools';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
 
-class RequestRow {
+export class RequestRow {
   id?: number;
   url: string;
   port: number | string;

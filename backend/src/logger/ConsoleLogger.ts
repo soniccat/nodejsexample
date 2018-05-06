@@ -2,7 +2,7 @@ import ILogger from 'main/logger/ILogger';
 
 class ConsoleLogger implements ILogger {
   log(...args: any[]): void {
-    if (args) {
+    if (args && args.length) {
       for (const arg of args) {
         console.log(arg);
       }
