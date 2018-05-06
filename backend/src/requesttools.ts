@@ -4,9 +4,9 @@ import * as http from 'http';
 import SendInfo from 'main/baseTypes/SendInfo';
 import { isString } from 'main/objectTools';
 
-export async function readPostBodyPromise(request: http.IncomingMessage): Promise<Buffer | null> {
-  return new Promise<Buffer | null>((resolve, reject) => {
-    readPostBody(request, (buffer: Buffer | null) => {
+export async function readPostBodyPromise(request: http.IncomingMessage): Promise<Buffer | undefined> {
+  return new Promise<Buffer | undefined>((resolve, reject) => {
+    readPostBody(request, (buffer: Buffer | undefined) => {
       resolve(buffer);
     });
   });
@@ -22,15 +22,28 @@ export function readPostBody(request: http.IncomingMessage, callback: (buffer?: 
 }
 
 export function readBody(request: http.IncomingMessage, callback: (buffer: Buffer) => void) {
-  const sendPost = [];
+  const bufferData: Buffer[] = [];
+  const stringData: string[] = [];
+
   request.on('data', (chunk) => {
-    sendPost.push(chunk);
+    if (isString(chunk)) {
+      stringData.push(chunk as string);
+    } else {
+      bufferData.push(chunk as Buffer)
+    }
   });
 
   request.on('end', () => {
-    const buffer = Buffer.concat(sendPost);
-    // console.log("post data " + buffer);
-    callback(buffer);
+    let result: Buffer;
+    if (stringData.length) {
+      result = new Buffer(stringData.join());
+    } else if (bufferData.length) {
+      result = Buffer.concat(bufferData);
+    } else {
+      result = new Buffer('');
+    }
+
+    callback(result);
   });
 }
 

@@ -10,11 +10,11 @@ class RequestRow {
   url: string;
   port: number | string;
   method: string;
-  headers: {[index: string]: any};
-  body: string | object;
+  headers: {[index: string]: any} | undefined;
+  body: string | object | undefined;
   responseStatus: number;
-  responseHeaders: {[index: string]: any};
-  responseBody: string | object;
+  responseHeaders: {[index: string]: any} | undefined;
+  responseBody: string | object | undefined;
   isStub: boolean;
 }
 
@@ -26,15 +26,15 @@ class DbRequestRow {
   url: string;
   port: number;
   method: number;
-  headers: string;
-  body_string: string;
+  headers?: string;
+  body_string?: string;
   body_string_is_json: boolean;
-  body_data: any;
+  body_data?: any;
   response_status: number;
-  response_headers: string | undefined;
-  response_string: string;
+  response_headers?: string;
+  response_string?: string;
   response_string_is_json: boolean;
-  response_data: any;
+  response_data?: any;
   is_stub: number;
 }
 
@@ -202,14 +202,14 @@ class RequestTable {
   normalizeRequest(request: DbRequestRow): RequestRow {
     let body;
     if (request.body_string_is_json) {
-      body = JSON.parse(request.body_string);
+      body = request.body_string ? JSON.parse(request.body_string) : {};
     } else if (request.body_string) {
       body = request.body_string;
     }
 
     let responseBody;
     if (request.response_string_is_json) {
-      responseBody = JSON.parse(request.response_string);
+      responseBody = request.response_string ? JSON.parse(request.response_string) : {};
     } else if (request.response_string) {
       responseBody = request.response_string;
     }
@@ -221,9 +221,9 @@ class RequestTable {
       url: request.url,
       port: request.port,
       method: this.getHttpMethodName(request.method),
-      headers: JSON.parse(request.headers),
+      headers: request.headers ? JSON.parse(request.headers) : {},
       responseStatus: request.response_status,
-      responseHeaders: JSON.parse(request.response_headers),
+      responseHeaders: request.response_headers ? JSON.parse(request.response_headers) : {},
       isStub: request.is_stub !== 0,
     };
   }
