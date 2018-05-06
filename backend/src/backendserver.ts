@@ -46,8 +46,8 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
   } else {
     proxy.handleRequest(req, res)
       .then((requestInfo: RequestInfo) => {
-        if (needWriteRequestRow(requestInfo.sendInfo, requestInfo.responseInfo)) {
-          requestDb.writeRequestRowAsRequestInfo(requestInfo.sendInfo, requestInfo.responseInfo);
+        if (needWriteRequestRow(requestInfo)) {
+          requestDb.writeRequestRowAsRequestInfo(requestInfo);
         }
       });
   }
@@ -74,8 +74,8 @@ dbConnection.connect((err) => {
   });
 });
 
-function needWriteRequestRow(requestInfo, responseInfo) {
-  return requestInfo.options.path && requestInfo.options.path.indexOf('api') !== -1;
+function needWriteRequestRow(requestInfo: RequestInfo) {
+  return requestInfo.sendInfo.options.path && requestInfo.sendInfo.options.path.indexOf('api') !== -1;
 }
 
 function isApiRequest(req: http.IncomingMessage) {

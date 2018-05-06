@@ -4,16 +4,17 @@ import SendInfo from 'main/baseTypes/SendInfo';
 import * as Client from 'mysql';
 import DbConnection from 'main/DbConnection';
 import { isString } from 'main/objectTools';
+import { RequestInfo } from 'main/baseTypes/RequestInfo';
 
 class RequestRow {
   id?: number;
   url: string;
   port: number | string;
   method: string;
-  headers: {[index: string]: any} | undefined;
+  headers: {[index: string]: any};
   body: string | object | undefined;
   responseStatus: number;
-  responseHeaders: {[index: string]: any} | undefined;
+  responseHeaders: {[index: string]: any};
   responseBody: string | object | undefined;
   isStub: boolean;
 }
@@ -45,16 +46,16 @@ class RequestTable {
     this.dbConnection = connection;
   }
 
-  writeRequestRowAsRequestInfo(requestInfo: SendInfo, responseInfo: ResponseInfo, callback?: Client.queryCallback) {
+  writeRequestRowAsRequestInfo(requestInfo: RequestInfo, callback?: Client.queryCallback) {
     this.writeRequestRow({
-      url: getUrlString(requestInfo),
-      port: requestInfo.options.port,
-      method: requestInfo.options.method,
-      headers: requestInfo.options.headers,
-      body: requestInfo.body,
-      responseStatus: responseInfo.statusCode,
-      responseHeaders: responseInfo.headers,
-      responseBody: responseInfo.body,
+      url: getUrlString(requestInfo.sendInfo),
+      port: requestInfo.sendInfo.options.port,
+      method: requestInfo.sendInfo.options.method,
+      headers: requestInfo.sendInfo.options.headers,
+      body: requestInfo.sendInfo.body,
+      responseStatus: requestInfo.responseInfo.statusCode,
+      responseHeaders: requestInfo.responseInfo.headers,
+      responseBody: requestInfo.responseInfo.body,
       isStub: false}, 
       callback);
   }
