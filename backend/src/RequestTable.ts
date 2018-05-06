@@ -20,6 +20,8 @@ class RequestRow {
 }
 
 // match SQL table row names
+
+/* tslint:disable:variable-name */
 class DbRequestRow {
   id: number;
   session_id: number;
@@ -38,6 +40,7 @@ class DbRequestRow {
   response_data?: any;
   is_stub: number;
 }
+/* tslint:enable:variable-name */
 
 class RequestTable {
   dbConnection: DbConnection;

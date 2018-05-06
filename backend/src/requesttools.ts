@@ -13,7 +13,6 @@ export async function readPostBodyPromise(request: http.IncomingMessage): Promis
 }
 
 export function readPostBody(request: http.IncomingMessage, callback: (buffer?: Buffer) => void) {
-  // console.log("### body " + util.inspect(originalRequest));
   if (request.method !== 'POST') {
     callback(undefined);
   } else {
@@ -29,7 +28,7 @@ export function readBody(request: http.IncomingMessage, callback: (buffer: Buffe
     if (isString(chunk)) {
       stringData.push(chunk as string);
     } else {
-      bufferData.push(chunk as Buffer)
+      bufferData.push(chunk as Buffer);
     }
   });
 
