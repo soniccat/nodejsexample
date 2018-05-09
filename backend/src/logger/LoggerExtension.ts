@@ -1,4 +1,4 @@
-import ILogger from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'main/logger/ILogger';
 
 class LoggerExtension implements ILogger {
   innerLogger: ILogger;
@@ -7,9 +7,9 @@ class LoggerExtension implements ILogger {
     this.innerLogger = logger;
   }
 
-  log(...args: any[]) {
+  log(level: LogLevel, ...args: any[]) {
     if (this.innerLogger.canLog.apply(null, args)) {
-      this.innerLogger.log.apply(null, args);
+      this.innerLogger.log.apply(null, [level].concat(args));
     }
   }
 

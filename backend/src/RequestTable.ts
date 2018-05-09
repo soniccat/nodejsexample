@@ -19,13 +19,13 @@ export class RequestRow {
   isStub: boolean;
 
   static checkType(obj): obj is RequestRow {
-    return typeof obj.url === `string` && 
-    typeof obj.port === `number` &&
-    typeof obj.method === `string` &&
-    obj.headers &&
-    typeof obj.responseStatus === `number` &&
-    obj.responseHeaders &&
-    typeof obj.isStub === `boolean`;
+    return typeof obj.url === `string` 
+    && typeof obj.port === `number` 
+    && typeof obj.method === `string` 
+    && obj.headers 
+    && typeof obj.responseStatus === `number` 
+    && obj.responseHeaders 
+    && typeof obj.isStub === `boolean`;
   }
 }
 
@@ -53,10 +53,12 @@ class DbRequestRow {
 /* tslint:enable:variable-name */
 
 class RequestTable {
-  dbConnection: DbConnection;
+  private dbConnection: DbConnection;
 
   constructor(connection: DbConnection) {
     this.dbConnection = connection;
+
+    this.getLastInsertedIndex = this.getLastInsertedIndex.bind(this);
   }
 
   async writeRequestRowAsRequestInfo(requestInfo: RequestInfo): Promise<any[]> {

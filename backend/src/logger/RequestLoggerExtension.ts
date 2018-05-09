@@ -4,11 +4,12 @@ import SendInfo from 'main/baseTypes/SendInfo';
 import * as util from 'util';
 import { getUrlString } from 'main/requesttools';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
+import { LogLevel } from 'main/logger/ILogger';
 
 class RequestLogger extends LoggerExtension {
-  log(...args: any[]): void {
+  log(level: LogLevel, ...args: any[]): void {
     if (this.canLog.apply(args)) {
-      this.logRequest(args[0] as RequestInfo);
+      this.logRequest(level, args[0] as RequestInfo);
     }
   }
 
@@ -23,10 +24,10 @@ class RequestLogger extends LoggerExtension {
     return canLog;
   }
 
-  logRequest(requestInfo: RequestInfo) {
-    this.innerLogger.log(`load ${getUrlString(requestInfo.sendInfo)}`);
-    this.innerLogger.log(`send ${util.inspect(requestInfo.sendInfo)}`);
-    this.innerLogger.log(`response ${util.inspect(requestInfo.sendInfo)}`);
+  logRequest(level: LogLevel, requestInfo: RequestInfo) {
+    this.innerLogger.log(level, `load ${getUrlString(requestInfo.sendInfo)}`);
+    this.innerLogger.log(level, `send ${util.inspect(requestInfo.sendInfo)}`);
+    this.innerLogger.log(level, `response ${util.inspect(requestInfo.sendInfo)}`);
   }
 }
 

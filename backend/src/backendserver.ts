@@ -16,6 +16,7 @@ import EmptyLogger from 'main/logger/EmptyLogger';
 import RequestLoggerExtension from 'main/logger/RequestLoggerExtension';
 import LoggerCollection from 'main/logger/LoggerCollection';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
+import { LogLevel } from 'main/logger/ILogger';
 
 // Config
 const host = 'aglushkov.com';
@@ -33,7 +34,7 @@ if (!databaseUser || !databasePass) {
 const consoleLogger = new ConsoleLogger();
 const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), consoleLogger]);
 
-const proxy = new Proxy('news360.com', logger);
+const proxy = new Proxy('github.com', logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const apiHandler = new ApiHandler(dbConnection, apiPath, logger);
@@ -43,7 +44,9 @@ const severPort = process.env.SERVER_PORT;
 const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
   if (isApiRequest(req)) {
     apiHandler.handleRequest(req, res)
-    .then(res => res.end());
+    .then((res) => {
+      res.end();
+    });
   } else {
     proxy.handleRequest(req, res)
       .then((requestInfo: RequestInfo) => {
@@ -56,13 +59,13 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
 });
 
 server.on('error', (err) => {
-  logger.log(`server error ${err}`);
+  logger.log(LogLevel.ERROR, `server error ${err}`);
   dbConnection.close();
   throw err;
 });
 
 process.on('uncaughtException', (err) => {
-  logger.log(err);
+  logger.log(LogLevel.ERROR, err);
   dbConnection.close();
   throw err;
 });

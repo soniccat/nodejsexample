@@ -1,4 +1,4 @@
-import ILogger from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'main/logger/ILogger';
 
 class LoggerCollection implements ILogger {
   loggers: ILogger[];
@@ -7,10 +7,10 @@ class LoggerCollection implements ILogger {
     this.loggers = loggers;
   }
 
-  log(...args: any[]) {
+  log(level: LogLevel, ...args: any[]) {
     for (const logger of this.loggers) {
       if (logger.canLog.apply(null, args)) {
-        logger.log.apply(null, args);
+        logger.log.apply(null, [level].concat(args));
         break;
       }
     }

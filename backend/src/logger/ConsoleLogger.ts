@@ -1,10 +1,10 @@
-import ILogger from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'main/logger/ILogger';
 
 class ConsoleLogger implements ILogger {
-  log(...args: any[]): void {
+  log(level: LogLevel, ...args: any[]): void {
     if (args && args.length) {
       for (const arg of args) {
-        console.log(arg);
+        console.log(level, arg);
       }
     }
   }

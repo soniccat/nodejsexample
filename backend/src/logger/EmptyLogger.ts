@@ -1,7 +1,7 @@
-import ILogger from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'main/logger/ILogger';
 
 class EmptyLogger implements ILogger {
-  log(...args: any[]): void {
+  log(level: LogLevel, ...args: any[]): void {
   }
 
   canLog(...args: any[]): boolean {

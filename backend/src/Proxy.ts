@@ -1,10 +1,11 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'main/requesttools';
 import ResponseInfo from 'main/baseTypes/ResponseInfo';
 import SendInfo from 'main/baseTypes/SendInfo';
-import ILogger from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'main/logger/ILogger';
 import * as https from 'https';
 import * as url from 'url';
 import * as http from 'http';
+import * as util from 'util';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
 
 class Proxy {
@@ -17,11 +18,11 @@ class Proxy {
   }
 
   async handleRequest(originalRequest: http.IncomingMessage, originalResponse: http.ServerResponse): Promise<RequestInfo> {
-    this.logger.log(`start ${originalRequest.url}`);
+    this.logger.log(LogLevel.DEBUG, `start ${originalRequest.url}`);
 
     const sendInfo: SendInfo = await this.prepareSendRequestInfo(originalRequest);
     const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendInfo);
-    this.logger.log(`end ${originalRequest.url}`);
+    this.logger.log(LogLevel.DEBUG, `end ${originalRequest.url}`);
 
     this.fillOriginalResponseInfo(originalResponse, responseInfo);
     return { sendInfo, responseInfo };
@@ -90,7 +91,7 @@ class Proxy {
     const responseInfo: ResponseInfo = await this.handleOriginalResponseEndPromise(originalResponseInfo);
 
     if (isZipContent(responseInfo.headers)) {
-      this.logger.log(`content decoded for ${sendInfo.path}`);
+      this.logger.log(LogLevel.DEBUG, `content decoded for ${sendInfo.path}`);
     }
 
     return responseInfo;
@@ -120,6 +121,7 @@ class Proxy {
         callback(responseInfo);
       });
     }).on('error', (e) => {
+      this.logger.log(LogLevel.ERROR, `prepareOriginalResponseInfo error ${util.inspect(e)}`);
       responseInfo.statusCode = 500;
       callback(responseInfo);
     });

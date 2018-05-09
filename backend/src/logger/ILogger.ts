@@ -1,6 +1,12 @@
 
+export enum LogLevel {
+  DEBUG,
+  WARNING,
+  ERROR,
+}
+
 interface ILogger {
-  log(...args: any[]): void;
+  log(level: LogLevel, ...args: any[]): void;
   canLog(...args: any[]): boolean;
 }
 
