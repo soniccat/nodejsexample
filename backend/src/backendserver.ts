@@ -10,7 +10,7 @@ import * as util from 'util';
 import Proxy from './Proxy';
 import DbConnection from './DbConnection';
 import RequestTable from './RequestTable';
-import ApiHandler from './ApiHandler';
+import ApiHandler from 'main/api/ApiHandler';
 import ConsoleLogger from 'main/logger/ConsoleLogger';
 import EmptyLogger from 'main/logger/EmptyLogger';
 import RequestLoggerExtension from 'main/logger/RequestLoggerExtension';
