@@ -26,7 +26,7 @@ class LoadRequestsOption {
   onlyNotNull: boolean;
 
   static checkType(arg: any): arg is LoadRequestsOption {
-    return arg.fields !== undefined && arg.onlyNotNull !== undefined;
+    return Array.isArray(arg.fields) && typeof arg.onlyNotNull === `boolean`;
   }
 }
 
@@ -49,11 +49,11 @@ class ApiHandler {
     this.requestTable = new RequestTable(this.dbConnection);
   }
 
-  async handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
-    const apiRequestInfo = await this.extractRequestData(req);
-
-    this.handleApiRequest(apiRequestInfo, res, () => {
-      res.end();
+  async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {
+    return this.extractRequestData(req)
+    .then((info: ApiRequestInfo) => this.handleApiRequest(info, res))
+    .then((res: http.ServerResponse) => {
+      return res;
     });
   }
 
@@ -68,7 +68,7 @@ class ApiHandler {
     return apiRequestInfo;
   }
 
-  async extractApiRequestInfo(req: http.IncomingMessage) {
+  async extractApiRequestInfo(req: http.IncomingMessage): Promise<ApiRequestInfo> {
     return new Promise<ApiRequestInfo>((resolve, request) => {
       if (req.url === undefined) {
         throw new Error('handleRequest: request without url');
@@ -95,67 +95,64 @@ class ApiHandler {
     });
   }
 
-  handleApiRequest(requestInfo: ApiRequestInfo, res: http.ServerResponse, callback: () => void) {
+  async handleApiRequest(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     // allow Cross-Origin Resource Sharing preflight request
     this.logger.log(`ApiHandler handle: ${requestInfo.components.join('/')} method: ${requestInfo.method}`);
 
     if (requestInfo.method === 'OPTIONS') {
-      this.handleOptionsRequest(res, callback);
-    } else if (requestInfo.components.length > 0 && LoadRequestsOption.checkType(requestInfo.body) && requestInfo.components[0] === 'requests') {
-      this.handleRequests(requestInfo.body, res, () => {
-        callback();
-      });
+      this.handleOptionsRequest(res);
+    } else if (requestInfo.components.length > 0 && requestInfo.components[0] === 'requests') {
+      if (LoadRequestsOption.checkType(requestInfo.body)) {
+        await this.handleRequests(requestInfo.body, res);
+      } else {
+        this.setResponseHeader(res, 400, `Body is incorrect`);
+      }
     } else if (requestInfo.components.length > 0 && requestInfo.body && requestInfo.components[0] === 'request') {
-      this.handleCreateRequest(requestInfo.body, res, () => {
-        callback();
-      });
+      if (RequestRow.checkType(requestInfo.body)) {
+        await this.handleCreateRequest(requestInfo.body, res);
+      } else {
+        this.setResponseHeader(res, 400, `Body is incorrect`);
+      }
     } else {
       this.fillNotFoundResponse(res);
-      callback();
     }
+
+    return res;
   }
 
-  private handleOptionsRequest(res: any, callback: () => void) {
+  private handleOptionsRequest(res: any) {
     res.writeHead(200, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
       'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
     });
-    callback();
   }
 
-  private handleCreateRequest(body: object, res: http.ServerResponse, callback: () => void) {
-    const obj = body as RequestRow;
-    this.requestTable.writeRequestRow(obj, (writeErr) => {
-      if (!writeErr) {
-        this.requestTable.getLastInsertedIndex((err, rows) => {
-          let code;
-          let resBody;
-
-          if (!err && rows.length && rows[0]['LAST_INSERT_ID()']) {
-            const insertedId = rows[0]['LAST_INSERT_ID()'];
-            resBody = JSON.stringify(Object.assign({ id: insertedId }, obj));
-            code = 200;
-          } else {
-            code = 500;
-          }
-
-          this.setResponseHeader(res, code, resBody);
-          callback();
-        });
-      } else {
-        this.setResponseHeader(res, 500, undefined);
-      }
+  async handleCreateRequest(requestRow: RequestRow, res: http.ServerResponse): Promise<http.ServerResponse> {
+    return this.requestTable.writeRequestRow(requestRow)
+    .then(this.requestTable.getLastInsertedIndex.bind(this))
+    .then((insertedId) => {
+      const resBody = JSON.stringify(Object.assign({ id: insertedId }, requestRow));
+      this.setResponseHeader(res, 200, resBody);
+    })
+    .catch((err) => {
+      this.setResponseHeader(res, 500);
+    })
+    .then(() => {
+      return res;
     });
   }
 
-  private handleRequests(body: LoadRequestsOption, res: http.ServerResponse, callback: () => void) {
-    this.loadRequests(body, (err, rows) => {
-      const code = err ? 500 : 200;
-      const resBody = err ? undefined : JSON.stringify(rows);
-
-      this.setResponseHeader(res, code, resBody);
-      callback();
+  async handleRequests(body: LoadRequestsOption, res: http.ServerResponse): Promise<http.ServerResponse> {
+    return this.loadRequests(body)
+    .then((rows: any[]) => {
+      this.setResponseHeader(res, 200, JSON.stringify(rows));
+    })
+    .catch((err) => {
+      this.setResponseHeader(res, 500);
+    })
+    .then(() => {
+      return res;
     });
   }
 
@@ -174,20 +171,27 @@ class ApiHandler {
     res.writeHead(404);
   }
 
-  private loadRequests(options: LoadRequestsOption, callback: Client.queryCallback) {
+  async loadRequests(options: LoadRequestsOption): Promise<any[]> {
+    const query = this.buildRequestsQuery(options);
+
+    this.logger.log(`query ${query}`);
+    return this.requestTable.queryRequests(query);
+  }
+
+  private buildRequestsQuery(options: LoadRequestsOption) {
+    // TODO: move query building in RequestTable
+
     let fields = '*';
     if (options.fields && options.fields.length) {
-      const wrappedFields = options.fields;// options.fields.map(v => this.dbConnection.wrapString(v));
+      const wrappedFields = options.fields; // options.fields.map(v => this.dbConnection.wrapString(v));
       fields = wrappedFields.join(',');
     }
-
     let wherePart = '';
     let urlRegexp = '';
     if (options.urlRegexp) {
       urlRegexp = options.urlRegexp;
       wherePart += `url REGEXP ${this.dbConnection.wrapString(urlRegexp)}`;
     }
-
     if (options.onlyNotNull && options.fields) {
       for (let i = 0; i < options.fields.length; i++) {
         if (wherePart.length > 0) {
@@ -196,17 +200,12 @@ class ApiHandler {
         wherePart += `${options.fields[i]} IS NOT NULL `;
       }
     }
-
     let query = `select ${fields} from main`;
     if (wherePart.length) {
       query += ` where ${wherePart}`;
     }
-
     query += ' order by date DESC';
-
-    // TODO: move query building in RequestTable
-    this.logger.log(`query ${query}`);
-    this.requestTable.queryRequests(query, callback);
+    return query;
   }
 }
 

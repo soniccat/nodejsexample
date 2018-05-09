@@ -7,12 +7,12 @@ import * as url from 'url';
 import * as http from 'http';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
 
-const proxyRedirectHost = 'news360.com';
-
 class Proxy {
   logger: ILogger;
+  redirectHost: string;
 
-  constructor(logger: ILogger) {
+  constructor(redirectHost: string, logger: ILogger) {
+    this.redirectHost = redirectHost;
     this.logger = logger;
   }
 
@@ -39,7 +39,6 @@ class Proxy {
     if (responseInfo.originalBody) {
       originalResponse.write(responseInfo.originalBody);
     }
-    originalResponse.end();
   }
 
   getSendInfo(req: http.IncomingMessage): SendInfo {
@@ -48,7 +47,7 @@ class Proxy {
     }
 
     const reqUrl = url.parse(req.url);
-    const redirectHost = proxyRedirectHost;
+    const redirectHost = this.redirectHost;
 
     if (reqUrl.host === undefined) {
       throw new Error(`getSendInfo: url host is empty ${reqUrl}`);

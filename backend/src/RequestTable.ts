@@ -9,7 +9,7 @@ import { RequestInfo } from 'main/baseTypes/RequestInfo';
 export class RequestRow {
   id?: number;
   url: string;
-  port: number | string;
+  port: number;
   method: string;
   headers: {[index: string]: any};
   body: string | object | undefined;
@@ -17,6 +17,16 @@ export class RequestRow {
   responseHeaders: {[index: string]: any};
   responseBody: string | object | undefined;
   isStub: boolean;
+
+  static checkType(obj): obj is RequestRow {
+    return typeof obj.url === `string` && 
+    typeof obj.port === `number` &&
+    typeof obj.method === `string` &&
+    obj.headers &&
+    typeof obj.responseStatus === `number` &&
+    obj.responseHeaders &&
+    typeof obj.isStub === `boolean`;
+  }
 }
 
 // match SQL table row names
@@ -49,8 +59,8 @@ class RequestTable {
     this.dbConnection = connection;
   }
 
-  writeRequestRowAsRequestInfo(requestInfo: RequestInfo, callback?: Client.queryCallback) {
-    this.writeRequestRow({
+  async writeRequestRowAsRequestInfo(requestInfo: RequestInfo): Promise<any[]> {
+    return this.writeRequestRow({
       url: getUrlString(requestInfo.sendInfo),
       port: requestInfo.sendInfo.port,
       method: requestInfo.sendInfo.method,
@@ -59,14 +69,17 @@ class RequestTable {
       responseStatus: requestInfo.responseInfo.statusCode,
       responseHeaders: requestInfo.responseInfo.headers,
       responseBody: requestInfo.responseInfo.body,
-      isStub: false}, 
-      callback);
+      isStub: false});
   }
 
-  writeRequestRow(obj: RequestRow, callback?: Client.queryCallback) {
+  async writeRequestRow(obj: RequestRow): Promise<any[]> {
+    const query = this.buildWriteRequestQuery(obj);
+    return this.dbConnection.queryPromise(query);
+  }
+
+  private buildWriteRequestQuery(obj: RequestRow) {
     const tableName = 'main';
     const sessionId = 1;
-
     // SQL
     let query = `INSERT INTO ${tableName} VALUES(null,
         ${sessionId}, 
@@ -75,46 +88,49 @@ class RequestTable {
         ${obj.port},
         ${this.getHttpMethodCode(obj.method)},
         ${(obj.headers ? this.wrapString(JSON.stringify(obj.headers)) : 'NULL')},`;
-
     let bodyString = 'NULL';
     let bodyStringIsJson = false;
     const bodyData = 'NULL';
-
     if (obj.body) {
       const bodyInfo = this.getBodyInfo(obj.body);
       bodyStringIsJson = bodyInfo.isJson;
       bodyString = bodyInfo.string;
     }
-
     // SQL
     query += `${bodyString}, 
         ${bodyStringIsJson}, 
         ${bodyData}, 
         ${obj.responseStatus}, 
         ${(obj.responseHeaders ? this.wrapString(JSON.stringify(obj.responseHeaders)) : 'NULL')},`;
-
     let responseString = 'NULL';
     let responseStringIsJson = false;
     const responseData = 'NULL';
-
     if (obj.responseBody) {
       const bodyInfo = this.getBodyInfo(obj.responseBody);
       responseStringIsJson = bodyInfo.isJson;
       responseString = bodyInfo.string;
     }
-
     // SQL
     query += `${responseString}, 
         ${responseStringIsJson}, 
         ${responseData},
         ${obj.isStub}
         );`;
-
-    this.dbConnection.query(query, callback);
+    return query;
   }
 
-  getLastInsertedIndex(callback) {
-    this.dbConnection.query('SELECT LAST_INSERT_ID();', callback);
+  async getLastInsertedIndex(): Promise<number> {
+    let index = undefined;
+    const rows = await this.dbConnection.queryPromise('SELECT LAST_INSERT_ID();');
+    if (rows.length && rows[0]['LAST_INSERT_ID()']) {
+      index = rows[0]['LAST_INSERT_ID()'];
+    }
+
+    if (index === undefined) {
+      return Promise.reject(undefined);
+    }
+
+    return index;
   }
 
   getBodyInfo(body: string | object) {
@@ -180,17 +196,11 @@ class RequestTable {
     }
   }
 
-  queryRequests(query: string, callback: Client.queryCallback) {
-    this.dbConnection.query(query, (err, rows: DbRequestRow[]) => {
-      let requestRows: RequestRow[] = [];
-      if (rows) {
-        requestRows = this.normalizeRequests(rows);
-      }
+  async queryRequests(query: string): Promise<any[]> {
+    const rows: DbRequestRow[] = await this.dbConnection.queryPromise(query);
+    const requestRows: RequestRow[] = this.normalizeRequests(rows);
 
-      if (callback) {
-        callback(err, requestRows);
-      }
-    });
+    return requestRows;
   }
 
   normalizeRequests(reqList: DbRequestRow[]): RequestRow[] {
