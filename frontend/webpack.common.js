@@ -5,7 +5,7 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    main: './src/react-app.jsx',
+    main: './src/react-app.tsx',
     test: './src/app.js',
     vendor: [
       'path',
@@ -43,11 +43,14 @@ module.exports = {
         use: {
           loader: 'babel-loader',
         },
+      }, { 
+        test: /\.tsx?$/, 
+        loader: "ts-loader" 
       },
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.scss'],
+    extensions: ['.js', '.jsx', '.tsx', '.scss'],
     alias: {
       Components: path.resolve(__dirname, 'src/components/'),
       Elements: path.resolve(__dirname, 'src/elements/'),

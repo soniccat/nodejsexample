@@ -3,14 +3,17 @@
     "module": "commonjs",
     "target": "es6",
     "sourceMap": true,
+    "jsx": "react",
 
     "baseUrl": ".",
     "paths": {
-      "main/*": ["src/*"]
+      "main/*": ["src/*"],
+      "Components/*": ["src/components/*"]
     },
 
     "lib": [
-      "es6"
+      "es6",
+      "dom"
     ]
   },
   "exclude": [
