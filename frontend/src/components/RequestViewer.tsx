@@ -1,10 +1,56 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
 import loadRequest from 'Utils/loadRequest';
 import { buildRequestsOptions, buildCreateRequestOptions } from 'Utils/RequestOptions';
 
-class RequestViewer extends React.Component {
+// TODO: use the same from backend (like contract)
+// TODO: avoid optionals
+export interface RequestOptions {
+  fields?: string[];
+  urlRegexp?: string;
+  onlyNotNull?: boolean;
+}
+
+// TODO: use the same from backend (like contract)
+export interface RequestRow {
+  id?: number;
+  url: string;
+  port: number;
+  method: string;
+  headers: {[index: string]: any};
+  body: string | object | undefined;
+  responseStatus: number;
+  responseHeaders: {[index: string]: any};
+  responseBody: string | object | undefined;
+  isStub: boolean;
+}
+
+export interface RequestViewerProps { 
+  requestOptions?: RequestOptions;
+  rows?: RequestRow[];
+  error?: Object;
+}
+
+export interface RequestViewerState {
+  requestOptions?: RequestOptions;
+  rows?: RequestRow[];
+  error?: Object;
+} 
+
+export class RequestViewer extends React.Component<RequestViewerProps, RequestViewerState> {
+  static defaultProps = {
+    requestOptions: {
+      fields: ['id', 'url', 'port', 'method',
+        'headers', 'body_string', 'body_string_is_json',
+        'response_status', 'response_headers', 'response_string', 'response_string_is_json',
+        'is_stub'],
+      urlRegexp: '.*v4.*',
+      onlyNotNull: false,
+    },
+    rows: [],
+    error: undefined,
+  };
+
   constructor(props) {
     super(props);
 
@@ -24,9 +70,9 @@ class RequestViewer extends React.Component {
   }
 
   onSearchChanged(event) {
-    this.setState({ requestOptions: { urlRegexp: event.target.value } }, (prevState, props) => {
-      console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
-      this.loadRequests();
+    this.setState({ requestOptions: { urlRegexp: event.target.value } }, () => {
+        console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
+        this.loadRequests();
     });
   }
 
@@ -104,24 +150,3 @@ class RequestViewer extends React.Component {
     );
   }
 }
-
-RequestViewer.defaultProps = {
-  requestOptions: {
-    fields: ['id', 'url', 'port', 'method',
-      'headers', 'body_string', 'body_string_is_json',
-      'response_status', 'response_headers', 'response_string', 'response_string_is_json',
-      'is_stub'],
-    urlRegexp: '.*v4.*',
-    onlyNotNull: false,
-  },
-  rows: [],
-  error: undefined,
-};
-
-RequestViewer.propTypes = {
-  requestOptions: PropTypes.object,
-  rows: PropTypes.array,
-  error: PropTypes.any,
-};
-
-export default RequestViewer;

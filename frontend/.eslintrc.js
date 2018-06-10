@@ -10,6 +10,7 @@ module.exports = {
     },
 
     "rules": {
-        "react/jsx-closing-tag-location": "off"
+        "react/jsx-closing-tag-location": "off",
+        "react/sort-comp" : "off",
     }
 };
