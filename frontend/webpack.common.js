@@ -63,6 +63,10 @@ module.exports = {
       chunks: 'all',
     },
   },
+  // externals: {
+  //   "react": "React",
+  //   "react-dom": "ReactDOM"
+  // },
   plugins: [
     new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
