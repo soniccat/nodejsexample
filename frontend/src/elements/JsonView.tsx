@@ -1,11 +1,27 @@
-import React from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import { isObject, isEmptyArray } from 'Utils/Tools';
 
-import style from 'CSS/JsonView';
+//import style from 'CSS/JsonView';
+require('CSS/JsonView');
 
-class JsonView extends React.Component {
-  constructor(props) {
+type JsonObj = any | Array<any>;
+
+export interface JsonViewProps { 
+  obj: JsonObj;
+  isEditable: PropTypes.bool;
+}
+
+export interface JsonViewState {
+  obj: JsonObj;
+  isEditable: boolean;
+  editingKey: string;
+  editingKeyName: string;
+  editingKeyValue: JsonObj;
+} 
+
+export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
+  constructor(props: JsonViewProps) {
     super(props);
 
     this.state = {
@@ -84,7 +100,7 @@ class JsonView extends React.Component {
       onClick={() => { this.onValueClicked(key); }}
       onKeyPress={() => { this.onValueClicked(key); }}
       role="textbox"
-      tabIndex="0">{value}
+      tabIndex={0}>{value}
     </div>);
   }
 
@@ -118,7 +134,7 @@ class JsonView extends React.Component {
           className={`json_key${isSubJson ? ' sub_json' : ''}`}
           onClick={() => { this.onKeyClicked(key); }}
           role="textbox" 
-          tabIndex="0"
+          tabIndex={0}
         >{key}
         </div>);
       }
@@ -129,14 +145,16 @@ class JsonView extends React.Component {
           className={`json_delete${isSubJson ? ' sub_json' : ''}`}
           onClick={() => { this.onKeyRemoved(key); }}
           role="textbox" 
-          tabIndex="0"
+          tabIndex={0}
         />);
       }
 
       cells.push(<div key={`${key}_delimeter`} className={`json_delimiter${isSubJson ? ' sub_json' : ''}`} />);
 
       const bodyKey = `${key}_value`;
-      cells.push(isSubJson ? <div key={bodyKey} className="json_value"><JsonView obj={obj} /></div> : this.renderJsonValue(key, bodyKey, obj));
+      cells.push(isSubJson ? 
+        <div key={bodyKey} className="json_value"><JsonView obj={obj} isEditable={this.props.isEditable} /></div> 
+        : this.renderJsonValue(key, bodyKey, obj));
     }
 
     return (<div className="json_view">
@@ -144,17 +162,5 @@ class JsonView extends React.Component {
     </div>);
   }
 }
-
-JsonView.defaultProps = {
-  isEditable: true,
-};
-
-JsonView.propTypes = {
-  obj: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.array,
-  ]).isRequired,
-  isEditable: PropTypes.bool,
-};
 
 export default JsonView;

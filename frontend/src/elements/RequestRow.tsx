@@ -31,7 +31,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
 
     this.state = {
-      isExpanded: false,
+      isExpanded: props.isExpanded,
       isSentExpanded: true,
       isReceivedExpanded: true,
       request: props.request
@@ -82,7 +82,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_sent_extra">
             <div className="request_headers">
               <div>Headers</div>
-              <JsonView obj={this.state.request.headers} />
+              <JsonView obj={this.state.request.headers} isEditable={true} />
             </div>
             <div className="request_body">
               <div>Body</div>
@@ -101,7 +101,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_received_extra">
             {this.state.request.responseHeaders ? <div className="request_headers">
               <div>Headers</div>
-              <JsonView obj={this.state.request.responseHeaders} />
+              <JsonView obj={this.state.request.responseHeaders} isEditable={true} />
             </div> : undefined}
             {this.state.request.responseBody ? <div className="request_body">
               <div>Body</div>
@@ -114,7 +114,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
 
   renderBodyContent(body) {
     if (isObject(body)) {
-      return <JsonView obj={body} />;
+      return <JsonView obj={body} isEditable={true} />;
     } else if (body) {
       return <div>{body}</div>;
     }

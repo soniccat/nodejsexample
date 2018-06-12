@@ -15,13 +15,13 @@ export interface RequestOptions {
 export interface RequestViewerProps { 
   requestOptions?: RequestOptions;
   rows?: Request[];
-  error?: Object;
+  error?: object;
 }
 
 export interface RequestViewerState {
   requestOptions?: RequestOptions;
   rows?: Request[];
-  error?: Object;
+  error?: object;
 } 
 
 export class RequestViewer extends React.Component<RequestViewerProps, RequestViewerState> {
