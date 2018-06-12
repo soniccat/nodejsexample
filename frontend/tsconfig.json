@@ -10,6 +10,7 @@
       "main/*": ["src/*"],
       "Components/*": ["src/components/*"],
       "Elements/*": ["src/elements/*"],
+      "Model/*": ["src/model/*"],
       "Utils/*": ["src/utils/*"],
       "CSS/*": ["css/*"],
     },

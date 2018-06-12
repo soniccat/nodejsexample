@@ -1,5 +1,6 @@
 import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
+import Request from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
 import { buildRequestsOptions, buildCreateRequestOptions } from 'Utils/RequestOptions';
 
@@ -11,29 +12,15 @@ export interface RequestOptions {
   onlyNotNull?: boolean;
 }
 
-// TODO: use the same from backend (like contract)
-export interface RequestRow {
-  id?: number;
-  url: string;
-  port: number;
-  method: string;
-  headers: {[index: string]: any};
-  body: string | object | undefined;
-  responseStatus: number;
-  responseHeaders: {[index: string]: any};
-  responseBody: string | object | undefined;
-  isStub: boolean;
-}
-
 export interface RequestViewerProps { 
   requestOptions?: RequestOptions;
-  rows?: RequestRow[];
+  rows?: Request[];
   error?: Object;
 }
 
 export interface RequestViewerState {
   requestOptions?: RequestOptions;
-  rows?: RequestRow[];
+  rows?: Request[];
   error?: Object;
 } 
 
@@ -51,7 +38,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     error: undefined,
   };
 
-  constructor(props) {
+  constructor(props: RequestViewerProps) {
     super(props);
 
     this.onSearchChanged = this.onSearchChanged.bind(this);
@@ -124,16 +111,8 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     console.dir(this.state.rows);
     const rows = this.state.rows.map(row => (<RequestRow
       key={row.id}
-      url={row.url}
-      port={row.port}
-      method={row.method}
-      headers={row.headers}
-      body={row.body}
-      responseStatus={row.responseStatus}
-      responseHeaders={row.responseHeaders}
-      responseBody={row.responseBody}
-      isStub={row.isStub}
-
+      request={row}
+      isExpanded={false}
       onCreateStubClicked={this.onCreateStubClicked}
     />));
 

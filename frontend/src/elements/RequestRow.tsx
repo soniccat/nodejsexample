@@ -1,12 +1,28 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import JsonView from 'Elements/JsonView';
+import Request from 'Model/Request';
 import { isObject } from 'Utils/Tools';
 
-import style from 'CSS/RequestRow';
+//import style from 'CSS/RequestRow.scss';
+require('CSS/RequestRow.scss');
 
-class RequestRow extends React.Component {
-  constructor(props) {
+export interface RequestRowProps { 
+  request: Request;
+
+  isExpanded: boolean;
+  onCreateStubClicked: (request: Request) => void;
+}
+
+export interface RequestRowState {
+  request: Request;
+
+  isExpanded: boolean;
+  isSentExpanded: boolean;
+  isReceivedExpanded: boolean;
+} 
+
+export class RequestRow extends React.Component<RequestRowProps, RequestRowState> {
+  constructor(props: RequestRowProps) {
     super(props);
 
     this.onRequestShortClicked = this.onRequestShortClicked.bind(this);
@@ -18,15 +34,7 @@ class RequestRow extends React.Component {
       isExpanded: false,
       isSentExpanded: true,
       isReceivedExpanded: true,
-      url: props.url,
-      port: props.port,
-      method: props.method,
-      headers: props.headers,
-      body: props.body,
-      responseStatus: props.responseStatus,
-      responseHeaders: props.responseHeaders,
-      responseBody: props.responseBody,
-      isStub: props.isStub,
+      request: props.request
     };
   }
 
@@ -37,15 +45,15 @@ class RequestRow extends React.Component {
           {this.renderExpandedMark('request_expand_mark', this.state.isExpanded)}
 
           <div className="request_method">
-            {this.state.method}
+            {this.state.request.method}
           </div>
           <div className="request_url">
-            {this.state.url}
+            {this.state.request.url}
           </div>
           <div className="request_response_status">
-            {this.state.responseStatus}
+            {this.state.request.responseStatus}
           </div>
-          {!this.state.isStub ?
+          {!this.state.request.isStub ?
             <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
                             Create stub
             </div> : undefined
@@ -74,11 +82,11 @@ class RequestRow extends React.Component {
           <div className="request_sent_extra">
             <div className="request_headers">
               <div>Headers</div>
-              <JsonView obj={this.state.headers} />
+              <JsonView obj={this.state.request.headers} />
             </div>
             <div className="request_body">
               <div>Body</div>
-              {this.renderBodyContent(this.state.body)}
+              {this.renderBodyContent(this.state.request.body)}
             </div>
           </div> : undefined}
       </div>
@@ -91,13 +99,13 @@ class RequestRow extends React.Component {
 
         {this.state.isReceivedExpanded ?
           <div className="request_received_extra">
-            {this.state.responseHeaders ? <div className="request_headers">
+            {this.state.request.responseHeaders ? <div className="request_headers">
               <div>Headers</div>
-              <JsonView obj={this.state.responseHeaders} />
+              <JsonView obj={this.state.request.responseHeaders} />
             </div> : undefined}
-            {this.state.responseBody ? <div className="request_body">
+            {this.state.request.responseBody ? <div className="request_body">
               <div>Body</div>
-              {this.renderBodyContent(this.state.responseBody)}
+              {this.renderBodyContent(this.state.request.responseBody)}
                                        </div> : undefined}
           </div> : undefined}
       </div>
@@ -132,23 +140,8 @@ class RequestRow extends React.Component {
   }
 
   onCreateStubClicked() {
-    this.props.onCreateStubClicked(this.state);
+    this.props.onCreateStubClicked(this.state.request);
   }
 }
-
-RequestRow.propTypes = {
-  isExpanded: PropTypes.bool,
-  url: PropTypes.string.isRequired,
-  port: PropTypes.number,
-  method: PropTypes.string,
-  headers: PropTypes.object,
-  body: PropTypes.any,
-  responseStatus: PropTypes.number,
-  responseHeaders: PropTypes.object,
-  responseBody: PropTypes.any,
-  isStub: PropTypes.bool,
-
-  onCreateStubClicked: PropTypes.func,
-};
 
 export default RequestRow;
