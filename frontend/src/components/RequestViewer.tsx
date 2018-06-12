@@ -2,7 +2,7 @@ import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
 import Request from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
-import { buildRequestsOptions, buildCreateRequestOptions } from 'Utils/requestOptions';
+import { buildRequestsOptions, buildCreateRequestOptions } from 'Utils/RequestOptions';
 
 // TODO: use the same from backend (like contract)
 // TODO: avoid optionals

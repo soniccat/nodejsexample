@@ -1,6 +1,6 @@
-import buildApiOptions from 'Utils/buildApiOptions';
+import buildApiOptions, { ApiOptions, ApiParameters } from 'Utils/buildApiOptions';
 
-export function buildRequestsOptions(options) {
+export function buildRequestsOptions(options: object) : ApiOptions {
   return buildApiOptions({
     method: 'post',
     path: 'requests',
@@ -8,7 +8,7 @@ export function buildRequestsOptions(options) {
   });
 }
 
-export function buildCreateRequestOptions(obj) {
+export function buildCreateRequestOptions(obj: object) : ApiOptions {
   return buildApiOptions({
     method: 'post',
     path: 'request',
