@@ -1,7 +1,7 @@
 
 const server = 'http://' + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH + '/';
 
-function buildApiOptions(options) {
+export function buildApiOptions(options) {
   const resultOptions = {
     headers: { 'Content-Type': 'application/json' },
     method: options.method,
