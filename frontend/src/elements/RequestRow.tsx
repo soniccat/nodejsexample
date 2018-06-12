@@ -82,7 +82,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_sent_extra">
             <div className="request_headers">
               <div>Headers</div>
-              <JsonView obj={this.state.request.headers} isEditable={true} />
+              {this.renderJsonView(this.state.request.headers)}
             </div>
             <div className="request_body">
               <div>Body</div>
@@ -101,7 +101,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_received_extra">
             {this.state.request.responseHeaders ? <div className="request_headers">
               <div>Headers</div>
-              <JsonView obj={this.state.request.responseHeaders} isEditable={true} />
+              {this.renderJsonView(this.state.request.responseHeaders)}
             </div> : undefined}
             {this.state.request.responseBody ? <div className="request_body">
               <div>Body</div>
@@ -114,11 +114,15 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
 
   renderBodyContent(body) {
     if (isObject(body)) {
-      return <JsonView obj={body} isEditable={true} />;
+      return this.renderJsonView(body);
     } else if (body) {
       return <div>{body}</div>;
     }
     return undefined;
+  }
+
+  renderJsonView(obj: any) {
+    return <JsonView obj={obj} isEditable={true} isExpanded={true} />;
   }
 
   onRequestShortClicked() {
