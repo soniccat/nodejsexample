@@ -1,6 +1,6 @@
 import * as React from 'react';
 import JsonView from 'Elements/JsonView';
-import Request from 'Model/Request';
+import { Request } from 'Model/Request';
 import { isObject } from 'Utils/Tools';
 
 //import style from 'CSS/RequestRow.scss';
@@ -8,14 +8,12 @@ require('CSS/RequestRow.scss');
 
 export interface RequestRowProps { 
   request: Request;
-
   isExpanded: boolean;
   onCreateStubClicked: (request: Request) => void;
+  onRequestChanged: (request: Request) => void;
 }
 
 export interface RequestRowState {
-  request: Request;
-
   isExpanded: boolean;
   isSentExpanded: boolean;
   isReceivedExpanded: boolean;
@@ -29,12 +27,12 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onSentShortClicked = this.onSentShortClicked.bind(this);
     this.onReceivedShortClicked = this.onReceivedShortClicked.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
+    this.onObjChanged = this.onObjChanged.bind(this);
 
     this.state = {
       isExpanded: props.isExpanded,
       isSentExpanded: true,
-      isReceivedExpanded: true,
-      request: props.request
+      isReceivedExpanded: true
     };
   }
 
@@ -45,15 +43,15 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           {this.renderExpandedMark('request_expand_mark', this.state.isExpanded)}
 
           <div className="request_method">
-            {this.state.request.method}
+            {this.props.request.method}
           </div>
           <div className="request_url">
-            {this.state.request.url}
+            {this.props.request.url}
           </div>
           <div className="request_response_status">
-            {this.state.request.responseStatus}
+            {this.props.request.responseStatus}
           </div>
-          {!this.state.request.isStub ?
+          {!this.props.request.isStub ?
             <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
                             Create stub
             </div> : undefined
@@ -82,11 +80,11 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_sent_extra">
             <div className="request_headers">
               <div>Headers</div>
-              {this.renderJsonView(this.state.request.headers)}
+              {this.renderJsonView(this.props.request.headers)}
             </div>
             <div className="request_body">
               <div>Body</div>
-              {this.renderBodyContent(this.state.request.body)}
+              {this.renderBodyContent(this.props.request.body)}
             </div>
           </div> : undefined}
       </div>
@@ -99,17 +97,17 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
 
         {this.state.isReceivedExpanded ?
           <div className="request_received_extra">
-            {this.state.request.responseHeaders ? <div className="request_headers">
+            {this.props.request.responseHeaders ? <div className="request_headers">
               <div>Headers</div>
-              {this.renderJsonView(this.state.request.responseHeaders)}
-            </div> : undefined}
-            {this.state.request.responseBody ? <div className="request_body">
+              {this.renderJsonView(this.props.request.responseHeaders)}
+              </div> : undefined}
+            {this.props.request.responseBody ? <div className="request_body">
               <div>Body</div>
-              {this.renderBodyContent(this.state.request.responseBody)}
-                                       </div> : undefined}
+              {this.renderBodyContent(this.props.request.responseBody)}
+              </div> : undefined}
           </div> : undefined}
       </div>
-            </div>);
+    </div>);
   }
 
   renderBodyContent(body) {
@@ -122,7 +120,14 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   }
 
   renderJsonView(obj: any) {
-    return <JsonView obj={obj} isEditable={true} isExpanded={true} />;
+    return <JsonView obj={obj} 
+      isEditable={true} 
+      isExpanded={true} 
+      onObjChanged={this.onObjChanged}/>;
+  }
+
+  onObjChanged(obj: any) {
+
   }
 
   onRequestShortClicked() {
@@ -144,7 +149,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   }
 
   onCreateStubClicked() {
-    this.props.onCreateStubClicked(this.state.request);
+    this.props.onCreateStubClicked(this.props.request);
   }
 }
 

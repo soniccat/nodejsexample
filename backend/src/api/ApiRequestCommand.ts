@@ -23,6 +23,8 @@ export default class ApiRequestCommand implements ApiCommand {
   async run(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     if (!RequestRow.checkType(requestInfo.body)) {
       setResponseHeader(res, 400, `Body is incorrect`);
+    } else if (requestInfo.body.id) {
+      await this.handleUpdateRequest(requestInfo.body, res);
     } else {
       await this.handleCreateRequest(requestInfo.body, res);
     }
@@ -32,6 +34,22 @@ export default class ApiRequestCommand implements ApiCommand {
 
   canRun(requestInfo: ApiRequestInfo): boolean {
     return requestInfo.components.length > 0 && requestInfo.body !== undefined && requestInfo.components[0] === 'request';
+  }
+
+  async handleUpdateRequest(requestRow: RequestRow, res: http.ServerResponse): Promise<http.ServerResponse> {
+    return this.requestTable.updateRequestRow(requestRow)
+    .then(this.requestTable.getLastInsertedIndex)
+    .then((insertedId) => {
+      const resBody = JSON.stringify(Object.assign({ id: insertedId }, requestRow));
+      setResponseHeader(res, 200, resBody);
+    })
+    .catch((err) => {
+      this.logger.log(LogLevel.ERROR, `ApiRequestCommand.handleUpdateRequest error: ${util.inspect(err)}`);
+      setResponseHeader(res, 500);
+    })
+    .then(() => {
+      return res;
+    });
   }
 
   async handleCreateRequest(requestRow: RequestRow, res: http.ServerResponse): Promise<http.ServerResponse> {

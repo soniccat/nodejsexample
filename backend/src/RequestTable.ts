@@ -6,6 +6,8 @@ import DbConnection from 'main/DbConnection';
 import { isString } from 'main/objectTools';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
 
+const tableName = 'main';
+
 export class RequestRow {
   id?: number;
   url: string;
@@ -79,8 +81,12 @@ class RequestTable {
     return this.dbConnection.queryPromise(query);
   }
 
+  async updateRequestRow(obj: RequestRow): Promise<any[]> {
+    const query = this.buildUpdateRequestQuery(obj);
+    return this.dbConnection.queryPromise(query);
+  }
+
   private buildWriteRequestQuery(obj: RequestRow) {
-    const tableName = 'main';
     const sessionId = 1;
     // SQL
     let query = `INSERT INTO ${tableName} VALUES(null,
@@ -89,7 +95,8 @@ class RequestTable {
         ${this.wrapString(obj.url)},
         ${obj.port},
         ${this.getHttpMethodCode(obj.method)},
-        ${(obj.headers ? this.wrapString(JSON.stringify(obj.headers)) : 'NULL')},`;
+        ${this.getSQLHeaderValue(obj.headers)},`;
+
     let bodyString = 'NULL';
     let bodyStringIsJson = false;
     const bodyData = 'NULL';
@@ -103,7 +110,8 @@ class RequestTable {
         ${bodyStringIsJson}, 
         ${bodyData}, 
         ${obj.responseStatus}, 
-        ${(obj.responseHeaders ? this.wrapString(JSON.stringify(obj.responseHeaders)) : 'NULL')},`;
+        ${this.getSQLHeaderValue(obj.responseHeaders)},`;
+
     let responseString = 'NULL';
     let responseStringIsJson = false;
     const responseData = 'NULL';
@@ -121,6 +129,47 @@ class RequestTable {
     return query;
   }
 
+  private buildUpdateRequestQuery(obj: RequestRow) {
+    const sessionId = 1;
+    // SQL
+    let query = `UPDATE ${tableName} SET 
+        url=${this.wrapString(obj.url)},
+        port=${obj.port},
+        method=${this.getHttpMethodCode(obj.method)},
+        headers=${this.getSQLHeaderValue(obj.headers)},`;
+
+    let bodyString = 'NULL';
+    let bodyStringIsJson = false;
+    const bodyData = 'NULL';
+    if (obj.body) {
+      const bodyInfo = this.getBodyInfo(obj.body);
+      bodyStringIsJson = bodyInfo.isJson;
+      bodyString = bodyInfo.string;
+    }
+    // SQL
+    query += `body_string=${bodyString}, 
+        body_string_is_json=${bodyStringIsJson}, 
+        body_data=${bodyData}, 
+        response_status=${obj.responseStatus}, 
+        response_headers=${this.getSQLHeaderValue(obj.responseHeaders)},`;
+    
+    let responseString = 'NULL';
+    let responseStringIsJson = false;
+    const responseData = 'NULL';
+    if (obj.responseBody) {
+      const bodyInfo = this.getBodyInfo(obj.responseBody);
+      responseStringIsJson = bodyInfo.isJson;
+      responseString = bodyInfo.string;
+    }
+    // SQL
+    query += `response_string=${responseString}, 
+        response_string_is_json=${responseStringIsJson}, 
+        response_data=${responseData},
+        is_stub=${obj.isStub}
+        );`;
+    return query;
+  }
+
   async getLastInsertedIndex(): Promise<number> {
     let index = undefined;
     const rows = await this.dbConnection.queryPromise('SELECT LAST_INSERT_ID();');
@@ -133,6 +182,10 @@ class RequestTable {
     }
 
     return index;
+  }
+
+  getSQLHeaderValue(obj: object) {
+    return (obj ? this.wrapString(JSON.stringify(obj)) : 'NULL');
   }
 
   getBodyInfo(body: string | object) {

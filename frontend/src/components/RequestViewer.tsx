@@ -1,16 +1,10 @@
+import { RequestOptions } from "../model/RequestOptions";
+
 import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
-import Request from 'Model/Request';
+import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
-import { buildRequestsOptions, buildCreateRequestOptions } from 'Utils/RequestOptions';
-
-// TODO: use the same from backend (like contract)
-// TODO: avoid optionals
-export interface RequestOptions {
-  fields?: string[];
-  urlRegexp?: string;
-  onlyNotNull?: boolean;
-}
+import { buildRequestsOptions, buildCreateRequestOptions, buildUpdateRequestOptions } from 'Utils/RequestOptions';
 
 export interface RequestViewerProps { 
   requestOptions?: RequestOptions;
@@ -63,7 +57,27 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     });
   }
 
-  onCreateStubClicked(row) {
+  onCreateStubClicked(row: Request) {
+    this.createStub(row);
+  }
+
+  onRequestChanged(row: Request) {
+    // Actions
+    loadRequest(buildUpdateRequestOptions(row), (err, response) => {
+      if (err) {
+        this.setState({
+          error: err,
+        });
+      }
+      else {
+        this.setState({
+          rows: [response.data].concat(this.state.rows),
+        });
+      }
+    });
+  }
+
+  private createStub(row: Request) {
     const options = buildCreateRequestOptions({
       url: row.url,
       port: row.port,
@@ -75,15 +89,14 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       responseBody: row.responseBody,
       isStub: true,
     });
-
     // Actions
-
     loadRequest(options, (err, response) => {
       if (err) {
         this.setState({
           error: err,
         });
-      } else {
+      }
+      else {
         this.setState({
           rows: [response.data].concat(this.state.rows),
         });
@@ -114,6 +127,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       request={row}
       isExpanded={false}
       onCreateStubClicked={this.onCreateStubClicked}
+      onRequestChanged={this.onRequestChanged}
     />));
 
     return (

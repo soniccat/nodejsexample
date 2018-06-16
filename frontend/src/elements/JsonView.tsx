@@ -8,12 +8,10 @@ export interface JsonViewProps {
   obj: any;
   isEditable: boolean;
   isExpanded: boolean;
+  onObjChanged: (obj: any) => void;
 }
 
 export interface JsonViewState {
-  obj: any;
-  isEditable: boolean;
-  isExpanded: boolean;
   valueExpandeStates: {[key: string] : boolean};
   editingKey: string;
   editingKeyName: string;
@@ -32,25 +30,11 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     }
 
     this.state = {
-      obj: props.obj,
-      isEditable: props.isEditable,
-      isExpanded: props.isExpanded,
       valueExpandeStates: expandedStates,
       editingKey: undefined,
       editingKeyName: undefined,
       editingKeyValue: undefined,
     };
-  }
-
-  static getDerivedStateFromProps(props : JsonViewProps, state : JsonViewState) {
-    if (props.isExpanded !== state.isExpanded) {
-      return {
-        isExpanded : props.isExpanded
-      };
-    }
-
-    // Return null to indicate no change to state.
-    return null;
   }
 
   onKeyClicked(key) {
@@ -61,23 +45,21 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   onKeyChanged(key, newKey) {
-    const newObj = this.state.obj;
+    const newObj = this.props.obj;
     newObj[newKey] = newObj[key];
     delete newObj[key];
 
     this.setState({
-      obj: newObj,
       editingKey: newKey,
       editingKeyName: newKey,
     });
   }
 
   onKeyRemoved(key) {
-    const newObj = this.state.obj;
+    const newObj = this.props.obj;
     delete newObj[key];
 
     this.setState({
-      obj: newObj,
       editingKey: undefined,
       editingKeyName: undefined,
     });
@@ -86,16 +68,15 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   onValueClicked(key) {
     this.setState({
       editingKey: key,
-      editingKeyValue: this.state.obj[key],
+      editingKeyValue: this.props.obj[key],
     });
   }
 
   onValueChanged(key, newValue) {
-    const newObj = this.state.obj;
+    const newObj = this.props.obj;
     newObj[key] = newValue;
 
     this.setState({
-      obj: newObj,
       editingKeyValue: newValue,
     });
   }
@@ -121,7 +102,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   render() {
     const cells = [];
 
-    if (this.state.isExpanded) {
+    if (this.props.isExpanded) {
       this.renderExpandedContent(cells);
     } else {
       cells.push(<div>collapsed</div>)
@@ -133,23 +114,32 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderExpandedContent(cells: any[]) {
-    const keys = Object.keys(this.state.obj).sort();
+    const keys = Object.keys(this.props.obj).sort();
     for (let i = 0; i < keys.length; ++i) {
       const key = keys[i];
-      const obj = this.state.obj[key];
+      const obj = this.props.obj[key];
       const isSubJson = isObject(obj) && !isEmptyArray(obj);
+
       if (isSubJson) {
         cells.push(this.renderExpandButton(this.state.valueExpandeStates[key], key, isSubJson));
       }
+
       cells.push(this.renderKey(key, isSubJson));
-      if (this.state.isEditable) {
+
+      if (this.props.isEditable) {
         cells.push(this.renderDeleteButton(key, isSubJson));
       }
-      cells.push(<div key={`${key}_delimeter`} className={`json_delimiter${isSubJson ? ' sub_json' : ''}`} />);
+
+      cells.push(<div key={`${key}_delimeter`} 
+        className={`json_delimiter${isSubJson ? ' sub_json' : ''}`} />);
+      
       const bodyKey = `${key}_value`;
       cells.push(isSubJson ?
         <div key={bodyKey} className="json_value">
-          <JsonView obj={obj} isEditable={this.props.isEditable} isExpanded={this.state.valueExpandeStates[key]} />
+          <JsonView obj={obj} 
+          isEditable={this.props.isEditable} 
+          isExpanded={this.state.valueExpandeStates[key]} 
+          onObjChanged={this.props.onObjChanged}/>
         </div>
         : this.renderJsonValue(key, bodyKey, obj));
     }

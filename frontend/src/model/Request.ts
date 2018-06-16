@@ -1,6 +1,5 @@
 // TODO: use the same from backend (like contract)
-export default interface Request {
-  id?: number;
+export interface RequestWithoutId {
   url: string;
   port: number;
   method: string;
@@ -14,4 +13,8 @@ export default interface Request {
   };
   responseBody: string | object | undefined;
   isStub: boolean;
+}
+
+export interface Request extends RequestWithoutId {
+  id: number;
 }
