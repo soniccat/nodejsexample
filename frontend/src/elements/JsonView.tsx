@@ -7,12 +7,12 @@ require('CSS/JsonView');
 export interface JsonViewProps { 
   obj: any;
   isEditable: boolean;
-  isExpanded: boolean;
+  expandLevel: number;
   onObjChanged: (obj: any) => void;
 }
 
 export interface JsonViewState {
-  valueExpandeStates: {[key: string] : boolean};
+  childExpandLevels: {[key: string] : number};
   editingKey: string;
   editingKeyName: string;
   editingKeyValue: any;
@@ -22,15 +22,15 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   constructor(props: JsonViewProps) {
     super(props);
 
-    var expandedStates : {[key: string] : boolean} = {};
+    var expandedStates : {[key: string] : number} = {};
     const keys = Object.keys(this.props.obj);
     for (let i = 0; i < keys.length; ++i) {
       let key = keys[i];
-      expandedStates[key] = props.isExpanded;
+      expandedStates[key] = this.defaultChildExpandLevel();
     }
 
     this.state = {
-      valueExpandeStates: expandedStates,
+      childExpandLevels: expandedStates,
       editingKey: undefined,
       editingKeyName: undefined,
       editingKeyValue: undefined,
@@ -95,20 +95,18 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   onExpandPressed(key: string) {
-    let newExpandeStates = this.state.valueExpandeStates
-    newExpandeStates[key] = !newExpandeStates[key]
+    let newExpandeStates = this.state.childExpandLevels;
+    newExpandeStates[key] = newExpandeStates[key] > 0 ? 0 : 1;
 
     this.setState({
-      valueExpandeStates: newExpandeStates
+      childExpandLevels: newExpandeStates
     })
   }
-
-  
 
   render() {
     const cells = [];
 
-    if (this.props.isExpanded) {
+    if (this.isExpanded()) {
       this.renderExpandedContent(cells);
     } else {
       cells.push(<div key={"collapsed"}>collapsed</div>)
@@ -127,7 +125,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       const isSubJson = isObject(obj) && !isEmptyArray(obj);
 
       if (isSubJson) {
-        cells.push(this.renderExpandButton(this.state.valueExpandeStates[key], key, isSubJson));
+        cells.push(this.renderExpandButton(this.state.childExpandLevels[key] > 0, key, isSubJson));
       }
 
       cells.push(this.renderKey(key, isSubJson));
@@ -144,7 +142,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
         <div key={bodyKey} className="json_value">
           <JsonView obj={obj} 
           isEditable={this.props.isEditable} 
-          isExpanded={this.state.valueExpandeStates[key]} 
+          expandLevel={this.state.childExpandLevels[key]} 
           onObjChanged={()=>this.props.onObjChanged(this.props.obj)}/>
         </div>
         : this.renderJsonValue(key, bodyKey, obj));
@@ -219,6 +217,14 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       role="textbox"
       tabIndex={0}>{value}
     </div>);
+  }
+
+  private defaultChildExpandLevel(): number {
+    return this.props.expandLevel > 0 ? this.props.expandLevel - 1 : 0;
+  }
+
+  isExpanded() {
+    return this.props.expandLevel > 0;
   }
 }
 

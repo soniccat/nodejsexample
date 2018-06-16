@@ -122,7 +122,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   renderJsonView(obj: any) {
     return <JsonView obj={obj} 
       isEditable={true} 
-      isExpanded={true} 
+      expandLevel={3} 
       onObjChanged={this.onObjChanged}/>;
   }
 
