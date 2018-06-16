@@ -53,6 +53,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       editingKey: newKey,
       editingKeyName: newKey,
     });
+
+    this.props.onObjChanged(this.props.obj)
   }
 
   onKeyRemoved(key) {
@@ -63,6 +65,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       editingKey: undefined,
       editingKeyName: undefined,
     });
+
+    this.props.onObjChanged(this.props.obj)
   }
 
   onValueClicked(key) {
@@ -79,6 +83,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.setState({
       editingKeyValue: newValue,
     });
+
+    this.props.onObjChanged(this.props.obj)
   }
 
   onFinishChanging() {
@@ -139,7 +145,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
           <JsonView obj={obj} 
           isEditable={this.props.isEditable} 
           isExpanded={this.state.valueExpandeStates[key]} 
-          onObjChanged={this.props.onObjChanged}/>
+          onObjChanged={()=>this.props.onObjChanged(this.props.obj)}/>
         </div>
         : this.renderJsonValue(key, bodyKey, obj));
     }

@@ -127,7 +127,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   }
 
   onObjChanged(obj: any) {
-
+    this.props.onRequestChanged(this.props.request)
   }
 
   onRequestShortClicked() {

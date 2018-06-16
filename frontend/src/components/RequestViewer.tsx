@@ -37,6 +37,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
+    this.onRequestChanged = this.onRequestChanged.bind(this);
 
     this.state = {
       requestOptions: this.props.requestOptions,
