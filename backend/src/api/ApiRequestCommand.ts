@@ -38,10 +38,8 @@ export default class ApiRequestCommand implements ApiCommand {
 
   async handleUpdateRequest(requestRow: RequestRow, res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.requestTable.updateRequestRow(requestRow)
-    .then(this.requestTable.getLastInsertedIndex)
-    .then((insertedId) => {
-      const resBody = JSON.stringify(Object.assign({ id: insertedId }, requestRow));
-      setResponseHeader(res, 200, resBody);
+    .then(() => {
+      setResponseHeader(res, 200, '');
     })
     .catch((err) => {
       this.logger.log(LogLevel.ERROR, `ApiRequestCommand.handleUpdateRequest error: ${util.inspect(err)}`);

@@ -111,7 +111,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     if (this.props.isExpanded) {
       this.renderExpandedContent(cells);
     } else {
-      cells.push(<div>collapsed</div>)
+      cells.push(<div key={"collapsed"}>collapsed</div>)
     }
 
     return (<div className="json_view">

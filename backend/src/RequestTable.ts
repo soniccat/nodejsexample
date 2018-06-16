@@ -165,8 +165,10 @@ class RequestTable {
     query += `response_string=${responseString}, 
         response_string_is_json=${responseStringIsJson}, 
         response_data=${responseData},
-        is_stub=${obj.isStub}
-        );`;
+        is_stub=${obj.isStub}`;
+
+    // WHERE
+    query += ` WHERE id=${obj.id};`;
     return query;
   }
 

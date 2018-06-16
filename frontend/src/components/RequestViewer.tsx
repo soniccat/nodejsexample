@@ -70,11 +70,6 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
           error: err,
         });
       }
-      else {
-        this.setState({
-          rows: [response.data].concat(this.state.rows),
-        });
-      }
     });
   }
 
@@ -122,7 +117,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   render() {
-    console.dir(this.state.rows);
+    //console.dir(this.state.rows);
     const rows = this.state.rows.map(row => (<RequestRow
       key={row.id}
       request={row}
