@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { isObject, isEmptyArray } from 'Utils/Tools';
+import {isObject, isEmptyArray} from 'Utils/Tools';
 
 //import style from 'CSS/JsonView';
 require('CSS/JsonView');
@@ -38,9 +38,17 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     };
   }
 
+  // Events
+
   onKeyClicked(key) {
     this.startKeyEditing(key);
   }
+
+  onValueClicked(key) {
+    this.startValueEditing(key);
+  }
+
+  // Actions
 
   private startKeyEditing(key: any) {
     this.setState({
@@ -72,10 +80,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     });
 
     this.props.onObjChanged(this.props.obj)
-  }
-
-  onValueClicked(key) {
-    this.startValueEditing(key);
   }
 
   private startValueEditing(key: any) {
@@ -111,6 +115,18 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       childExpandLevels: newExpandeStates
     })
   }
+
+  // Getters
+
+  private defaultChildExpandLevel(): number {
+    return this.props.expandLevel > 0 ? this.props.expandLevel - 1 : 0;
+  }
+
+  isExpanded() {
+    return this.props.expandLevel > 0;
+  }
+
+  // Rendering
 
   render() {
     const cells = [];
@@ -151,10 +167,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       cells.push(isSubJson ?
         <div key={bodyKey} className="json_value">
           <JsonView obj={obj} 
-          isEditable={this.props.isEditable} 
-          expandLevel={this.state.childExpandLevels[key]} 
-          onObjChanged={()=>this.props.onObjChanged(this.props.obj)}
-          onCollapsedPressed={(obj)=>this.expandChild(key)}/>
+            isEditable={this.props.isEditable} 
+            expandLevel={this.state.childExpandLevels[key]} 
+            onObjChanged={()=>this.props.onObjChanged(this.props.obj)}
+            onCollapsedPressed={(obj)=>this.expandChild(key)}/>
         </div>
         : this.renderJsonValue(key, bodyKey, obj));
     }
@@ -179,7 +195,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderKey(key: string, isSubJson: boolean): any {
-    if (this.state.editingKey === key && !this.state.editingKeyValue) {
+    if (this.state.editingKey === key && this.state.editingKeyValue === undefined) {
       return <div key={'' + 'editing' + '_key'}>
         <input type="text" 
         value={this.state.editingKeyName} 
@@ -204,7 +220,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   renderJsonValue(key: string, tagKey: string, value: any) {
-    if (this.state.editingKey === key && this.state.editingKeyValue) {
+    if (this.state.editingKey === key && this.state.editingKeyValue != undefined) {
       return (<div key="editing_value">
         <input
           type="text"
@@ -228,14 +244,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       role="textbox"
       tabIndex={0}>{value}
     </div>);
-  }
-
-  private defaultChildExpandLevel(): number {
-    return this.props.expandLevel > 0 ? this.props.expandLevel - 1 : 0;
-  }
-
-  isExpanded() {
-    return this.props.expandLevel > 0;
   }
 }
 

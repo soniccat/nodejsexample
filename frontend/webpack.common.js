@@ -37,12 +37,6 @@ module.exports = {
         use: [
           { loader: 'file-loader' },
         ],
-      }, {
-        test: /\.jsx?$/,
-        exclude: /(node_modules)/,
-        use: {
-          loader: 'babel-loader',
-        },
       }, { 
         test: /\.tsx?$/, 
         loader: "ts-loader" 
@@ -50,7 +44,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.ts','.jsx', '.tsx', '.scss'],
+    extensions: ['.js', '.ts', '.tsx', '.scss'],
     alias: {
       Components: path.resolve(__dirname, 'src/components/'),
       Elements: path.resolve(__dirname, 'src/elements/'),
