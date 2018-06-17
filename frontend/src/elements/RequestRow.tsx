@@ -123,7 +123,8 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     return <JsonView obj={obj} 
       isEditable={true} 
       expandLevel={3} 
-      onObjChanged={this.onObjChanged}/>;
+      onObjChanged={this.onObjChanged}
+      onCollapsedPressed={(key)=>{}}/>;
   }
 
   onObjChanged(obj: any) {
