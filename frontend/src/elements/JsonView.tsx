@@ -104,6 +104,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.setState({
       editingKey: undefined,
       editingKeyName: undefined,
+      editingKeyValue: undefined,
     });
   }
 
@@ -195,29 +196,36 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderKey(key: string, isSubJson: boolean): any {
+    let textarea;
     if (this.state.editingKey === key && this.state.editingKeyValue === undefined) {
-      return <div key={'' + 'editing' + '_key'}>
+      textarea = <div key={'' + 'editing_key'}>
         <textarea
+        autoFocus={true}
         value={this.state.editingKeyName}
         onChange={(event) => {
           this.changeKey(key, event.target.value);
         } }
         onKeyPress={(e) => {
           if (e.key === 'Enter') {
-            this.finishEditing();
             e.preventDefault();
-            return false;
+            this.finishEditing();
           }
-          return true;
         } } />
       </div>;
     }
 
     return <div key={`${key}_key`}
       className={`json_key${isSubJson ? ' sub_json' : ''}`}
-      onClick={() => { this.onKeyClicked(key); } }
+      onClick={() => {
+        if (textarea === undefined) {
+          this.onKeyClicked(key);
+        }
+      }
+    }
       role="textbox"
-      tabIndex={0}>{key}
+      tabIndex={0}>
+        <div>{key}</div>
+        {textarea}
     </div>;
   }
 
@@ -247,6 +255,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   renderJsonValueTextArea(key: string, tagKey: string, value: any) {
     return (<div key="editing_value">
       <textarea
+        autoFocus={true}
         value={this.state.editingKeyValue}
         onChange={(event) => {
           this.changeValue(key, event.target.value);
