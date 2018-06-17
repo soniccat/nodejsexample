@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { RequestViewer } from 'Components/RequestViewer';
 
-export interface AppProps { 
-  compiler: string; 
-  framework: string; 
+export interface AppProps {
+  compiler: string;
+  framework: string;
 }
 
 export class App extends React.Component<AppProps, {}> {

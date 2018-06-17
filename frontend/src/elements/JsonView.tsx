@@ -197,7 +197,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   private renderKey(key: string, isSubJson: boolean): any {
     if (this.state.editingKey === key && this.state.editingKeyValue === undefined) {
       return <div key={'' + 'editing' + '_key'}>
-        <input type="text"
+        <textarea
         value={this.state.editingKeyName}
         onChange={(event) => {
           this.changeKey(key, event.target.value);
@@ -221,8 +221,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   renderJsonValue(key: string, tagKey: string, value: any) {
     if (this.state.editingKey === key && this.state.editingKeyValue !== undefined) {
       return (<div key="editing_value">
-        <input
-          type="text"
+        <textarea
           value={this.state.editingKeyValue}
           onChange={(event) => {
             this.changeValue(key, event.target.value);

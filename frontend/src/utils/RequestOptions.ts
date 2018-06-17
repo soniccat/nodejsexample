@@ -1,5 +1,5 @@
 import buildApiOptions, { ApiOptions, ApiParameters } from 'Utils/buildApiOptions';
-import {Request, RequestWithoutId} from 'Model/Request';
+import { Request, RequestWithoutId } from 'Model/Request';
 
 export function buildRequestsOptions(options: object) : ApiOptions {
   return buildApiOptions({
