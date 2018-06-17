@@ -205,7 +205,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
         onKeyPress={(e) => {
           if (e.key === 'Enter') {
             this.finishEditing();
+            e.preventDefault();
+            return false;
           }
+          return true;
         } } />
       </div>;
     }
@@ -219,28 +222,42 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   renderJsonValue(key: string, tagKey: string, value: any) {
+    let textarea;
     if (this.state.editingKey === key && this.state.editingKeyValue !== undefined) {
-      return (<div key="editing_value">
-        <textarea
-          value={this.state.editingKeyValue}
-          onChange={(event) => {
-            this.changeValue(key, event.target.value);
-          }}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              this.finishEditing();
-            }
-          }}
-        />
-      </div>);
+      textarea = this.renderJsonValueTextArea(key, tagKey, value);
     }
+
     return (<div
       key={tagKey}
       className="json_value"
       onClick={() => { this.onValueClicked(key); }}
-      onKeyPress={() => { this.onValueClicked(key); }}
+      onKeyPress={() => {
+        if (textarea === undefined) {
+          this.onValueClicked(key);
+        }
+      }
+    }
       role="textbox"
-      tabIndex={0}>{value}
+      tabIndex={0}>
+        <div>{value}</div>
+        {textarea}
+    </div>);
+  }
+
+  renderJsonValueTextArea(key: string, tagKey: string, value: any) {
+    return (<div key="editing_value">
+      <textarea
+        value={this.state.editingKeyValue}
+        onChange={(event) => {
+          this.changeValue(key, event.target.value);
+        }}
+        onKeyPress={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.finishEditing();
+          }
+        }}
+      />
     </div>);
   }
 }
