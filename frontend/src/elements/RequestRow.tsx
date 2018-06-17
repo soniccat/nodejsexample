@@ -3,10 +3,10 @@ import JsonView from 'Elements/JsonView';
 import { Request } from 'Model/Request';
 import { isObject } from 'Utils/Tools';
 
-//import style from 'CSS/RequestRow.scss';
+// import style from 'CSS/RequestRow.scss';
 require('CSS/RequestRow.scss');
 
-export interface RequestRowProps { 
+export interface RequestRowProps {
   request: Request;
   isExpanded: boolean;
   onCreateStubClicked: (request: Request) => void;
@@ -17,7 +17,7 @@ export interface RequestRowState {
   isExpanded: boolean;
   isSentExpanded: boolean;
   isReceivedExpanded: boolean;
-} 
+}
 
 export class RequestRow extends React.Component<RequestRowProps, RequestRowState> {
   constructor(props: RequestRowProps) {
@@ -32,7 +32,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.state = {
       isExpanded: props.isExpanded,
       isSentExpanded: true,
-      isReceivedExpanded: true
+      isReceivedExpanded: true,
     };
   }
 
@@ -113,22 +113,24 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   renderBodyContent(body) {
     if (isObject(body)) {
       return this.renderJsonView(body);
-    } else if (body) {
+    }
+
+    if (body) {
       return <div>{body}</div>;
     }
     return undefined;
   }
 
   renderJsonView(obj: any) {
-    return <JsonView obj={obj} 
-      isEditable={true} 
-      expandLevel={3} 
+    return <JsonView obj={obj}
+      isEditable={true}
+      expandLevel={3}
       onObjChanged={this.onObjChanged}
-      onCollapsedPressed={(key)=>{}}/>;
+      onCollapsedPressed={(key) => {}}/>;
   }
 
   onObjChanged(obj: any) {
-    this.props.onRequestChanged(this.props.request)
+    this.props.onRequestChanged(this.props.request);
   }
 
   onRequestShortClicked() {

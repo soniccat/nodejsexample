@@ -1,4 +1,4 @@
-import { RequestOptions } from "../model/RequestOptions";
+import { RequestOptions } from 'Model/RequestOptions';
 
 import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
@@ -6,7 +6,7 @@ import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
 import { buildRequestsOptions, buildCreateRequestOptions, buildUpdateRequestOptions } from 'Utils/RequestOptions';
 
-export interface RequestViewerProps { 
+export interface RequestViewerProps {
   requestOptions?: RequestOptions;
   rows?: Request[];
   error?: object;
@@ -16,7 +16,7 @@ export interface RequestViewerState {
   requestOptions?: RequestOptions;
   rows?: Request[];
   error?: object;
-} 
+}
 
 export class RequestViewer extends React.Component<RequestViewerProps, RequestViewerState> {
   static defaultProps = {
@@ -53,8 +53,8 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
   onSearchChanged(event) {
     this.setState({ requestOptions: { urlRegexp: event.target.value } }, () => {
-        console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
-        this.loadRequests();
+      console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
+      this.loadRequests();
     });
   }
 
@@ -91,8 +91,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
         this.setState({
           error: err,
         });
-      }
-      else {
+      } else {
         this.setState({
           rows: [response.data].concat(this.state.rows),
         });
@@ -117,7 +116,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   render() {
-    //console.dir(this.state.rows);
+    // console.dir(this.state.rows);
     const rows = this.state.rows.map(row => (<RequestRow
       key={row.id}
       request={row}
