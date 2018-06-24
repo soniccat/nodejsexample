@@ -76,9 +76,15 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       delete this.childRefs[key];
     }
 
+    // TODO: use mutable-helpber
+    const newExpandeStates = this.state.childExpandLevels;
+    newExpandeStates[newKey] = newExpandeStates[key];
+    delete newExpandeStates[key];
+
     this.setState({
       editingKey: newKey,
       editingKeyName: newKey,
+      childExpandLevels: newExpandeStates,
     });
 
     this.props.onObjChanged(this.props.obj);
@@ -126,6 +132,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   expandChild(key: string) {
+    // TODO: use mutable-helpber
     const newExpandeStates = this.state.childExpandLevels;
     newExpandeStates[key] = newExpandeStates[key] > 0 ? 0 : 1;
 
