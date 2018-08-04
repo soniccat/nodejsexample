@@ -19,7 +19,7 @@ import { RequestInfo } from 'main/baseTypes/RequestInfo';
 import { LogLevel } from 'main/logger/ILogger';
 
 // Config
-const host = 'aglushkov.com';
+const host = 'news360.com';
 const apiPath = '__api__';
 
 const databaseUser = process.env.DB_USER;
@@ -34,7 +34,7 @@ if (!databaseUser || !databasePass) {
 const consoleLogger = new ConsoleLogger();
 const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), consoleLogger]);
 
-const proxy = new Proxy('github.com', logger);
+const proxy = new Proxy('news360.com', logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const apiHandler = new ApiHandler(dbConnection, apiPath, logger);
@@ -52,7 +52,9 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       .then((requestInfo: RequestInfo) => {
         res.end();
         if (needWriteRequestRow(requestInfo)) {
-          requestDb.writeRequestRowAsRequestInfo(requestInfo);
+          requestDb.writeRequestRowAsRequestInfo(requestInfo).then((rows:any[]) => {
+            logger.log(LogLevel.DEBUG, `added to DB ${requestInfo.sendInfo.path}`);
+          });
         }
       });
   }

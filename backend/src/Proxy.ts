@@ -122,6 +122,7 @@ class Proxy {
       });
     }).on('error', (e) => {
       this.logger.log(LogLevel.ERROR, `prepareOriginalResponseInfo error ${util.inspect(e)}`);
+      responseInfo.headers = {};
       responseInfo.statusCode = 500;
       callback(responseInfo);
     });
