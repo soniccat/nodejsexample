@@ -1,32 +1,32 @@
-import buildApiOptions, { ApiOptions, ApiParameters } from 'Utils/buildApiOptions';
+import buildApiCall, { ApiCall, ApiParameters } from 'Utils/buildApiCall';
 import { Request, RequestWithoutId } from 'Model/Request';
 
-export function buildRequestsOptions(options: object) : ApiOptions {
-  return buildApiOptions({
+export function buildRequestsCall(options: object) : ApiCall {
+  return buildApiCall({
     method: 'POST',
     path: 'requests',
     data: options,
   });
 }
 
-export function buildCreateRequestOptions(obj: RequestWithoutId) : ApiOptions {
-  return buildApiOptions({
+export function buildCreateRequestCall(obj: RequestWithoutId) : ApiCall {
+  return buildApiCall({
     method: 'POST',
     path: 'request',
     data: obj,
   });
 }
 
-export function buildUpdateRequestOptions(obj: Request) : ApiOptions {
-  return buildApiOptions({
+export function buildUpdateRequestCall(obj: Request) : ApiCall {
+  return buildApiCall({
     method: 'POST',
     path: 'request/' + obj.id,
     data: obj,
   });
 }
 
-export function buildDeleteRequestOptions(id: number) : ApiOptions {
-  return buildApiOptions({
+export function buildDeleteRequestCall(id: number) : ApiCall {
+  return buildApiCall({
     method: 'DELETE',
     path: 'request/' + id,
   });

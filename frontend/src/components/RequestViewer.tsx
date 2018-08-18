@@ -4,7 +4,7 @@ import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
 import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
-import { buildRequestsOptions, buildCreateRequestOptions, buildUpdateRequestOptions, buildDeleteRequestOptions } from 'Utils/RequestOptions';
+import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestOptions';
 
 export interface RequestViewerProps {
   requestOptions?: RequestOptions;
@@ -65,7 +65,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
   onRequestChanged(row: Request) {
     // Actions
-    loadRequest(buildUpdateRequestOptions(row), (err, response) => {
+    loadRequest(buildUpdateRequestCall(row), (err, response) => {
       if (err) {
         this.setState({
           error: err,
@@ -75,7 +75,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   onRequestDeleteClicked(row: Request) {
-    loadRequest(buildDeleteRequestOptions(row.id), (err, response) => {
+    loadRequest(buildDeleteRequestCall(row.id), (err, response) => {
       if (err) {
         this.setState({
           error: err,
@@ -91,7 +91,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   private createStub(row: Request) {
-    const options = buildCreateRequestOptions({
+    const options = buildCreateRequestCall({
       url: row.url,
       port: row.port,
       method: row.method,
@@ -117,7 +117,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   loadRequests() {
-    const options = buildRequestsOptions(this.state.requestOptions);
+    const options = buildRequestsCall(this.state.requestOptions);
 
     loadRequest(options, (err, response) => {
       if (err) {
