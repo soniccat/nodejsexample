@@ -41,8 +41,8 @@ class RequestTable {
     this.getLastInsertedIndex = this.getLastInsertedIndex.bind(this);
   }
 
-  async writeRequestRowAsRequestInfo(requestInfo: RequestInfo): Promise<any[]> {
-    return this.writeRequestRow({
+  async writeRequestAsRequestInfo(requestInfo: RequestInfo): Promise<any[]> {
+    return this.writeRequest({
       url: getUrlString(requestInfo.sendInfo),
       port: requestInfo.sendInfo.port,
       method: requestInfo.sendInfo.method,
@@ -54,17 +54,17 @@ class RequestTable {
       isStub: false});
   }
 
-  async writeRequestRow(obj: Request): Promise<any[]> {
+  async writeRequest(obj: Request): Promise<any[]> {
     const query = this.buildWriteRequestQuery(obj);
     return this.dbConnection.queryPromise(query);
   }
 
-  async updateRequestRow(obj: Request): Promise<any[]> {
+  async updateRequest(obj: Request): Promise<any[]> {
     const query = this.buildUpdateRequestQuery(obj);
     return this.dbConnection.queryPromise(query);
   }
 
-  async deleteRequestRow(id: number): Promise<any[]> {
+  async deleteRequest(id: number): Promise<any[]> {
     const query = this.buildDeleteRequestQuery(id);
     return this.dbConnection.queryPromise(query);
   }
@@ -240,11 +240,11 @@ class RequestTable {
     }
   }
 
-  async queryRequests(query: string): Promise<any[]> {
+  async queryRequests(query: string): Promise<Request[]> {
     const rows: DbRequestRow[] = await this.dbConnection.queryPromise(query);
-    const requestRows: Request[] = this.normalizeRequests(rows);
+    const requests: Request[] = this.normalizeRequests(rows);
 
-    return requestRows;
+    return requests;
   }
 
   normalizeRequests(reqList: DbRequestRow[]): Request[] {

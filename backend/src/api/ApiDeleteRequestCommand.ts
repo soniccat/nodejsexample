@@ -35,7 +35,7 @@ export default class ApiDeleteRequestCommand implements ApiCommand {
   }
 
   async handleDeleteRequest(id: number, res: http.ServerResponse): Promise<http.ServerResponse> {
-    return this.requestTable.deleteRequestRow(id)
+    return this.requestTable.deleteRequest(id)
     .then(() => {
       setResponseHeader(res, 200, '');
     })

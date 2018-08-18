@@ -40,7 +40,7 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
   }
 
   async handleUpdateRequest(requestRow: Request, res: http.ServerResponse): Promise<http.ServerResponse> {
-    return this.requestTable.updateRequestRow(requestRow)
+    return this.requestTable.updateRequest(requestRow)
     .then(() => {
       setResponseHeader(res, 200, '');
     })

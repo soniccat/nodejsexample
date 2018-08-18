@@ -39,7 +39,7 @@ export default class ApiCreateRequestCommand implements ApiCommand {
   }
 
   async handleCreateRequest(requestRow: Request, res: http.ServerResponse): Promise<http.ServerResponse> {
-    return this.requestTable.writeRequestRow(requestRow)
+    return this.requestTable.writeRequest(requestRow)
     .then(this.requestTable.getLastInsertedIndex)
     .then((insertedId) => {
       const resBody = JSON.stringify(Object.assign({ id: insertedId }, requestRow));

@@ -52,7 +52,7 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       .then((requestInfo: RequestInfo) => {
         res.end();
         if (needWriteRequestRow(requestInfo)) {
-          requestDb.writeRequestRowAsRequestInfo(requestInfo).then((rows:any[]) => {
+          requestDb.writeRequestAsRequestInfo(requestInfo).then((rows:any[]) => {
             logger.log(LogLevel.DEBUG, `added to DB ${requestInfo.sendInfo.path}`);
           });
         }

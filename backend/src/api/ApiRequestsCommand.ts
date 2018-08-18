@@ -1,5 +1,6 @@
 import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
 import ApiRequestInfo from 'main/api/ApiRequestInfo';
+import { Request } from 'Model/Request';
 import * as http from 'http';
 import * as util from 'util';
 import RequestTable from 'main/RequestTable';
@@ -55,7 +56,7 @@ export default class ApiRequestsCommand implements ApiCommand {
 
   async handleRequests(body: LoadRequestsOption, res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.loadRequests(body)
-    .then((rows: any[]) => {
+    .then((rows: Request[]) => {
       setResponseHeader(res, 200, JSON.stringify(rows));
     })
     .catch((err) => {
@@ -67,7 +68,7 @@ export default class ApiRequestsCommand implements ApiCommand {
     });
   }
 
-  async loadRequests(options: LoadRequestsOption): Promise<any[]> {
+  async loadRequests(options: LoadRequestsOption): Promise<Request[]> {
     const query = this.buildRequestsQuery(options);
 
     this.logger.log(LogLevel.DEBUG, `query ${query}`);
