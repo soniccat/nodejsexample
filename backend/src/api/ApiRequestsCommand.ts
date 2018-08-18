@@ -1,6 +1,7 @@
 import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
 import ApiRequestInfo from 'main/api/ApiRequestInfo';
 import { Request } from 'Model/Request';
+import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as http from 'http';
 import * as util from 'util';
 import RequestTable from 'main/RequestTable';
@@ -15,18 +16,6 @@ import ILogger, { LogLevel } from 'main/logger/ILogger';
 //  onlyNotNull - show only when every field is not null
 // response:
 //  list of db objects with the requested fields
-
-class LoadRequestsOption {
-  fields?: string[];
-  urlRegexp?: string;
-  onlyNotNull: boolean;
-
-  static checkType(arg: any): arg is LoadRequestsOption {
-    return Array.isArray(arg.fields)
-    || typeof arg.onlyNotNull === `boolean`
-    || typeof arg.urlRegexp === 'string';
-  }
-}
 
 export default class ApiRequestsCommand implements ApiCommand {
   logger: ILogger;

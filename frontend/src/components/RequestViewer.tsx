@@ -1,19 +1,19 @@
-import { RequestOptions } from 'Model/RequestOptions';
+import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
 import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
 import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
-import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestOptions';
+import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
 
 export interface RequestViewerProps {
-  requestOptions?: RequestOptions;
+  requestOptions?: LoadRequestsOption;
   rows?: Request[];
   error?: object;
 }
 
 export interface RequestViewerState {
-  requestOptions?: RequestOptions;
+  requestOptions?: LoadRequestsOption;
   rows?: Request[];
   error?: object;
 }
