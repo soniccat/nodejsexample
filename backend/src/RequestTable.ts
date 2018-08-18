@@ -86,6 +86,11 @@ class RequestTable {
     return this.dbConnection.queryPromise(query);
   }
 
+  async deleteRequestRow(id: number): Promise<any[]> {
+    const query = this.buildDeleteRequestQuery(id);
+    return this.dbConnection.queryPromise(query);
+  }
+
   private buildWriteRequestQuery(obj: RequestRow) {
     const sessionId = 1;
     // SQL
@@ -170,6 +175,10 @@ class RequestTable {
     // WHERE
     query += ` WHERE id=${obj.id};`;
     return query;
+  }
+
+  private buildDeleteRequestQuery(id: number) {
+    return `DELETE FROM ${tableName} WHERE id=${id}`;
   }
 
   async getLastInsertedIndex(): Promise<number> {

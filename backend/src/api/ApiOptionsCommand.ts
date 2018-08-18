@@ -8,7 +8,7 @@ export default class ApiOptionsCommand implements ApiCommand {
     // allow Cross-Origin Resource Sharing preflight request
     res.writeHead(200, {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE',
       'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
     });
 

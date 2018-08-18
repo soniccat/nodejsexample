@@ -4,14 +4,14 @@ const server = 'http://' + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH 
 export interface ApiParameters {
   path: string;
   method: string;
-  data: object;
+  data?: object;
 }
 
 export interface ApiOptions {
   headers: {[index: string]: string};
   method: string;
   url: string;
-  data: object;
+  data?: object;
 }
 
 export function buildApiOptions(options: ApiParameters) : ApiOptions {

@@ -34,6 +34,7 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
   canRun(requestInfo: ApiRequestInfo): boolean {
     return requestInfo.components.length === 2 &&
       requestInfo.body !== undefined &&
+      requestInfo.method === 'POST' &&
       requestInfo.components[0] === 'request';
   }
 

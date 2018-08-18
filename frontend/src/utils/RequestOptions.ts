@@ -3,7 +3,7 @@ import { Request, RequestWithoutId } from 'Model/Request';
 
 export function buildRequestsOptions(options: object) : ApiOptions {
   return buildApiOptions({
-    method: 'post',
+    method: 'POST',
     path: 'requests',
     data: options,
   });
@@ -11,7 +11,7 @@ export function buildRequestsOptions(options: object) : ApiOptions {
 
 export function buildCreateRequestOptions(obj: RequestWithoutId) : ApiOptions {
   return buildApiOptions({
-    method: 'post',
+    method: 'POST',
     path: 'request',
     data: obj,
   });
@@ -19,8 +19,15 @@ export function buildCreateRequestOptions(obj: RequestWithoutId) : ApiOptions {
 
 export function buildUpdateRequestOptions(obj: Request) : ApiOptions {
   return buildApiOptions({
-    method: 'post',
+    method: 'POST',
     path: 'request/' + obj.id,
     data: obj,
+  });
+}
+
+export function buildDeleteRequestOptions(id: number) : ApiOptions {
+  return buildApiOptions({
+    method: 'DELETE',
+    path: 'request/' + id,
   });
 }

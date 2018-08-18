@@ -31,8 +31,9 @@ export default class ApiCreateRequestCommand implements ApiCommand {
   }
 
   canRun(requestInfo: ApiRequestInfo): boolean {
-    return requestInfo.components.length === 0 &&
+    return requestInfo.components.length === 1 &&
     requestInfo.body !== undefined &&
+    requestInfo.method === 'POST' &&
     requestInfo.components[0] === 'request';
   }
 
@@ -44,7 +45,7 @@ export default class ApiCreateRequestCommand implements ApiCommand {
       setResponseHeader(res, 200, resBody);
     })
     .catch((err) => {
-      this.logger.log(LogLevel.ERROR, `ApiRequestCommand.handleCreateRequest error: ${util.inspect(err)}`);
+      this.logger.log(LogLevel.ERROR, `ApiCreateRequestCommand.handleCreateRequest error: ${util.inspect(err)}`);
       setResponseHeader(res, 500);
     })
     .then(() => {

@@ -11,6 +11,7 @@ export interface RequestRowProps {
   isExpanded: boolean;
   onCreateStubClicked: (request: Request) => void;
   onRequestChanged: (request: Request) => void;
+  onDeleteClicked: (request: Request) => void;
 }
 
 export interface RequestRowState {
@@ -27,6 +28,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onSentShortClicked = this.onSentShortClicked.bind(this);
     this.onReceivedShortClicked = this.onReceivedShortClicked.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
+    this.onDeleteClicked = this.onDeleteClicked.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
 
     this.state = {
@@ -54,8 +56,10 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           {!this.props.request.isStub ?
             <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
                             Create stub
-            </div> : undefined
-                    }
+            </div> : undefined}
+          <div className="request_delete" onClick={this.onDeleteClicked}>
+            DEL
+          </div>
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
@@ -151,8 +155,14 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     });
   }
 
-  onCreateStubClicked() {
+  onCreateStubClicked(e: React.MouseEvent<HTMLDivElement>) {
+    e.stopPropagation();
     this.props.onCreateStubClicked(this.props.request);
+  }
+
+  onDeleteClicked(e: React.MouseEvent<HTMLDivElement>) {
+    e.stopPropagation();
+    this.props.onDeleteClicked(this.props.request);
   }
 }
 

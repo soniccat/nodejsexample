@@ -4,7 +4,7 @@ import * as React from 'react';
 import RequestRow from 'Elements/RequestRow';
 import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
-import { buildRequestsOptions, buildCreateRequestOptions, buildUpdateRequestOptions } from 'Utils/RequestOptions';
+import { buildRequestsOptions, buildCreateRequestOptions, buildUpdateRequestOptions, buildDeleteRequestOptions } from 'Utils/RequestOptions';
 
 export interface RequestViewerProps {
   requestOptions?: RequestOptions;
@@ -38,6 +38,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onRequestChanged = this.onRequestChanged.bind(this);
+    this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
 
     this.state = {
       requestOptions: this.props.requestOptions,
@@ -68,6 +69,22 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       if (err) {
         this.setState({
           error: err,
+        });
+      }
+    });
+  }
+
+  onRequestDeleteClicked(row: Request) {
+    loadRequest(buildDeleteRequestOptions(row.id), (err, response) => {
+      if (err) {
+        this.setState({
+          error: err,
+        });
+      } else {
+        this.setState({
+          rows: this.state.rows.filter((element: Request, index, array) => {
+            return element.id !== row.id;
+          }),
         });
       }
     });
@@ -123,6 +140,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       isExpanded={false}
       onCreateStubClicked={this.onCreateStubClicked}
       onRequestChanged={this.onRequestChanged}
+      onDeleteClicked={this.onRequestDeleteClicked}
     />));
 
     return (

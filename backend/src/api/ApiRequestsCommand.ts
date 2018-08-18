@@ -2,7 +2,6 @@ import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
 import ApiRequestInfo from 'main/api/ApiRequestInfo';
 import * as http from 'http';
 import * as util from 'util';
-import DbConnection from 'main/DbConnection';
 import RequestTable from 'main/RequestTable';
 import ILogger, { LogLevel } from 'main/logger/ILogger';
 
@@ -30,11 +29,9 @@ class LoadRequestsOption {
 
 export default class ApiRequestsCommand implements ApiCommand {
   logger: ILogger;
-  dbConnection: DbConnection;
   requestTable:RequestTable;
 
-  constructor(dbConnection: DbConnection, requestTable: RequestTable, logger: ILogger) {
-    this.dbConnection = dbConnection;
+  constructor(requestTable: RequestTable, logger: ILogger) {
     this.requestTable = requestTable;
     this.logger = logger;
   }
@@ -50,7 +47,10 @@ export default class ApiRequestsCommand implements ApiCommand {
   }
 
   canRun(requestInfo: ApiRequestInfo): boolean {
-    return requestInfo.components.length > 0 && requestInfo.body !== undefined && requestInfo.components[0] === 'requests';
+    return requestInfo.components.length > 0 &&
+    requestInfo.body !== undefined &&
+    requestInfo.method === 'POST' &&
+    requestInfo.components[0] === 'requests';
   }
 
   async handleRequests(body: LoadRequestsOption, res: http.ServerResponse): Promise<http.ServerResponse> {
@@ -86,7 +86,7 @@ export default class ApiRequestsCommand implements ApiCommand {
     let urlRegexp = '';
     if (options.urlRegexp) {
       urlRegexp = options.urlRegexp;
-      wherePart += `url REGEXP ${this.dbConnection.wrapString(urlRegexp)}`;
+      wherePart += `url REGEXP ${this.requestTable.wrapString(urlRegexp)}`;
     }
     if (options.onlyNotNull && options.fields) {
       for (let i = 0; i < options.fields.length; i += 1) {

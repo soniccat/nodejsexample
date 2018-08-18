@@ -11,6 +11,7 @@ import ApiOptionsCommand from 'main/api/ApiOptionsCommand';
 import ApiRequestsCommand from 'main/api/ApiRequestsCommand';
 import ApiUpdateRequestCommand from 'main/api/ApiUpdateRequestCommand';
 import ApiCreateRequestCommand from 'main/api/ApiCreateRequestCommand';
+import ApiDeleteRequestCommand from 'main/api/ApiDeleteRequestCommand';
 
 class ApiHandler {
   dbConnection: DbConnection;
@@ -27,9 +28,10 @@ class ApiHandler {
 
     this.commands = [
       new ApiOptionsCommand(),
-      new ApiRequestsCommand(dbConnection, this.requestTable, logger),
+      new ApiRequestsCommand(this.requestTable, logger),
       new ApiUpdateRequestCommand(this.requestTable, logger),
-      new ApiCreateRequestCommand(this.requestTable, logger)];
+      new ApiCreateRequestCommand(this.requestTable, logger),
+      new ApiDeleteRequestCommand(this.requestTable, logger)];
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {
