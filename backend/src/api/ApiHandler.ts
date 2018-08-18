@@ -9,7 +9,8 @@ import ApiRequestInfo from 'main/api/ApiRequestInfo';
 import { ApiCommand, setResponseHeader, setNotFoundResponse } from 'main/api/ApiCommand';
 import ApiOptionsCommand from 'main/api/ApiOptionsCommand';
 import ApiRequestsCommand from 'main/api/ApiRequestsCommand';
-import ApiRequestCommand from 'main/api/ApiRequestCommand';
+import ApiUpdateRequestCommand from 'main/api/ApiUpdateRequestCommand';
+import ApiCreateRequestCommand from 'main/api/ApiCreateRequestCommand';
 
 class ApiHandler {
   dbConnection: DbConnection;
@@ -27,7 +28,8 @@ class ApiHandler {
     this.commands = [
       new ApiOptionsCommand(),
       new ApiRequestsCommand(dbConnection, this.requestTable, logger),
-      new ApiRequestCommand(this.requestTable, logger)];
+      new ApiUpdateRequestCommand(this.requestTable, logger),
+      new ApiCreateRequestCommand(this.requestTable, logger)];
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {
@@ -54,18 +56,18 @@ class ApiHandler {
       if (req.url === undefined) {
         throw new Error('handleRequest: request without url');
       }
-  
+
       if (req.method === undefined) {
         throw new Error('handleRequest: request without method');
       }
-  
+
       const reqUrl = url.parse(req.url);
       const method = req.method;
-  
+
       if (reqUrl.path === undefined) {
         throw new Error(`handleRequest: request without url path ${reqUrl}`);
       }
-  
+
       const path = reqUrl.path.substr(this.apiPath.length + 2); // +2 for double '/' at the beginning and end
       const components = path.split('/');
 

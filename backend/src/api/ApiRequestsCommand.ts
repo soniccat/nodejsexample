@@ -22,8 +22,8 @@ class LoadRequestsOption {
   onlyNotNull: boolean;
 
   static checkType(arg: any): arg is LoadRequestsOption {
-    return Array.isArray(arg.fields) 
-    || typeof arg.onlyNotNull === `boolean` 
+    return Array.isArray(arg.fields)
+    || typeof arg.onlyNotNull === `boolean`
     || typeof arg.urlRegexp === 'string';
   }
 }
@@ -34,7 +34,7 @@ export default class ApiRequestsCommand implements ApiCommand {
   requestTable:RequestTable;
 
   constructor(dbConnection: DbConnection, requestTable: RequestTable, logger: ILogger) {
-    this.dbConnection = dbConnection;  
+    this.dbConnection = dbConnection;
     this.requestTable = requestTable;
     this.logger = logger;
   }

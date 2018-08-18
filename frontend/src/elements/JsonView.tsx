@@ -84,10 +84,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.props.onObjChanged(this.props.obj);
   }
 
-  removeKey(key) {
+  removeKey(objKey: string, key: number) {
     const newObj = this.props.obj;
     delete this.childRefs[key];
-    delete newObj[key];
+    delete newObj[objKey];
 
     this.setState({
       editingKey: undefined,
@@ -226,7 +226,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       cells.push(this.renderKey(objKey, key, isSubJson));
 
       if (this.props.isEditable) {
-        cells.push(this.renderDeleteButton(key, isSubJson));
+        cells.push(this.renderDeleteButton(objKey, key, isSubJson));
       }
 
       cells.push(<div key={`${key}_delimeter`}
@@ -263,10 +263,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       </div>;
   }
 
-  private renderDeleteButton(key: number, isSubJson: boolean): any {
+  private renderDeleteButton(objKey: string, key: number, isSubJson: boolean): any {
     return <div key={`${key}_delete_button`}
       className={`json_delete${isSubJson ? ' sub_json' : ''}`}
-      onClick={() => { this.removeKey(key); } }
+      onClick={() => { this.removeKey(objKey, key); } }
       role="button"
       tabIndex={0}>(del)</div>;
   }

@@ -20,7 +20,7 @@ export function buildCreateRequestOptions(obj: RequestWithoutId) : ApiOptions {
 export function buildUpdateRequestOptions(obj: Request) : ApiOptions {
   return buildApiOptions({
     method: 'post',
-    path: 'request',
+    path: 'request/' + obj.id,
     data: obj,
   });
 }

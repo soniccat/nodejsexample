@@ -21,12 +21,12 @@ export class RequestRow {
   isStub: boolean;
 
   static checkType(obj): obj is RequestRow {
-    return typeof obj.url === `string` 
-    && typeof obj.port === `number` 
-    && typeof obj.method === `string` 
-    && obj.headers 
-    && typeof obj.responseStatus === `number` 
-    && obj.responseHeaders 
+    return typeof obj.url === `string`
+    && typeof obj.port === `number`
+    && typeof obj.method === `string`
+    && obj.headers
+    && typeof obj.responseStatus === `number`
+    && obj.responseHeaders
     && typeof obj.isStub === `boolean`;
   }
 }
@@ -90,8 +90,8 @@ class RequestTable {
     const sessionId = 1;
     // SQL
     let query = `INSERT INTO ${tableName} VALUES(null,
-        ${sessionId}, 
-        NOW(), 
+        ${sessionId},
+        NOW(),
         ${this.wrapString(obj.url)},
         ${obj.port},
         ${this.getHttpMethodCode(obj.method)},
@@ -106,10 +106,10 @@ class RequestTable {
       bodyString = bodyInfo.string;
     }
     // SQL
-    query += `${bodyString}, 
-        ${bodyStringIsJson}, 
-        ${bodyData}, 
-        ${obj.responseStatus}, 
+    query += `${bodyString},
+        ${bodyStringIsJson},
+        ${bodyData},
+        ${obj.responseStatus},
         ${this.getSQLHeaderValue(obj.responseHeaders)},`;
 
     let responseString = 'NULL';
@@ -121,8 +121,8 @@ class RequestTable {
       responseString = bodyInfo.string;
     }
     // SQL
-    query += `${responseString}, 
-        ${responseStringIsJson}, 
+    query += `${responseString},
+        ${responseStringIsJson},
         ${responseData},
         ${obj.isStub}
         );`;
@@ -132,7 +132,7 @@ class RequestTable {
   private buildUpdateRequestQuery(obj: RequestRow) {
     const sessionId = 1;
     // SQL
-    let query = `UPDATE ${tableName} SET 
+    let query = `UPDATE ${tableName} SET
         url=${this.wrapString(obj.url)},
         port=${obj.port},
         method=${this.getHttpMethodCode(obj.method)},
@@ -147,12 +147,12 @@ class RequestTable {
       bodyString = bodyInfo.string;
     }
     // SQL
-    query += `body_string=${bodyString}, 
-        body_string_is_json=${bodyStringIsJson}, 
-        body_data=${bodyData}, 
-        response_status=${obj.responseStatus}, 
+    query += `body_string=${bodyString},
+        body_string_is_json=${bodyStringIsJson},
+        body_data=${bodyData},
+        response_status=${obj.responseStatus},
         response_headers=${this.getSQLHeaderValue(obj.responseHeaders)},`;
-    
+
     let responseString = 'NULL';
     let responseStringIsJson = false;
     const responseData = 'NULL';
@@ -162,8 +162,8 @@ class RequestTable {
       responseString = bodyInfo.string;
     }
     // SQL
-    query += `response_string=${responseString}, 
-        response_string_is_json=${responseStringIsJson}, 
+    query += `response_string=${responseString},
+        response_string_is_json=${responseStringIsJson},
         response_data=${responseData},
         is_stub=${obj.isStub}`;
 

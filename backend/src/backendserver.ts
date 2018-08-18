@@ -7,9 +7,9 @@ import * as https from 'https';
 import * as url from 'url';
 import * as util from 'util';
 
-import Proxy from './Proxy';
-import DbConnection from './DbConnection';
-import RequestTable from './RequestTable';
+import Proxy from 'main/Proxy';
+import DbConnection from 'main/DbConnection';
+import RequestTable from 'main/RequestTable';
 import ApiHandler from 'main/api/ApiHandler';
 import ConsoleLogger from 'main/logger/ConsoleLogger';
 import EmptyLogger from 'main/logger/EmptyLogger';
