@@ -1,5 +1,5 @@
 import buildApiCall, { ApiCall, ApiParameters } from 'Utils/buildApiCall';
-import { Request, RequestWithoutId } from 'Model/Request';
+import { Request } from 'Model/Request';
 
 export function buildRequestsCall(options: object) : ApiCall {
   return buildApiCall({
@@ -9,7 +9,7 @@ export function buildRequestsCall(options: object) : ApiCall {
   });
 }
 
-export function buildCreateRequestCall(obj: RequestWithoutId) : ApiCall {
+export function buildCreateRequestCall(obj: Request) : ApiCall {
   return buildApiCall({
     method: 'POST',
     path: 'request',

@@ -2,7 +2,8 @@ import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
 import ApiRequestInfo from 'main/api/ApiRequestInfo';
 import * as http from 'http';
 import * as util from 'util';
-import RequestTable, { RequestRow } from 'main/RequestTable';
+import RequestTable from 'main/RequestTable';
+import { Request } from 'Model/Request';
 import ILogger, { LogLevel } from 'main/logger/ILogger';
 
 // SPEC:
@@ -21,7 +22,7 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
   }
 
   async run(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    if (!RequestRow.checkType(requestInfo.body)) {
+    if (!Request.checkType(requestInfo.body)) {
       setResponseHeader(res, 400, `Body is incorrect`);
     } else {
       requestInfo.body.id = parseInt(requestInfo.components[1], 10);
@@ -38,7 +39,7 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
       requestInfo.components[0] === 'request';
   }
 
-  async handleUpdateRequest(requestRow: RequestRow, res: http.ServerResponse): Promise<http.ServerResponse> {
+  async handleUpdateRequest(requestRow: Request, res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.requestTable.updateRequestRow(requestRow)
     .then(() => {
       setResponseHeader(res, 200, '');

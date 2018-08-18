@@ -1,6 +1,7 @@
 import * as url from 'url';
 import { readPostBody, readPostBodyPromise } from 'main/requesttools';
-import RequestTable, { RequestRow } from 'main/RequestTable';
+import RequestTable from 'main/RequestTable';
+import { Request } from 'Model/Request';
 import DbConnection from 'main/DbConnection';
 import ILogger, { LogLevel } from 'main/logger/ILogger';
 import * as http from 'http';

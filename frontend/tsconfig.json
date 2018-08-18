@@ -9,7 +9,7 @@
     "paths": {
       "Components/*": ["src/components/*"],
       "Elements/*": ["src/elements/*"],
-      "Model/*": ["src/model/*"],
+      "Model/*": ["../model/*"],
       "Utils/*": ["src/utils/*"],
       "CSS/*": ["css/*"],
     },

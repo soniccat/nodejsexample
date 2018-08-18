@@ -5,31 +5,9 @@ import * as Client from 'mysql';
 import DbConnection from 'main/DbConnection';
 import { isString } from 'main/objectTools';
 import { RequestInfo } from 'main/baseTypes/RequestInfo';
+import { Request } from 'Model/Request';
 
 const tableName = 'main';
-
-export class RequestRow {
-  id?: number;
-  url: string;
-  port: number;
-  method: string;
-  headers: {[index: string]: any};
-  body: string | object | undefined;
-  responseStatus: number;
-  responseHeaders: {[index: string]: any};
-  responseBody: string | object | undefined;
-  isStub: boolean;
-
-  static checkType(obj): obj is RequestRow {
-    return typeof obj.url === `string`
-    && typeof obj.port === `number`
-    && typeof obj.method === `string`
-    && obj.headers
-    && typeof obj.responseStatus === `number`
-    && obj.responseHeaders
-    && typeof obj.isStub === `boolean`;
-  }
-}
 
 // match SQL table row names
 
@@ -76,12 +54,12 @@ class RequestTable {
       isStub: false});
   }
 
-  async writeRequestRow(obj: RequestRow): Promise<any[]> {
+  async writeRequestRow(obj: Request): Promise<any[]> {
     const query = this.buildWriteRequestQuery(obj);
     return this.dbConnection.queryPromise(query);
   }
 
-  async updateRequestRow(obj: RequestRow): Promise<any[]> {
+  async updateRequestRow(obj: Request): Promise<any[]> {
     const query = this.buildUpdateRequestQuery(obj);
     return this.dbConnection.queryPromise(query);
   }
@@ -91,7 +69,7 @@ class RequestTable {
     return this.dbConnection.queryPromise(query);
   }
 
-  private buildWriteRequestQuery(obj: RequestRow) {
+  private buildWriteRequestQuery(obj: Request) {
     const sessionId = 1;
     // SQL
     let query = `INSERT INTO ${tableName} VALUES(null,
@@ -134,7 +112,7 @@ class RequestTable {
     return query;
   }
 
-  private buildUpdateRequestQuery(obj: RequestRow) {
+  private buildUpdateRequestQuery(obj: Request) {
     const sessionId = 1;
     // SQL
     let query = `UPDATE ${tableName} SET
@@ -264,13 +242,13 @@ class RequestTable {
 
   async queryRequests(query: string): Promise<any[]> {
     const rows: DbRequestRow[] = await this.dbConnection.queryPromise(query);
-    const requestRows: RequestRow[] = this.normalizeRequests(rows);
+    const requestRows: Request[] = this.normalizeRequests(rows);
 
     return requestRows;
   }
 
-  normalizeRequests(reqList: DbRequestRow[]): RequestRow[] {
-    const result: RequestRow[] = [];
+  normalizeRequests(reqList: DbRequestRow[]): Request[] {
+    const result: Request[] = [];
 
     for (let i = 0; i < reqList.length; i += 1) {
       result[i] = this.normalizeRequest(reqList[i]);
@@ -279,7 +257,7 @@ class RequestTable {
     return result;
   }
 
-  normalizeRequest(request: DbRequestRow): RequestRow {
+  normalizeRequest(request: DbRequestRow): Request {
     let body;
     if (request.body_string_is_json) {
       body = request.body_string ? JSON.parse(request.body_string) : {};
