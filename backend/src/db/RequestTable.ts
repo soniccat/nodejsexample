@@ -1,10 +1,10 @@
-import { getUrlString } from 'main/requesttools';
-import ResponseInfo from 'main/baseTypes/ResponseInfo';
-import SendInfo from 'main/baseTypes/SendInfo';
+import { getUrlString } from 'Utils/requesttools';
+import ResponseInfo from 'Data/request/ResponseInfo';
+import SendInfo from 'Data/request/SendInfo';
 import * as Client from 'mysql';
-import DbConnection from 'main/DbConnection';
-import { isString } from 'main/objectTools';
-import { RequestInfo } from 'main/baseTypes/RequestInfo';
+import DbConnection from 'DB/DbConnection';
+import { isString } from 'Utils/objectTools';
+import { RequestInfo } from 'Data/request/RequestInfo';
 import { Request } from 'Model/Request';
 
 const tableName = 'main';

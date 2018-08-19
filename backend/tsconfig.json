@@ -8,6 +8,11 @@
     "baseUrl": ".",
     "paths": {
       "Model/*": ["../model/*"],
+      "DB/*": ["src/db/*"],
+      "Logger/*": ["src/logger/*"],
+      "Proxy/*": ["src/proxy/*"],
+      "Data/*": ["src/data/*"],
+      "Utils/*": ["src/utils/*"],
       "main/*": ["src/*"]
     },
 

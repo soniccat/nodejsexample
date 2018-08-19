@@ -36,6 +36,11 @@ module.exports = {
     extensions: ['.js', '.tsx', '.ts'],
     alias: {
       Model: path.resolve(__dirname, '../model/'),
+      DB: path.resolve(__dirname, 'src/db'),
+      Logger: path.resolve(__dirname, 'src/logger'),
+      Proxy: path.resolve(__dirname, 'src/proxy'),
+      Data: path.resolve(__dirname, 'src/data'),
+      Utils: path.resolve(__dirname, 'src/utils'),
       main: path.resolve(__dirname, 'src'),
     },
   },

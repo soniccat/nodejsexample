@@ -1,8 +1,8 @@
 import * as util from 'util';
 import * as zlib from 'zlib';
 import * as http from 'http';
-import SendInfo from 'main/baseTypes/SendInfo';
-import { isString } from 'main/objectTools';
+import SendInfo from 'Data/request/SendInfo';
+import { isString } from 'Utils/objectTools';
 
 export async function readPostBodyPromise(request: http.IncomingMessage): Promise<Buffer | undefined> {
   return new Promise<Buffer | undefined>((resolve, reject) => {

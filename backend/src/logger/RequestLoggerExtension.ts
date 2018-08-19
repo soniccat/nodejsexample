@@ -1,10 +1,10 @@
-import LoggerExtension from 'main/logger/LoggerExtension';
-import ResponseInfo from 'main/baseTypes/ResponseInfo';
-import SendInfo from 'main/baseTypes/SendInfo';
+import LoggerExtension from 'Logger/LoggerExtension';
+import ResponseInfo from 'Data/request/ResponseInfo';
+import SendInfo from 'Data/request/SendInfo';
 import * as util from 'util';
-import { getUrlString } from 'main/requesttools';
-import { RequestInfo } from 'main/baseTypes/RequestInfo';
-import { LogLevel } from 'main/logger/ILogger';
+import { getUrlString } from 'Utils/requesttools';
+import { RequestInfo } from 'Data/request/RequestInfo';
+import { LogLevel } from 'Logger/ILogger';
 
 class RequestLogger extends LoggerExtension {
   log(level: LogLevel, ...args: any[]): void {

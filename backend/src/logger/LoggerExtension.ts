@@ -1,4 +1,4 @@
-import ILogger, { LogLevel } from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'Logger/ILogger';
 
 class LoggerExtension implements ILogger {
   innerLogger: ILogger;

@@ -1,6 +1,5 @@
 import * as http from 'http';
 
-// is used to build a db insert query
 class ResponseInfo {
   headers: http.OutgoingHttpHeaders;
   statusCode: number;

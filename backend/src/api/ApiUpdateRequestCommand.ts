@@ -2,9 +2,9 @@ import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
 import ApiRequestInfo from 'main/api/ApiRequestInfo';
 import * as http from 'http';
 import * as util from 'util';
-import RequestTable from 'main/RequestTable';
+import RequestTable from 'DB/RequestTable';
 import { Request } from 'Model/Request';
-import ILogger, { LogLevel } from 'main/logger/ILogger';
+import ILogger, { LogLevel } from 'Logger/ILogger';
 
 // SPEC:
 //

@@ -4,8 +4,8 @@ import { Request } from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as http from 'http';
 import * as util from 'util';
-import RequestTable from 'main/RequestTable';
-import ILogger, { LogLevel } from 'main/logger/ILogger';
+import RequestTable from 'DB/RequestTable';
+import ILogger, { LogLevel } from 'Logger/ILogger';
 
 // SPEC:
 //

@@ -1,9 +1,9 @@
 import * as url from 'url';
-import { readPostBody, readPostBodyPromise } from 'main/requesttools';
-import RequestTable from 'main/RequestTable';
+import { readPostBody, readPostBodyPromise } from 'Utils/requesttools';
+import RequestTable from 'DB/RequestTable';
 import { Request } from 'Model/Request';
-import DbConnection from 'main/DbConnection';
-import ILogger, { LogLevel } from 'main/logger/ILogger';
+import DbConnection from 'DB/DbConnection';
+import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as http from 'http';
 import * as Client from 'mysql';
 import ApiRequestInfo from 'main/api/ApiRequestInfo';

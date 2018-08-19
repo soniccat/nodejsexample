@@ -7,16 +7,16 @@ import * as https from 'https';
 import * as url from 'url';
 import * as util from 'util';
 
-import Proxy from 'main/Proxy';
-import DbConnection from 'main/DbConnection';
-import RequestTable from 'main/RequestTable';
+import Proxy from 'Proxy/Proxy';
+import DbConnection from 'DB/DbConnection';
+import RequestTable from 'DB/RequestTable';
 import ApiHandler from 'main/api/ApiHandler';
-import ConsoleLogger from 'main/logger/ConsoleLogger';
-import EmptyLogger from 'main/logger/EmptyLogger';
-import RequestLoggerExtension from 'main/logger/RequestLoggerExtension';
-import LoggerCollection from 'main/logger/LoggerCollection';
-import { RequestInfo } from 'main/baseTypes/RequestInfo';
-import { LogLevel } from 'main/logger/ILogger';
+import ConsoleLogger from 'Logger/ConsoleLogger';
+import EmptyLogger from 'Logger/EmptyLogger';
+import RequestLoggerExtension from 'Logger/RequestLoggerExtension';
+import LoggerCollection from 'Logger/LoggerCollection';
+import { RequestInfo } from 'Data/request/RequestInfo';
+import { LogLevel } from 'Logger/ILogger';
 
 // Config
 const host = 'news360.com';
