@@ -1,11 +1,19 @@
 import StubGroup from 'Data/stub/StubGroup';
+import { StubGroupTable } from 'DB/StubGroupTable';
 
 class StubHolder {
+  stubGroupTable: StubGroupTable;
   stubGroups: StubGroup[] = [];
 
-  async load() : Promise<null> {
+  constructor(stubGroupTable: StubGroupTable) {
+    this.stubGroupTable = stubGroupTable;
+  }
 
-    return null;
+  async load() : Promise<null> {
+    return this.stubGroupTable.loadStubGroups().then((groups: StubGroup[]) => {
+      this.stubGroups = groups;
+      return null;
+    });
   }
 }
 
