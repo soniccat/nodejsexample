@@ -74,6 +74,7 @@ process.on('uncaughtException', (err) => {
   throw err;
 });
 
+// Start
 dbConnection.connect((err) => {
   if (err) {
     throw err;
