@@ -1,15 +1,33 @@
 import { getUrlString } from 'Utils/requesttools';
-import ResponseInfo from 'Data/request/ResponseInfo';
-import SendInfo from 'Data/request/SendInfo';
-import * as Client from 'mysql';
 import DbConnection from 'DB/DbConnection';
 import { isString } from 'Utils/objectTools';
 import { RequestInfo } from 'Data/request/RequestInfo';
 import { Request } from 'Model/Request';
+import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
-const tableName = 'main';
+const tableName = 'request';
 
 // match SQL table row names
+/*
+create table if not exists request (
+  id bigint unsigned auto_increment primary key,
+  session_id integer unsigned not null,
+  date datetime not null,
+  url varchar(2048) not null,
+  port smallint unsigned not null,
+  method tinyint unsigned not null,
+  headers json null check(headers is null or json_valid(headers)),
+  body_string longtext null,
+  body_string_is_json boolean,
+  body_data mediumblob null,
+  response_status smallint unsigned null,
+  response_headers json null check(response_headers is null or json_valid(response_headers)),
+  response_string longtext null,
+  response_string_is_json boolean,
+  response_data mediumblob null,
+  is_stub boolean
+) engine=InnoDB default charset utf8;
+*/
 
 /* tslint:disable:variable-name */
 class DbRequestRow {
@@ -41,6 +59,14 @@ class RequestTable {
     this.getLastInsertedIndex = this.getLastInsertedIndex.bind(this);
   }
 
+  async loadRequests(options: LoadRequestsOption): Promise<Request[]> {
+    const query = this.buildLoadQuery(options);
+    return await this.dbConnection.queryPromise(query).
+      then((requests: DbRequestRow[]) => {
+        return this.normalizeRequests(requests);
+      });
+  }
+
   async writeRequestAsRequestInfo(requestInfo: RequestInfo): Promise<any[]> {
     return this.writeRequest({
       url: getUrlString(requestInfo.sendInfo),
@@ -67,6 +93,34 @@ class RequestTable {
   async deleteRequest(id: number): Promise<any[]> {
     const query = this.buildDeleteRequestQuery(id);
     return this.dbConnection.queryPromise(query);
+  }
+
+  private buildLoadQuery(options: LoadRequestsOption) {
+    let fields = '*';
+    if (options.fields && options.fields.length) {
+      const wrappedFields = options.fields; // options.fields.map(v => this.dbConnection.wrapString(v));
+      fields = wrappedFields.join(',');
+    }
+    let wherePart = '';
+    let urlRegexp = '';
+    if (options.urlRegexp) {
+      urlRegexp = options.urlRegexp;
+      wherePart += `url REGEXP ${this.wrapString(urlRegexp)}`;
+    }
+    if (options.onlyNotNull && options.fields) {
+      for (let i = 0; i < options.fields.length; i += 1) {
+        if (wherePart.length > 0) {
+          wherePart += ' AND ';
+        }
+        wherePart += `${options.fields[i]} IS NOT NULL `;
+      }
+    }
+    let query = `select ${fields} from ${tableName}`;
+    if (wherePart.length) {
+      query += ` where ${wherePart}`;
+    }
+    query += ' order by date DESC';
+    return query;
   }
 
   private buildWriteRequestQuery(obj: Request) {
@@ -238,13 +292,6 @@ class RequestTable {
       case 2: return 'POST';
       default: return 'UNKNOWN';
     }
-  }
-
-  async queryRequests(query: string): Promise<Request[]> {
-    const rows: DbRequestRow[] = await this.dbConnection.queryPromise(query);
-    const requests: Request[] = this.normalizeRequests(rows);
-
-    return requests;
   }
 
   normalizeRequests(reqList: DbRequestRow[]): Request[] {

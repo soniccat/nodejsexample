@@ -17,6 +17,7 @@ import RequestLoggerExtension from 'Logger/RequestLoggerExtension';
 import LoggerCollection from 'Logger/LoggerCollection';
 import { RequestInfo } from 'Data/request/RequestInfo';
 import { LogLevel } from 'Logger/ILogger';
+import { StubGroupTable } from 'DB/StubGroupTable';
 
 // Config
 const host = 'news360.com';
@@ -37,6 +38,7 @@ const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), 
 const proxy = new Proxy('news360.com', logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
+const stubGroupDb = new StubGroupTable(dbConnection);
 const apiHandler = new ApiHandler(dbConnection, apiPath, logger);
 
 const severPort = process.env.SERVER_PORT;
@@ -77,7 +79,9 @@ dbConnection.connect((err) => {
     throw err;
   }
 
-  server.listen(severPort, () => {
+  stubGroupDb.loadStubGroups().then(() => {
+    server.listen(severPort, () => {
+    });
   });
 });
 

@@ -58,39 +58,6 @@ export default class ApiRequestsCommand implements ApiCommand {
   }
 
   async loadRequests(options: LoadRequestsOption): Promise<Request[]> {
-    const query = this.buildRequestsQuery(options);
-
-    this.logger.log(LogLevel.DEBUG, `query ${query}`);
-    return this.requestTable.queryRequests(query);
-  }
-
-  private buildRequestsQuery(options: LoadRequestsOption) {
-    // TODO: move query building in RequestTable
-
-    let fields = '*';
-    if (options.fields && options.fields.length) {
-      const wrappedFields = options.fields; // options.fields.map(v => this.dbConnection.wrapString(v));
-      fields = wrappedFields.join(',');
-    }
-    let wherePart = '';
-    let urlRegexp = '';
-    if (options.urlRegexp) {
-      urlRegexp = options.urlRegexp;
-      wherePart += `url REGEXP ${this.requestTable.wrapString(urlRegexp)}`;
-    }
-    if (options.onlyNotNull && options.fields) {
-      for (let i = 0; i < options.fields.length; i += 1) {
-        if (wherePart.length > 0) {
-          wherePart += ' AND ';
-        }
-        wherePart += `${options.fields[i]} IS NOT NULL `;
-      }
-    }
-    let query = `select ${fields} from main`;
-    if (wherePart.length) {
-      query += ` where ${wherePart}`;
-    }
-    query += ' order by date DESC';
-    return query;
+    return this.requestTable.loadRequests(options);
   }
 }
