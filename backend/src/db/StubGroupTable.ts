@@ -34,7 +34,7 @@ create table if not exists stub_group_requests (
 /* tslint:disable:variable-name */
 class DbStubGroup extends DbRequestRow {
   stub_group_id: number;
-  parent_group_id: number;
+  stub_parent_group_id: number;
 }
 /* tslint:enable:variable-name */
 
@@ -49,7 +49,7 @@ export class StubGroupTable {
     const query = this.buildLoadQuery();
     return await this.dbConnection.queryPromise(query).
       then((stubs: DbStubGroup[]) => {
-        return this.normalizeStubGroups(stubs);
+        return this.fillParentGroups(this.normalizeStubGroups(stubs));
       });
   }
 
@@ -66,28 +66,41 @@ export class StubGroupTable {
     return result;
   }
 
-  stubGroupById(dbGroup: DbStubGroup, groups: StubGroup[]): StubGroup {
-    let res = groups.find((value: StubGroup, index: number, obj: StubGroup[]) => {
-      return value.id === dbGroup.id;
+  fillParentGroups(groups: StubGroup[]): StubGroup[] {
+    groups.forEach((value: StubGroup, index: number, array: StubGroup[]) => {
+      const parentGroup = value.parent !== undefined ? this.findGroupById(value.parent.id, groups) : undefined;
+      value.parent = parentGroup;
     });
 
+    return groups;
+  }
+
+  stubGroupById(dbGroup: DbStubGroup, groups: StubGroup[]): StubGroup {
+    let res = this.findGroupById(dbGroup.stub_group_id, groups);
     if (res === undefined) {
-      const parent = dbGroup.parent_group_id ? new StubGroup(dbGroup.parent_group_id) : undefined;
-      res = new StubGroup(dbGroup.id);
+      const parent = dbGroup.stub_parent_group_id ? new StubGroup(dbGroup.stub_parent_group_id) : undefined;
+      res = new StubGroup(dbGroup.stub_group_id);
+      res.parent = parent;
+      groups.push(res);
     }
 
     return res;
   }
 
+  findGroupById(id: number, groups: StubGroup[]): StubGroup | undefined {
+    return groups.find((value: StubGroup, index: number, obj: StubGroup[]) => {
+      return value.id === id;
+    });
+  }
+
   normalizeStubGroup(stubGroup: DbStubGroup, requestTable: RequestTable, result: StubGroup) {
     const request = requestTable.normalizeRequest(stubGroup);
-
-    result.
+    result.requests.push(request);
   }
 
   private buildLoadQuery() {
     return `select ${tableName}.id as stub_group_id,
-                   ${tableName}.parent_request_id as stub_parent_request_id,
+                   ${tableName}.parent_group_id as stub_parent_group_id,
                    request.*
     from ${tableName} left outer join ${relationTableName}
         left join request

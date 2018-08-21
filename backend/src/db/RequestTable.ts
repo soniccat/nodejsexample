@@ -30,7 +30,7 @@ create table if not exists request (
 */
 
 /* tslint:disable:variable-name */
-class DbRequestRow {
+export class DbRequestRow {
   id: number;
   session_id: number;
   date: string;
