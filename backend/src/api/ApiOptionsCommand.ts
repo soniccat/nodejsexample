@@ -1,9 +1,9 @@
 import { ApiCommand } from 'main/api/ApiCommand';
-import ApiRequestInfo from 'main/api/ApiRequestInfo';
+import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import * as http from 'http';
 
 export default class ApiOptionsCommand implements ApiCommand {
-  async run(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
+  async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
 
     // allow Cross-Origin Resource Sharing preflight request
     res.writeHead(200, {
@@ -15,7 +15,7 @@ export default class ApiOptionsCommand implements ApiCommand {
     return res;
   }
 
-  canRun(requestInfo: ApiRequestInfo): boolean {
+  canRun(requestInfo: ApiCommandInfo): boolean {
     return requestInfo.method === 'OPTIONS';
   }
 }

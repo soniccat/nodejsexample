@@ -1,5 +1,5 @@
-import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
-import ApiRequestInfo from 'main/api/ApiRequestInfo';
+import { ApiCommand, setResponse } from 'main/api/ApiCommand';
+import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import { Request } from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as http from 'http';
@@ -26,18 +26,18 @@ export default class ApiRequestsCommand implements ApiCommand {
     this.logger = logger;
   }
 
-  async run(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
+  async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     if (LoadRequestsOption.checkType(requestInfo.body)) {
       await this.handleRequests(requestInfo.body, res);
     } else {
-      setResponseHeader(res, 400, `Body is incorrect`);
+      setResponse(res, 400, `Body is incorrect`);
     }
 
     return res;
   }
 
-  canRun(requestInfo: ApiRequestInfo): boolean {
-    return requestInfo.components.length > 0 &&
+  canRun(requestInfo: ApiCommandInfo): boolean {
+    return requestInfo.components.length === 1 &&
     requestInfo.body !== undefined &&
     requestInfo.method === 'POST' &&
     requestInfo.components[0] === 'requests';
@@ -46,11 +46,11 @@ export default class ApiRequestsCommand implements ApiCommand {
   async handleRequests(body: LoadRequestsOption, res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.loadRequests(body)
     .then((rows: Request[]) => {
-      setResponseHeader(res, 200, JSON.stringify(rows));
+      setResponse(res, 200, JSON.stringify(rows));
     })
     .catch((err) => {
       this.logger.log(LogLevel.ERROR, `LoadRequestsOption.handleRequests error: ${util.inspect(err)}`);
-      setResponseHeader(res, 500);
+      setResponse(res, 500);
     })
     .then(() => {
       return res;

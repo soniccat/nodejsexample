@@ -1,5 +1,5 @@
-import { ApiCommand, setResponseHeader } from 'main/api/ApiCommand';
-import ApiRequestInfo from 'main/api/ApiRequestInfo';
+import { ApiCommand, setResponse } from 'main/api/ApiCommand';
+import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import * as http from 'http';
 import * as util from 'util';
 import RequestTable from 'DB/RequestTable';
@@ -21,9 +21,9 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
     this.logger = logger;
   }
 
-  async run(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
+  async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     if (!Request.checkType(requestInfo.body)) {
-      setResponseHeader(res, 400, `Body is incorrect`);
+      setResponse(res, 400, `Body is incorrect`);
     } else {
       requestInfo.body.id = parseInt(requestInfo.components[1], 10);
       await this.handleUpdateRequest(requestInfo.body, res);
@@ -32,7 +32,7 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
     return res;
   }
 
-  canRun(requestInfo: ApiRequestInfo): boolean {
+  canRun(requestInfo: ApiCommandInfo): boolean {
     return requestInfo.components.length === 2 &&
       requestInfo.body !== undefined &&
       requestInfo.method === 'POST' &&
@@ -42,11 +42,11 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
   async handleUpdateRequest(requestRow: Request, res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.requestTable.updateRequest(requestRow)
     .then(() => {
-      setResponseHeader(res, 200, '');
+      setResponse(res, 200, '');
     })
     .catch((err) => {
       this.logger.log(LogLevel.ERROR, `ApiUpdateRequestCommand.handleUpdateRequest error: ${util.inspect(err)}`);
-      setResponseHeader(res, 500);
+      setResponse(res, 500);
     })
     .then(() => {
       return res;

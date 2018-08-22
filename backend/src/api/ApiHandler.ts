@@ -1,24 +1,25 @@
 import * as url from 'url';
-import { readPostBody, readPostBodyPromise } from 'Utils/requesttools';
+import { readPostBodyPromise } from 'Utils/requesttools';
 import RequestTable from 'DB/RequestTable';
-import { Request } from 'Model/Request';
 import DbConnection from 'DB/DbConnection';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as http from 'http';
-import * as Client from 'mysql';
-import ApiRequestInfo from 'main/api/ApiRequestInfo';
-import { ApiCommand, setResponseHeader, setNotFoundResponse } from 'main/api/ApiCommand';
+import ApiCommandInfo from 'main/api/ApiCommandInfo';
+import { ApiCommand, setNotFoundResponse } from 'main/api/ApiCommand';
 import ApiOptionsCommand from 'main/api/ApiOptionsCommand';
 import ApiRequestsCommand from 'main/api/ApiRequestsCommand';
 import ApiUpdateRequestCommand from 'main/api/ApiUpdateRequestCommand';
 import ApiCreateRequestCommand from 'main/api/ApiCreateRequestCommand';
 import ApiDeleteRequestCommand from 'main/api/ApiDeleteRequestCommand';
+import { StubGroupTable } from 'DB/StubGroupTable';
+import ApiStubGroupsCommand from 'main/api/ApiStubGroupsCommand';
 
 class ApiHandler {
   dbConnection: DbConnection;
   apiPath: string;
   logger: ILogger;
   requestTable: RequestTable;
+  stubGroupsTable: StubGroupTable;
   commands: ApiCommand[];
 
   constructor(dbConnection: DbConnection, apiPath: string, logger: ILogger) {
@@ -26,24 +27,26 @@ class ApiHandler {
     this.apiPath = apiPath;
     this.logger = logger;
     this.requestTable = new RequestTable(this.dbConnection);
+    this.stubGroupsTable = new StubGroupTable(this.dbConnection);
 
     this.commands = [
       new ApiOptionsCommand(),
       new ApiRequestsCommand(this.requestTable, logger),
       new ApiUpdateRequestCommand(this.requestTable, logger),
       new ApiCreateRequestCommand(this.requestTable, logger),
-      new ApiDeleteRequestCommand(this.requestTable, logger)];
+      new ApiDeleteRequestCommand(this.requestTable, logger),
+      new ApiStubGroupsCommand(this.stubGroupsTable, logger)];
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.extractRequestData(req)
-    .then((info: ApiRequestInfo) => this.handleApiRequest(info, res))
+    .then((info: ApiCommandInfo) => this.handleApiRequest(info, res))
     .then((res: http.ServerResponse) => {
       return res;
     });
   }
 
-  async extractRequestData(req: http.IncomingMessage): Promise<ApiRequestInfo> {
+  async extractRequestData(req: http.IncomingMessage): Promise<ApiCommandInfo> {
     const apiRequestInfo = await this.extractApiRequestInfo(req);
     const body = await readPostBodyPromise(req);
 
@@ -54,8 +57,8 @@ class ApiHandler {
     return apiRequestInfo;
   }
 
-  async extractApiRequestInfo(req: http.IncomingMessage): Promise<ApiRequestInfo> {
-    return new Promise<ApiRequestInfo>((resolve, request) => {
+  async extractApiRequestInfo(req: http.IncomingMessage): Promise<ApiCommandInfo> {
+    return new Promise<ApiCommandInfo>((resolve, request) => {
       if (req.url === undefined) {
         throw new Error('handleRequest: request without url');
       }
@@ -81,7 +84,7 @@ class ApiHandler {
     });
   }
 
-  async handleApiRequest(requestInfo: ApiRequestInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
+  async handleApiRequest(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     this.logger.log(LogLevel.DEBUG, `ApiHandler handle: ${requestInfo.components.join('/')} method: ${requestInfo.method}`);
 
     for (const command of this.commands) {
