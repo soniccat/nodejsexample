@@ -12,6 +12,7 @@
       "Model/*": ["../model/*"],
       "Utils/*": ["src/utils/*"],
       "CSS/*": ["css/*"],
+      "Node/*": ["node_modules/*"],
     },
 
     "lib": [

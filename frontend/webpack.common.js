@@ -51,6 +51,7 @@ module.exports = {
       Model: path.resolve(__dirname, '../model/'),
       Utils: path.resolve(__dirname, 'src/utils/'),
       CSS: path.resolve(__dirname, 'css/'),
+      Node: path.resolve(__dirname, 'node_modules/'),
     },
   },
   optimization: {
