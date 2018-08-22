@@ -4,7 +4,7 @@ import { StubGroupTable } from 'DB/StubGroupTable';
 import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import * as http from 'http';
 import * as util from 'util';
-import StubGroup from 'Data/stub/StubGroup';
+import StubGroup from 'Model/StubGroup';
 
 // SPEC:
 //

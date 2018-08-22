@@ -1,4 +1,4 @@
-import StubGroup from 'Data/stub/StubGroup';
+import StubGroup from 'Model/StubGroup';
 import DbConnection from 'DB/DbConnection';
 import RequestTable, { DbRequestRow } from 'DB/RequestTable';
 import { Request } from 'Model/Request';

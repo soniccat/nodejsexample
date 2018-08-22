@@ -1,4 +1,4 @@
-import StubGroup from 'Data/stub/StubGroup';
+import StubGroup from 'Model/StubGroup';
 import { StubGroupTable } from 'DB/StubGroupTable';
 
 class StubHolder {

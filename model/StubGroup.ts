@@ -1,4 +1,4 @@
-import { Request } from 'Model/Request';
+import { Request } from './Request';
 
 class StubGroup {
   id: number;

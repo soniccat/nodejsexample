@@ -9,7 +9,7 @@ require('CSS/RequestRow.scss');
 export interface RequestRowProps {
   request: Request;
   isExpanded: boolean;
-  onCreateStubClicked: (request: Request) => void;
+  onCreateStubClicked?: (request: Request) => void;
   onRequestChanged: (request: Request) => void;
   onDeleteClicked: (request: Request) => void;
 }
