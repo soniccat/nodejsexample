@@ -77,7 +77,8 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
         trigger={open => (
           <div className="stub_group_add_button">Stub groups</div>
         )}
-        closeOnDocumentClick
+        closeOnDocumentClick={true}
+        keepTooltipInside={true}
         >
         <span> popup content </span>
       </Popup>
