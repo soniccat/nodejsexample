@@ -1,6 +1,5 @@
 import StubGroup from 'Model/StubGroup';
 import * as React from 'react';
-import RequestRow from 'Elements/RequestRow';
 import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
 import { buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
@@ -40,9 +39,9 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     this.loadStubGroups();
   }
 
-  onRequestChanged(row: Request) {
+  onRequestChanged(request: Request, group: StubGroup) {
     // Actions
-    loadRequest(buildUpdateRequestCall(row), (err, response) => {
+    loadRequest(buildUpdateRequestCall(request), (err, response) => {
       if (err) {
         this.setState({
           error: err,
@@ -51,13 +50,14 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     });
   }
 
-  onRequestDeleteClicked(row: Request) {
-    loadRequest(buildDeleteRequestCall(row.id), (err, response) => {
+  onRequestDeleteClicked(request: Request, group: StubGroup) {
+    loadRequest(buildDeleteRequestCall(request.id), (err, response) => {
       if (err) {
         this.setState({
           error: err,
         });
       } else {
+        // remove request from stub
         // this.setState({
         //   rows: this.state.rows.filter((element: Request, index, array) => {
         //     return element.id !== row.id;
@@ -87,26 +87,9 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     const rows = this.state.rows.map(row => (<StubGroupRow
       key={row.id}
       stubGroup={row}
-      isExpanded={false}>
-        {this.renderRequests(row.requests)}
-      </StubGroupRow>));
-
-    return (
-      <div>
-        {rows}
-      </div>
-    );
-  }
-
-  renderRequests(requests: Request[]) {
-    const rows = requests.map(row => (<RequestRow
-      key={row.id}
-      request={row}
       isExpanded={false}
       onRequestChanged={this.onRequestChanged}
-      onDeleteClicked={this.onRequestDeleteClicked}
-    />));
-
+      onRequestDeleteClicked={this.onRequestDeleteClicked}/>));
     return (
       <div>
         {rows}

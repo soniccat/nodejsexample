@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { isObject, isEmptyArray } from 'Utils/Tools';
+import ExpandButton from 'Elements/ExpandButton';
 
 // import style from 'CSS/JsonView';
 require('CSS/JsonView');
@@ -21,7 +22,7 @@ export interface JsonViewState {
 }
 
 export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
-  childRefs: {[key: number] : React.RefObject<JsonView>};
+  childRefs: {[index: number] : React.RefObject<JsonView>};
   childIndexes: {[key: string] : number};
   nextChildIndex: number = 1;
 
@@ -32,6 +33,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleWillStartEditing = this.handleWillStartEditing.bind(this);
+    this.onCollapsedPressed = this.onCollapsedPressed.bind(this);
+    this.onObjChanged = this.onObjChanged.bind(this);
 
     const expandedStates : {[key: number] : number} = {};
     const keys = Object.keys(this.props.obj);
@@ -84,9 +87,9 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.props.onObjChanged(this.props.obj);
   }
 
-  removeKey(objKey: string, key: number) {
+  removeKey(objKey: string, index: number) {
     const newObj = this.props.obj;
-    delete this.childRefs[key];
+    delete this.childRefs[index];
     delete newObj[objKey];
 
     this.setState({
@@ -129,6 +132,9 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     // TODO: use mutable-helpber
     const newExpandeStates = this.state.childExpandLevels;
     newExpandeStates[index] = newExpandeStates[index] > 0 ? 0 : 1;
+    if (newExpandeStates[index] === 0) {
+      delete this.childRefs[index];
+    }
 
     this.setState({
       childExpandLevels: newExpandeStates,
@@ -136,8 +142,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private stopEditing() {
-    for (const key in this.childRefs) {
-      this.childRefs[key].current.stopEditing();
+    for (const index in this.childRefs) {
+      this.childRefs[index].current.stopEditing();
     }
 
     this.finishEditing();
@@ -189,10 +195,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     return index;
   }
 
-  // getObjValue(key: number): any {
-
-  // }
-
   // Rendering
 
   render() {
@@ -201,13 +203,18 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     if (this.isExpanded()) {
       this.renderExpandedContent(cells);
     } else {
+      this.childRefs = [];
       cells.push(<div key={'collapsed'}
-       onClick={() => { this.props.onCollapsedPressed(this.props.obj); }}>collapsed</div>);
+       onClick={this.onCollapsedPressed}>collapsed</div>);
     }
 
     return (<div className="json_view">
       {cells}
     </div>);
+  }
+
+  private onCollapsedPressed() {
+    this.props.onCollapsedPressed(this.props.obj);
   }
 
   private renderExpandedContent(cells: any[]) {
@@ -240,7 +247,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
           <JsonView obj={obj}
             isEditable={this.props.isEditable}
             expandLevel={this.state.childExpandLevels[index]}
-            onObjChanged={() => this.props.onObjChanged(this.props.obj)}
+            onObjChanged={this.onObjChanged}
             onCollapsedPressed={obj => this.expandChild(index)}
             willStartEditing={this.handleWillStartEditing}
             ref={ref}/>
@@ -253,14 +260,15 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     }
   }
 
+  private onObjChanged() {
+    this.props.onObjChanged(this.props.obj);
+  }
+
   private renderExpandButton(isExpanded: boolean, index: number, isSubJson: boolean): any {
-    return <div key={`${index}_expand_button`}
+    return <ExpandButton key={`${index}_expand_button`}
       className={`json_expand${isSubJson ? ' sub_json' : ''}`}
       onClick={() => { this.expandChild(index); } }
-      role="button"
-      tabIndex={0}>
-        {isExpanded ? '-' : '+'}
-      </div>;
+      isExpanded = {isExpanded}/>;
   }
 
   private renderDeleteButton(objKey: string, index: number, isSubJson: boolean): any {

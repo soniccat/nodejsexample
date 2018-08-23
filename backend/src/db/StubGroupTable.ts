@@ -9,6 +9,7 @@ const relationTableName = 'stub_group_requests';
 /*
 create table if not exists stub_group (
   id bigint unsigned auto_increment primary key,
+  name varchar(2048) not null,
   parent_group_id bigint unsigned,
   CONSTRAINT `fk_parent_group_id`
             FOREIGN KEY (parent_group_id) REFERENCES stub_group (id)
@@ -34,6 +35,7 @@ create table if not exists stub_group_requests (
 /* tslint:disable:variable-name */
 class DbStubGroup extends DbRequestRow {
   stub_group_id: number;
+  stub_name: string;
   stub_parent_group_id: number;
 }
 /* tslint:enable:variable-name */
@@ -79,7 +81,7 @@ export class StubGroupTable {
     let res = this.findGroupById(dbGroup.stub_group_id, groups);
     if (res === undefined) {
       const parent = dbGroup.stub_parent_group_id ? new StubGroup(dbGroup.stub_parent_group_id) : undefined;
-      res = new StubGroup(dbGroup.stub_group_id);
+      res = new StubGroup(dbGroup.stub_group_id, dbGroup.stub_name);
       res.parent = parent;
       groups.push(res);
     }
@@ -100,6 +102,7 @@ export class StubGroupTable {
 
   private buildLoadQuery() {
     return `select ${tableName}.id as stub_group_id,
+                   ${tableName}.name as stub_name,
                    ${tableName}.parent_group_id as stub_parent_group_id,
                    request.*
     from ${tableName} left outer join ${relationTableName}

@@ -2,6 +2,7 @@ import * as React from 'react';
 import JsonView from 'Elements/JsonView';
 import { Request } from 'Model/Request';
 import { isObject } from 'Utils/Tools';
+import ExpandButton from 'Elements/ExpandButton';
 
 // import style from 'CSS/RequestRow.scss';
 require('CSS/RequestRow.scss');
@@ -67,9 +68,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   }
 
   renderExpandedMark(className, isExpanded) {
-    return (<div className={className}>
-      {isExpanded ? '-' : '+'}
-            </div>);
+    return <ExpandButton className={className} isExpanded={isExpanded}/>;
   }
 
   renderExtra() {
