@@ -10,7 +10,7 @@ export interface AppProps {
 export class App extends React.Component<AppProps, {}> {
   render() {
     return <div>
-      <Tabs>
+      <Tabs forceRenderTabPanel={true}>
         <TabList>
           <Tab>Requests</Tab>
           <Tab>Stub Groups</Tab>

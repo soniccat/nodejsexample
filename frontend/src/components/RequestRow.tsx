@@ -3,9 +3,8 @@ import JsonView from 'Elements/JsonView';
 import { Request } from 'Model/Request';
 import { isObject } from 'Utils/Tools';
 import ExpandButton from 'Elements/ExpandButton';
-
-// import style from 'CSS/RequestRow.scss';
-require('CSS/RequestRow.scss');
+import Popup from 'reactjs-popup';
+import 'CSS/RequestRow';
 
 export interface RequestRowProps {
   request: Request;
@@ -58,9 +57,10 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
             <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
                             Create stub
             </div> : undefined}
-          <div className="request_delete" onClick={this.onDeleteClicked}>
+          <div className="request_delete_button" onClick={this.onDeleteClicked}>
             DEL
           </div>
+          {this.props.request.isStub ? this.renderStubGroupsButton() : undefined}
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
@@ -69,6 +69,19 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
 
   renderExpandedMark(className, isExpanded) {
     return <ExpandButton className={className} isExpanded={isExpanded}/>;
+  }
+
+  renderStubGroupsButton() {
+    return <span onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+      <Popup
+        trigger={open => (
+          <div className="stub_group_add_button">Stub groups</div>
+        )}
+        closeOnDocumentClick
+        >
+        <span> popup content </span>
+      </Popup>
+    </span>;
   }
 
   renderExtra() {

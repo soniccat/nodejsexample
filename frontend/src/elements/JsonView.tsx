@@ -1,9 +1,7 @@
 import * as React from 'react';
 import { isObject, isEmptyArray } from 'Utils/Tools';
 import ExpandButton from 'Elements/ExpandButton';
-
-// import style from 'CSS/JsonView';
-require('CSS/JsonView');
+import 'CSS/JsonView';
 
 export interface JsonViewProps {
   obj: any;

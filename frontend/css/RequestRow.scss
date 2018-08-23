@@ -22,9 +22,15 @@
     display: inline-block;
   }
 
-  .request_delete {
+  .request_delete_button {
     padding: 5px;
     background: lightcoral;
+    display: inline-block;
+  }
+
+  .stub_group_add_button {
+    padding: 5px;
+    background: lightgreen;
     display: inline-block;
   }
 

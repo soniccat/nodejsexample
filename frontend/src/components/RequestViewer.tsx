@@ -1,7 +1,7 @@
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
 import * as React from 'react';
-import RequestRow from 'Elements/RequestRow';
+import RequestRow from 'Components/RequestRow';
 import { Request } from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
