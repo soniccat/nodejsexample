@@ -6,6 +6,7 @@ import 'Node/react-tabs/style/react-tabs';
 import { StubGroupViewer } from 'Components/StubGroupViewer';
 import DataHolder from '../data/DataHolder';
 import StubGroup from 'Model/StubGroup';
+import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
 export interface AppProps {
 }
@@ -14,6 +15,32 @@ export interface AppState {
   dataHolder: DataHolder;
 }
 
+class AppDataHolder extends DataHolder {
+  component: App;
+
+  constructor(component: App) {
+    super();
+    this.component = component;
+  }
+
+  loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
+    return this.bindToUpdate(super.loadRequests(requestOptions));
+  }
+
+  createStub(request: Request) {
+    return this.bindToUpdate(super.createStub(request));
+  }
+
+  bindToUpdate(promise: Promise<any>): Promise<any> {
+    return promise.then((data) => {
+      this.component.updateHolder();
+      return data;
+    }).catch((err) => {
+      this.component.updateHolder();
+      return err;
+    });
+  }
+}
 
 export class App extends React.Component<AppProps, AppState> {
   constructor(props) {
@@ -22,15 +49,7 @@ export class App extends React.Component<AppProps, AppState> {
     this.updateHolder = this.updateHolder.bind(this);
     this.onStubGroupsUpdated = this.onStubGroupsUpdated.bind(this);
 
-    const dataHolder = new DataHolder();
-
-    // inject state updated
-    const onRequestsUpdatedBase = dataHolder.onRequestsUpdated;
-    dataHolder.onRequestsUpdated = () => {
-      onRequestsUpdatedBase();
-      this.updateHolder();
-    };
-
+    const dataHolder = new AppDataHolder(this);
     this.state = {
       dataHolder,
     };

@@ -82,29 +82,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   private createStub(row: Request) {
-    // const options = buildCreateRequestCall({
-    //   url: row.url,
-    //   port: row.port,
-    //   method: row.method,
-    //   headers: row.headers,
-    //   body: row.body,
-    //   responseStatus: row.responseStatus,
-    //   responseHeaders: row.responseHeaders,
-    //   responseBody: row.responseBody,
-    //   isStub: true,
-    // });
-    // // Actions
-    // loadRequest(options, (err, response) => {
-    //   if (err) {
-    //     this.setState({
-    //       error: err,
-    //     });
-    //   } else {
-    //     this.setState({
-    //       rows: [response.data].concat(this.state.rows),
-    //     });
-    //   }
-    // });
+    this.props.dataHolder.createStub(row);
   }
 
   render() {

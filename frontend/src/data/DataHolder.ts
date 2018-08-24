@@ -43,4 +43,13 @@ export default class DataHolder {
       }
     });
   }
+
+  createStub(row: Request) {
+    const options = buildCreateRequestCall(Object.assign({}, row, { isStub: true }));
+
+    return loadCommand(options).then((response) => {
+      this.requests = [response.data].concat(this.requests);
+      return response.data;
+    });
+  }
 }
