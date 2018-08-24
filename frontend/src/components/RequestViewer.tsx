@@ -3,21 +3,16 @@ import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as React from 'react';
 import RequestRow from 'Components/RequestRow';
 import Request from 'Model/Request';
-import loadRequest from 'Utils/loadRequest';
-import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
 import DataHolder from '../data/DataHolder';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
   dataHolder: DataHolder;
   error?: object;
-
-  onRequestsUpdated: (requests: Request[]) => void;
 }
 
 export interface RequestViewerState {
   requestOptions?: LoadRequestsOption;
-  rows?: Request[];
   error?: object;
 }
 
@@ -45,13 +40,13 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   // Events
 
   componentDidMount() {
-    this.loadRequests();
+    this.props.dataHolder.loadRequests(this.state.requestOptions);
   }
 
   onSearchChanged(event) {
     this.setState({ requestOptions: { urlRegexp: event.target.value } }, () => {
       console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
-      this.loadRequests();
+      this.props.dataHolder.loadRequests(this.state.requestOptions);
     });
   }
 
@@ -61,73 +56,60 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
   onRequestChanged(row: Request) {
     // Actions
-    loadRequest(buildUpdateRequestCall(row), (err, response) => {
-      if (err) {
-        this.setState({
-          error: err,
-        });
-      }
-    });
+    // loadRequest(buildUpdateRequestCall(row), (err, response) => {
+    //   if (err) {
+    //     this.setState({
+    //       error: err,
+    //     });
+    //   }
+    // });
   }
 
   onRequestDeleteClicked(row: Request) {
-    loadRequest(buildDeleteRequestCall(row.id), (err, response) => {
-      if (err) {
-        this.setState({
-          error: err,
-        });
-      } else {
-        this.setState({
-          rows: this.state.rows.filter((element: Request, index, array) => {
-            return element.id !== row.id;
-          }),
-        });
-      }
-    });
+    // loadRequest(buildDeleteRequestCall(row.id), (err, response) => {
+    //   if (err) {
+    //     this.setState({
+    //       error: err,
+    //     });
+    //   } else {
+    //     this.setState({
+    //       rows: this.state.rows.filter((element: Request, index, array) => {
+    //         return element.id !== row.id;
+    //       }),
+    //     });
+    //   }
+    // });
   }
 
   private createStub(row: Request) {
-    const options = buildCreateRequestCall({
-      url: row.url,
-      port: row.port,
-      method: row.method,
-      headers: row.headers,
-      body: row.body,
-      responseStatus: row.responseStatus,
-      responseHeaders: row.responseHeaders,
-      responseBody: row.responseBody,
-      isStub: true,
-    });
-    // Actions
-    loadRequest(options, (err, response) => {
-      if (err) {
-        this.setState({
-          error: err,
-        });
-      } else {
-        this.setState({
-          rows: [response.data].concat(this.state.rows),
-        });
-      }
-    });
-  }
-
-  loadRequests() {
-    const options = buildRequestsCall(this.state.requestOptions);
-
-    loadRequest(options, (err, response) => {
-      if (err) {
-        this.setState({
-          error: err,
-        });
-      } else {
-        this.props.onRequestsUpdated(response.data);
-      }
-    });
+    // const options = buildCreateRequestCall({
+    //   url: row.url,
+    //   port: row.port,
+    //   method: row.method,
+    //   headers: row.headers,
+    //   body: row.body,
+    //   responseStatus: row.responseStatus,
+    //   responseHeaders: row.responseHeaders,
+    //   responseBody: row.responseBody,
+    //   isStub: true,
+    // });
+    // // Actions
+    // loadRequest(options, (err, response) => {
+    //   if (err) {
+    //     this.setState({
+    //       error: err,
+    //     });
+    //   } else {
+    //     this.setState({
+    //       rows: [response.data].concat(this.state.rows),
+    //     });
+    //   }
+    // });
   }
 
   render() {
-    const rows = this.state.rows.map(row => (<RequestRow
+    const requests = this.props.dataHolder.requests ? this.props.dataHolder.requests : [];
+    const rows = requests.map(row => (<RequestRow
       key={row.id}
       request={row}
       isExpanded={false}

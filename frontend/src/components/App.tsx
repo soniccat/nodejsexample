@@ -14,26 +14,31 @@ export interface AppState {
   dataHolder: DataHolder;
 }
 
-//const DataHolderContext = React.createContext<DataHolder>(new DataHolder());
 
 export class App extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props);
 
-    this.onRequestsUpdated = this.onRequestsUpdated.bind(this);
+    this.updateHolder = this.updateHolder.bind(this);
     this.onStubGroupsUpdated = this.onStubGroupsUpdated.bind(this);
 
+    const dataHolder = new DataHolder();
+
+    // inject state updated
+    const onRequestsUpdatedBase = dataHolder.onRequestsUpdated;
+    dataHolder.onRequestsUpdated = () => {
+      onRequestsUpdatedBase();
+      this.updateHolder();
+    };
+
     this.state = {
-      dataHolder: new DataHolder(),
+      dataHolder,
     };
   }
 
-  onRequestsUpdated(requests: Request[]) {
-    const holder = this.state.dataHolder;
-    holder.setRequests(requests);
-
+  updateHolder() {
     this.setState({
-      dataHolder: holder,
+      dataHolder: this.state.dataHolder,
     });
   }
 
@@ -55,7 +60,7 @@ export class App extends React.Component<AppProps, AppState> {
         </TabList>
 
         <TabPanel>
-          <RequestViewer dataHolder={this.state.dataHolder} onRequestsUpdated={this.onRequestsUpdated}/>
+          <RequestViewer dataHolder={this.state.dataHolder}/>
         </TabPanel>
         <TabPanel>
           <StubGroupViewer />
