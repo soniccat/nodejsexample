@@ -12,11 +12,6 @@ export interface StubGroupViewerState {
 }
 
 export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubGroupViewerState> {
-  static defaultProps = {
-    rows: [],
-    error: undefined,
-  };
-
   constructor(props: StubGroupViewerProps) {
     super(props);
 
@@ -34,14 +29,7 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
   }
 
   onRequestChanged(request: Request, group: StubGroup) {
-    // Actions
-    // loadCommand(buildUpdateRequestCall(request), (err, response) => {
-    //   if (err) {
-    //     this.setState({
-    //       error: err,
-    //     });
-    //   }
-    // });
+    this.props.dataHolder.updateRequest(request);
   }
 
   onRequestDeleteClicked(request: Request, group: StubGroup) {

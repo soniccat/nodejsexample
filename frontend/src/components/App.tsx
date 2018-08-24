@@ -23,6 +23,16 @@ class AppDataHolder extends DataHolder {
     this.component = component;
   }
 
+  onStubGroupsUpdated() {
+    super.onStubGroupsUpdated();
+    this.component.updateHolder();
+  }
+
+  onStubGroupsErrorUpdated() {
+    super.onStubGroupsErrorUpdated();
+    this.component.updateHolder();
+  }
+
   onRequestsUpdated() {
     super.onRequestsUpdated();
     this.component.updateHolder();
