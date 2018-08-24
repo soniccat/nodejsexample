@@ -3,7 +3,7 @@ import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import * as http from 'http';
 import * as util from 'util';
 import RequestTable from 'DB/RequestTable';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 
 // SPEC:

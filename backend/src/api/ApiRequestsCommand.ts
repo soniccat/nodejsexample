@@ -1,6 +1,6 @@
 import { ApiCommand, setResponse } from 'main/api/ApiCommand';
 import ApiCommandInfo from 'main/api/ApiCommandInfo';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as http from 'http';
 import * as util from 'util';
@@ -11,9 +11,7 @@ import ILogger, { LogLevel } from 'Logger/ILogger';
 //
 // requests (POST)- fetch requests from db
 // params:
-//  fields    - required fields in a string array
 //  urlRegexp   - regexp for url to filter
-//  onlyNotNull - show only when every field is not null
 // response:
 //  list of db objects with the requested fields
 

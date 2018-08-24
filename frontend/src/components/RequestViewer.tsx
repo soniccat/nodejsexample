@@ -2,14 +2,17 @@ import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
 import * as React from 'react';
 import RequestRow from 'Components/RequestRow';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
+import DataHolder from '../data/DataHolder';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
-  rows?: Request[];
+  dataHolder: DataHolder;
   error?: object;
+
+  onRequestsUpdated: (requests: Request[]) => void;
 }
 
 export interface RequestViewerState {
@@ -21,14 +24,8 @@ export interface RequestViewerState {
 export class RequestViewer extends React.Component<RequestViewerProps, RequestViewerState> {
   static defaultProps = {
     requestOptions: {
-      fields: ['id', 'url', 'port', 'method',
-        'headers', 'body_string', 'body_string_is_json',
-        'response_status', 'response_headers', 'response_string', 'response_string_is_json',
-        'is_stub'],
       urlRegexp: '.*v4.*',
-      onlyNotNull: false,
     },
-    rows: [],
     error: undefined,
   };
 
@@ -42,7 +39,6 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
     this.state = {
       requestOptions: this.props.requestOptions,
-      rows: this.props.rows,
     };
   }
 
@@ -125,9 +121,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
           error: err,
         });
       } else {
-        this.setState({
-          rows: response.data,
-        });
+        this.props.onRequestsUpdated(response.data);
       }
     });
   }

@@ -2,7 +2,7 @@ import { getUrlString } from 'Utils/requesttools';
 import DbConnection from 'DB/DbConnection';
 import { isString } from 'Utils/objectTools';
 import { RequestInfo } from 'Data/request/RequestInfo';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
 const tableName = 'request';
@@ -96,26 +96,14 @@ class RequestTable {
   }
 
   private buildLoadQuery(options: LoadRequestsOption) {
-    let fields = '*';
-    if (options.fields && options.fields.length) {
-      const wrappedFields = options.fields; // options.fields.map(v => this.dbConnection.wrapString(v));
-      fields = wrappedFields.join(',');
-    }
     let wherePart = '';
     let urlRegexp = '';
     if (options.urlRegexp) {
       urlRegexp = options.urlRegexp;
       wherePart += `url REGEXP ${this.wrapString(urlRegexp)}`;
     }
-    if (options.onlyNotNull && options.fields) {
-      for (let i = 0; i < options.fields.length; i += 1) {
-        if (wherePart.length > 0) {
-          wherePart += ' AND ';
-        }
-        wherePart += `${options.fields[i]} IS NOT NULL `;
-      }
-    }
-    let query = `select ${fields} from ${tableName}`;
+
+    let query = `select * from ${tableName}`;
     if (wherePart.length) {
       query += ` where ${wherePart}`;
     }

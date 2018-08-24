@@ -1,6 +1,6 @@
 import * as React from 'react';
 import JsonView from 'Elements/JsonView';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import { isObject } from 'Utils/Tools';
 import ExpandButton from 'Elements/ExpandButton';
 import Popup from 'reactjs-popup';

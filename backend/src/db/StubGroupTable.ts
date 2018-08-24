@@ -1,7 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import DbConnection from 'DB/DbConnection';
 import RequestTable, { DbRequestRow } from 'DB/RequestTable';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 
 const tableName = 'stub_group';
 const relationTableName = 'stub_group_requests';

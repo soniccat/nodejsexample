@@ -1,5 +1,5 @@
 import buildApiCall, { ApiCall, ApiParameters } from 'Utils/buildApiCall';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 
 export function buildRequestsCall(options: object) : ApiCall {
   return buildApiCall({

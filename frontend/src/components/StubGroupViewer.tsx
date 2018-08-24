@@ -1,6 +1,6 @@
 import StubGroup from 'Model/StubGroup';
 import * as React from 'react';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import loadRequest from 'Utils/loadRequest';
 import { buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
 import { buildStubGroupsCall } from 'Utils/StubGroupCalls';

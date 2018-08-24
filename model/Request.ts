@@ -1,4 +1,4 @@
-export class Request {
+export default class Request {
   id?: number;
   url: string;
   port: number;

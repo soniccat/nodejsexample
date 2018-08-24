@@ -1,6 +1,6 @@
 import * as React from 'react';
 import StubGroup from 'Model/StubGroup';
-import { Request } from 'Model/Request';
+import Request from 'Model/Request';
 import RequestRow from 'Components/RequestRow';
 import ExpandButton from 'Elements/ExpandButton';
 import 'CSS/StubGroupRow';
