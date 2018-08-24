@@ -8,12 +8,10 @@ import DataHolder from '../data/DataHolder';
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
   dataHolder: DataHolder;
-  error?: object;
 }
 
 export interface RequestViewerState {
   requestOptions?: LoadRequestsOption;
-  error?: object;
 }
 
 export class RequestViewer extends React.Component<RequestViewerProps, RequestViewerState> {
@@ -21,7 +19,6 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     requestOptions: {
       urlRegexp: '.*v4.*',
     },
-    error: undefined,
   };
 
   constructor(props: RequestViewerProps) {
@@ -43,42 +40,23 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.props.dataHolder.loadRequests(this.state.requestOptions);
   }
 
-  onSearchChanged(event) {
+  private onSearchChanged(event) {
     this.setState({ requestOptions: { urlRegexp: event.target.value } }, () => {
       console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
       this.props.dataHolder.loadRequests(this.state.requestOptions);
     });
   }
 
-  onCreateStubClicked(row: Request) {
+  private onCreateStubClicked(row: Request) {
     this.createStub(row);
   }
 
-  onRequestChanged(row: Request) {
-    // Actions
-    // loadRequest(buildUpdateRequestCall(row), (err, response) => {
-    //   if (err) {
-    //     this.setState({
-    //       error: err,
-    //     });
-    //   }
-    // });
+  private onRequestChanged(row: Request) {
+    this.props.dataHolder.updateRequest(row);
   }
 
-  onRequestDeleteClicked(row: Request) {
-    // loadRequest(buildDeleteRequestCall(row.id), (err, response) => {
-    //   if (err) {
-    //     this.setState({
-    //       error: err,
-    //     });
-    //   } else {
-    //     this.setState({
-    //       rows: this.state.rows.filter((element: Request, index, array) => {
-    //         return element.id !== row.id;
-    //       }),
-    //     });
-    //   }
-    // });
+  private onRequestDeleteClicked(row: Request) {
+    this.props.dataHolder.deleteRequest(row);
   }
 
   private createStub(row: Request) {

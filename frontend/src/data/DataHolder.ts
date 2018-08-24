@@ -27,6 +27,10 @@ export default class DataHolder {
 
   setRequestsError(error: Error) {
     this.requestsError = error;
+    this.onRequestErrorUpdated();
+  }
+
+  onRequestErrorUpdated() {
   }
 
   loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
@@ -44,11 +48,28 @@ export default class DataHolder {
     });
   }
 
-  createStub(row: Request) {
-    const options = buildCreateRequestCall(Object.assign({}, row, { isStub: true }));
+  deleteRequest(row: Request): Promise<any> {
+    return loadCommand(buildDeleteRequestCall(row.id)).then((response) => {
+      this.setRequests(this.requests.filter((element: Request, index, array) => {
+        return element.id !== row.id;
+      }));
+      return response;
+    });
+  }
 
+  updateRequest(row: Request): Promise<any> {
+    return loadCommand(buildUpdateRequestCall(row)).then((response) => {
+      this.setRequests(this.requests.map((value: Request, index: number, array: Request[]) => {
+        return value.id === row.id ? row : value;
+      }));
+      return response;
+    });
+  }
+
+  createStub(row: Request): Promise<any> {
+    const options = buildCreateRequestCall(Object.assign({}, row, { isStub: true }));
     return loadCommand(options).then((response) => {
-      this.requests = [response.data].concat(this.requests);
+      this.setRequests([response.data].concat(this.requests));
       return response.data;
     });
   }

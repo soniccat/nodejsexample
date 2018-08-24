@@ -23,22 +23,14 @@ class AppDataHolder extends DataHolder {
     this.component = component;
   }
 
-  loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
-    return this.bindToUpdate(super.loadRequests(requestOptions));
+  onRequestsUpdated() {
+    super.onRequestsUpdated();
+    this.component.updateHolder();
   }
 
-  createStub(request: Request) {
-    return this.bindToUpdate(super.createStub(request));
-  }
-
-  bindToUpdate(promise: Promise<any>): Promise<any> {
-    return promise.then((data) => {
-      this.component.updateHolder();
-      return data;
-    }).catch((err) => {
-      this.component.updateHolder();
-      return err;
-    });
+  onRequestErrorUpdated() {
+    super.onRequestErrorUpdated();
+    this.component.updateHolder();
   }
 }
 
