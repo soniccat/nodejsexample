@@ -9,6 +9,7 @@
     "paths": {
       "Components/*": ["src/components/*"],
       "Elements/*": ["src/elements/*"],
+      "Data/*": ["src/data/*"],
       "Model/*": ["../model/*"],
       "Utils/*": ["src/utils/*"],
       "CSS/*": ["css/*"],

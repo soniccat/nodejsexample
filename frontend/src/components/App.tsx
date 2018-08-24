@@ -4,7 +4,7 @@ import { RequestViewer } from 'Components/RequestViewer';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'Node/react-tabs/style/react-tabs';
 import { StubGroupViewer } from 'Components/StubGroupViewer';
-import DataHolder from '../data/DataHolder';
+import DataHolder from 'Data/DataHolder';
 import StubGroup from 'Model/StubGroup';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -74,7 +74,7 @@ export class App extends React.Component<AppProps, AppState> {
           <RequestViewer dataHolder={this.state.dataHolder}/>
         </TabPanel>
         <TabPanel>
-          <StubGroupViewer />
+          <StubGroupViewer dataHolder={this.state.dataHolder}/>
         </TabPanel>
       </Tabs>
     </div>;

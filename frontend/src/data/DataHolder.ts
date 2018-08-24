@@ -1,6 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import Request from 'Model/Request';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
+import { buildStubGroupsCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -9,10 +10,37 @@ export default class DataHolder {
   requests?: Request[]; // for RequestViewer
   requestsError?: Error;
 
-  stubGroups: StubGroup[]; // StubGroupViewer
+  stubGroups?: StubGroup[]; // StubGroupViewer
+  stubGroupsError?: Error;
+
+  // StubGroups
 
   setStubGroups(stubGroups: StubGroup[]) {
     this.stubGroups = stubGroups;
+    this.onStubGroupsUpdated();
+  }
+
+  onStubGroupsUpdated() {
+  }
+
+  setStubGroupsError(error: Error) {
+    this.stubGroupsError = error;
+    this.onStubGroupsErrorUpdated();
+  }
+
+  onStubGroupsErrorUpdated() {
+  }
+
+  loadStubGroups() {
+    const call = buildStubGroupsCall();
+
+    loadCommand(call).then((response) => {
+      this.setStubGroups(response.data);
+      return response.data;
+    }).catch((err) => {
+      this.setStubGroupsError(err);
+      return err;
+    });
   }
 
   // Requests

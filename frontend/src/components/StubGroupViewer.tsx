@@ -1,19 +1,14 @@
 import StubGroup from 'Model/StubGroup';
 import * as React from 'react';
 import Request from 'Model/Request';
-import loadCommand from 'Utils/loadCommand';
-import { buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
-import { buildStubGroupsCall } from 'Utils/StubGroupCalls';
 import { StubGroupRow } from 'Components/StubGroupRow';
+import DataHolder from 'Data/DataHolder';
 
 export interface StubGroupViewerProps {
-  rows?: StubGroup[];
-  error?: object;
+  dataHolder: DataHolder;
 }
 
 export interface StubGroupViewerState {
-  rows?: StubGroup[];
-  error?: object;
 }
 
 export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubGroupViewerState> {
@@ -29,7 +24,6 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
 
     this.state = {
-      rows: this.props.rows,
     };
   }
 
@@ -68,23 +62,12 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
   }
 
   loadStubGroups() {
-    // const call = buildStubGroupsCall();
-
-    // loadCommand(call, (err, response) => {
-    //   if (err) {
-    //     this.setState({
-    //       error: err,
-    //     });
-    //   } else {
-    //     this.setState({
-    //       rows: response.data,
-    //     });
-    //   }
-    // });
+    this.props.dataHolder.loadStubGroups();
   }
 
   render() {
-    const rows = this.state.rows.map(row => (<StubGroupRow
+    const stubGroups = this.props.dataHolder.stubGroups ? this.props.dataHolder.stubGroups : [];
+    const rows = stubGroups.map(row => (<StubGroupRow
       key={row.id}
       stubGroup={row}
       isExpanded={false}

@@ -3,7 +3,7 @@ import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as React from 'react';
 import RequestRow from 'Components/RequestRow';
 import Request from 'Model/Request';
-import DataHolder from '../data/DataHolder';
+import DataHolder from 'Data/DataHolder';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
@@ -48,7 +48,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   }
 
   private onCreateStubClicked(row: Request) {
-    this.createStub(row);
+    this.props.dataHolder.createStub(row);
   }
 
   private onRequestChanged(row: Request) {
@@ -57,10 +57,6 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
   private onRequestDeleteClicked(row: Request) {
     this.props.dataHolder.deleteRequest(row);
-  }
-
-  private createStub(row: Request) {
-    this.props.dataHolder.createStub(row);
   }
 
   render() {
