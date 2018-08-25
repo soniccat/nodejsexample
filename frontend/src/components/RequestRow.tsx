@@ -97,13 +97,11 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_sent_extra">
             <div className="request_headers">
               <div>Headers</div>
-              {this.renderJsonView(this.props.request.headers, (obj) => {
-                this.onObjChanged(Object.assign({}, this.props.request, { headers: obj }));
-              })}
+              {this.renderJsonView(this.props.request.headers, 'headers')}
             </div>
             <div className="request_body">
               <div>Body</div>
-              {this.renderBodyContent(this.props.request.body)}
+              {this.renderBodyContent(this.props.request.body, 'body')}
             </div>
           </div> : undefined}
       </div>
@@ -118,24 +116,20 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_received_extra">
             {this.props.request.responseHeaders ? <div className="request_headers">
               <div>Headers</div>
-              {this.renderJsonView(this.props.request.responseHeaders, (obj) => {
-                this.onObjChanged(Object.assign({}, this.props.request, { responseHeaders: obj }));
-              })}
+              {this.renderJsonView(this.props.request.responseHeaders, 'responseHeaders')}
               </div> : undefined}
             {this.props.request.responseBody ? <div className="request_body">
               <div>Body</div>
-              {this.renderBodyContent(this.props.request.responseBody)}
+              {this.renderBodyContent(this.props.request.responseBody, 'responseBody')}
               </div> : undefined}
           </div> : undefined}
       </div>
     </div>);
   }
 
-  renderBodyContent(body) {
+  renderBodyContent(body: any, keyName: string) {
     if (isObject(body)) {
-      return this.renderJsonView(body, (obj) => {
-        //this.onObjChanged(Object.assign({}, this.props.request, { responseHeaders: obj }));
-      });
+      return this.renderJsonView(body, keyName);
     }
 
     if (body) {
@@ -144,11 +138,11 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     return undefined;
   }
 
-  renderJsonView(obj: any, onChange: (obj: any) => void) {
+  renderJsonView(obj: any, keyName: string) {
     return <JsonView obj={obj}
       isEditable={true}
       expandLevel={3}
-      onObjChanged={onChange}
+      onObjChanged={obj => this.onObjChanged(Object.assign({}, this.props.request, { [keyName]: obj }))}
       onCollapsedPressed={(key) => {}}/>;
   }
 

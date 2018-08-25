@@ -69,10 +69,12 @@ export default class DataHolder {
       if (this.loadingRequestOptions === requestOptions) {
         this.setRequests(response.data);
       }
+      return response.data;
     }).catch((err) => {
       if (this.loadingRequestOptions === requestOptions) {
         this.setRequestsError(err);
       }
+      return err;
     });
   }
 
@@ -88,7 +90,7 @@ export default class DataHolder {
 
     if (deleteIndex !== -1) {
       return loadCommand(buildDeleteRequestCall(row.id)).then((response) => {
-        return response;
+        return response.data;
       }).catch((err) => {
         const insertIndex = deleteIndex < this.requests.length ? deleteIndex : this.requests.length;
         this.requests.splice(insertIndex, 0, row);
@@ -101,11 +103,21 @@ export default class DataHolder {
   }
 
   updateRequest(row: Request): Promise<any> {
-    return loadCommand(buildUpdateRequestCall(row)).then((response) => {
+    let oldValue: Request | undefined;
+    this.setRequests(this.requests.map((value: Request, index: number, array: Request[]) => {
+      if (value.id === row.id) {
+        oldValue = value;
+        return row;
+      }
+
+      return value;
+    }));
+
+    return loadCommand(buildUpdateRequestCall(row)).catch((err) => {
       this.setRequests(this.requests.map((value: Request, index: number, array: Request[]) => {
-        return value.id === row.id ? row : value;
+        return (oldValue !== undefined && value.id === oldValue.id) ? oldValue : value;
       }));
-      return response;
+      return err;
     });
   }
 

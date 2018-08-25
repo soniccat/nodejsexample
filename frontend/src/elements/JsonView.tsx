@@ -75,9 +75,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     const newObj = Object.assign({}, obj, { [newObjKey]: obj[oldObjKey] });
     delete newObj[oldObjKey];
 
-    //obj[newObjKey] = obj[oldObjKey];
-    //delete obj[oldObjKey];
-
     this.childIndexes[newObjKey] = index;
     delete this.childIndexes[oldObjKey];
 
@@ -89,16 +86,16 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   removeKey(objKey: string, index: number) {
-    const newObj = this.props.obj;
-    delete this.childRefs[index];
+    const newObj = Object.assign({}, this.props.obj);
     delete newObj[objKey];
+    delete this.childRefs[index];
 
     this.setState({
       editingIndex: undefined,
       editingKeyName: undefined,
     });
 
-    this.props.onObjChanged(this.props.obj);
+    this.props.onObjChanged(newObj);
   }
 
   private startValueEditing(objKey: string, index: number) {
@@ -112,7 +109,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   changeValue(objKey: string, newValue: any) {
     const newObj = Object.assign({}, this.props.obj, { [objKey]: newValue });
-    //newObj[objKey] = newValue;
 
     this.setState({
       editingKeyValue: newValue,
