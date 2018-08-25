@@ -58,6 +58,7 @@
     "@types/react-dom": "^16.0.7",
     "@types/react-tabs": "^1.0.5",
     "axios": "^0.18.0",
+    "immutable": "^3.8.2",
     "npm-check-updates": "^2.14.2",
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
