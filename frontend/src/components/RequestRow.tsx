@@ -1,4 +1,3 @@
-import { fromJS, Iterable } from 'immutable';
 import * as React from 'react';
 import JsonView from 'Elements/JsonView';
 import Request from 'Model/Request';
@@ -145,8 +144,8 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     return undefined;
   }
 
-  renderJsonView(obj: any, onChange: (obj: Iterable<any, any>) => void) {
-    return <JsonView obj={fromJS(obj)}
+  renderJsonView(obj: any, onChange: (obj: any) => void) {
+    return <JsonView obj={obj}
       isEditable={true}
       expandLevel={3}
       onObjChanged={onChange}

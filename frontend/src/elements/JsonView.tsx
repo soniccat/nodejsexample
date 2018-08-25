@@ -1,15 +1,14 @@
-import { Map, Iterable } from 'immutable';
 import * as React from 'react';
 import { isObject, isEmptyArray } from 'Utils/Tools';
 import ExpandButton from 'Elements/ExpandButton';
 import 'CSS/JsonView';
 
 export interface JsonViewProps {
-  obj: Map<any, any>;
+  obj: any;
   isEditable: boolean;
   expandLevel: number;
-  onObjChanged: (obj: Map<any, any>) => void;
-  onCollapsedPressed: (obj: Map<any, any>) => void;
+  onObjChanged: (obj: any) => void;
+  onCollapsedPressed: (obj: any) => void;
   willStartEditing?: () => void;
 }
 
@@ -36,9 +35,9 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.onObjChanged = this.onObjChanged.bind(this);
 
     const expandedStates : {[key: number] : number} = {};
-    const keys = this.props.obj.keySeq();
-    for (let i = 0; i < keys.size; i += 1) {
-      const index = this.ensureChildIndex(keys.get(i));
+    const keys = Object.keys(this.props.obj);
+    for (let i = 0; i < keys.length; i += 1) {
+      const index = this.ensureChildIndex(keys[i]);
       expandedStates[index] = this.defaultChildExpandLevel();
     }
 
@@ -73,10 +72,11 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   changeKey(oldObjKey: string, newObjKey: string, index: number) {
     const obj = this.props.obj;
-    const newObj = obj.set(newObjKey, obj.get(oldObjKey)).remove(oldObjKey);
+    const newObj = Object.assign({}, obj, { [newObjKey]: obj[oldObjKey] });
+    delete newObj[oldObjKey];
 
-    obj[newObjKey] = obj[oldObjKey];
-    delete obj[oldObjKey];
+    //obj[newObjKey] = obj[oldObjKey];
+    //delete obj[oldObjKey];
 
     this.childIndexes[newObjKey] = index;
     delete this.childIndexes[oldObjKey];
@@ -106,12 +106,12 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
     this.setState({
       editingIndex: index,
-      editingKeyValue: this.props.obj.get(objKey),
+      editingKeyValue: this.props.obj[objKey],
     });
   }
 
   changeValue(objKey: string, newValue: any) {
-    const newObj = this.props.obj.set(objKey, newValue);
+    const newObj = Object.assign({}, this.props.obj, { [objKey]: newValue });
     //newObj[objKey] = newValue;
 
     this.setState({
@@ -219,12 +219,12 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderExpandedContent(cells: any[]) {
-    const keys = this.props.obj.keySeq().sort();
+    const keys = Object.keys(this.props.obj).sort();
 
-    for (let i = 0; i < keys.size; i += 1) {
-      const objKey = keys.get(i);
-      const index = this.ensureChildIndex(keys.get(i));
-      const obj = this.props.obj.get(objKey);
+    for (let i = 0; i < keys.length; i += 1) {
+      const objKey = keys[i];
+      const index = this.ensureChildIndex(keys[i]);
+      const obj = this.props.obj[objKey];
       const isSubJson = isObject(obj) && !isEmptyArray(obj);
 
       if (isSubJson) {
@@ -261,8 +261,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     }
   }
 
-  private onObjChanged(objKey: string, obj: Iterable<any, any>) {
-    const newObj = this.props.obj.set(objKey, obj);
+  private onObjChanged(objKey: string, obj: any) {
+    const newObj = Object.assign({}, this.props.obj, { [objKey]: obj });
     this.props.onObjChanged(newObj);
   }
 
