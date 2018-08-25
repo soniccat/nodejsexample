@@ -77,12 +77,27 @@ export default class DataHolder {
   }
 
   deleteRequest(row: Request): Promise<any> {
-    return loadCommand(buildDeleteRequestCall(row.id)).then((response) => {
-      this.setRequests(this.requests.filter((element: Request, index, array) => {
-        return element.id !== row.id;
-      }));
-      return response;
-    });
+    let deleteIndex = -1;
+    this.setRequests(this.requests.filter((element: Request, index, array) => {
+      const needKeep = element.id !== row.id;
+      if (!needKeep) {
+        deleteIndex = index;
+      }
+      return needKeep;
+    }));
+
+    if (deleteIndex !== -1) {
+      return loadCommand(buildDeleteRequestCall(row.id)).then((response) => {
+        return response;
+      }).catch((err) => {
+        const insertIndex = deleteIndex < this.requests.length ? deleteIndex : this.requests.length;
+        this.requests.splice(insertIndex, 0, row);
+        this.setRequests(this.requests);
+        return err;
+      });
+    }
+
+    return Promise.resolve();
   }
 
   updateRequest(row: Request): Promise<any> {
