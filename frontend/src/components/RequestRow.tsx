@@ -98,7 +98,9 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_sent_extra">
             <div className="request_headers">
               <div>Headers</div>
-              {this.renderJsonView(this.props.request.headers)}
+              {this.renderJsonView(this.props.request.headers, (obj) => {
+                this.onObjChanged(Object.assign({}, this.props.request, { headers: obj }));
+              })}
             </div>
             <div className="request_body">
               <div>Body</div>
@@ -117,7 +119,9 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_received_extra">
             {this.props.request.responseHeaders ? <div className="request_headers">
               <div>Headers</div>
-              {this.renderJsonView(this.props.request.responseHeaders)}
+              {this.renderJsonView(this.props.request.responseHeaders, (obj) => {
+                this.onObjChanged(Object.assign({}, this.props.request, { responseHeaders: obj }));
+              })}
               </div> : undefined}
             {this.props.request.responseBody ? <div className="request_body">
               <div>Body</div>
@@ -130,7 +134,9 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
 
   renderBodyContent(body) {
     if (isObject(body)) {
-      return this.renderJsonView(body);
+      return this.renderJsonView(body, (obj) => {
+        //this.onObjChanged(Object.assign({}, this.props.request, { responseHeaders: obj }));
+      });
     }
 
     if (body) {
@@ -139,16 +145,16 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     return undefined;
   }
 
-  renderJsonView(obj: any) {
+  renderJsonView(obj: any, onChange: (obj: Iterable<any, any>) => void) {
     return <JsonView obj={fromJS(obj)}
       isEditable={true}
       expandLevel={3}
-      onObjChanged={this.onObjChanged}
+      onObjChanged={onChange}
       onCollapsedPressed={(key) => {}}/>;
   }
 
-  onObjChanged(obj: Iterable<any, any>) {
-    this.props.onRequestChanged(obj.toJS());
+  onObjChanged(obj: Request) {
+    this.props.onRequestChanged(obj);
   }
 
   onRequestShortClicked() {
