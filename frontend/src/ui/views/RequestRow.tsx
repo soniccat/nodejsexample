@@ -1,9 +1,10 @@
 import * as React from 'react';
-import JsonView from '../common/JsonView';
+import JsonView from 'UI/common/JsonView';
 import Request from 'Model/Request';
 import { isObject } from 'Utils/Tools';
-import ExpandButton from '../common/ExpandButton';
+import ExpandButton from 'UI/common/ExpandButton';
 import 'CSS/RequestRow';
+import Popup from 'reactjs-popup';
 
 export interface RequestRowProps {
   request: Request;
@@ -11,7 +12,7 @@ export interface RequestRowProps {
   onCreateStubClicked?: (request: Request) => void;
   onRequestChanged: (request: Request) => void;
   onDeleteClicked: (request: Request) => void;
-  stubGroupElement?: JSX.Element;
+  stubGroupPopupContent?: JSX.Element;
 }
 
 export interface RequestRowState {
@@ -60,11 +61,25 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_delete_button" onClick={this.onDeleteClicked}>
             DEL
           </div>
-          {this.props.request.isStub ? this.props.stubGroupElement : undefined}
+          {(this.props.request.isStub && this.props.stubGroupPopupContent !== undefined) ? this.renderStubGroupsButton() : undefined}
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
     );
+  }
+
+  renderStubGroupsButton() {
+    return <span onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+      <Popup
+        trigger={open => (
+          <div className="stub_group_add_button">Stub groups</div>
+        )}
+        closeOnDocumentClick={true}
+        keepTooltipInside={true}
+        >
+        {this.props.stubGroupPopupContent}
+      </Popup>
+    </span>;
   }
 
   renderExpandedMark(className, isExpanded) {

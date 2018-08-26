@@ -1,9 +1,9 @@
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
-import Popup from 'reactjs-popup';
 import * as React from 'react';
 import RequestRow from 'UI/views/RequestRow';
 import Request from 'Model/Request';
 import DataHolder from 'Data/DataHolder';
+import { StubGroupList } from 'UI/containers/StubGroupList';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
@@ -61,7 +61,6 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
 
   render() {
     const requests = this.props.dataHolder.requests ? this.props.dataHolder.requests : [];
-    const element = this.renderStubGroupsButton();
     const rows = requests.map(request => (<RequestRow
       key={request.id}
       request={request}
@@ -69,7 +68,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       onCreateStubClicked={this.onCreateStubClicked}
       onRequestChanged={this.onRequestChanged}
       onDeleteClicked={this.onRequestDeleteClicked}
-      stubGroupElement={element}
+      stubGroupPopupContent={<StubGroupList dataHolder={this.props.dataHolder} request={request}/>}
     />));
 
     return (
@@ -83,23 +82,5 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
         {rows}
       </div>
     );
-  }
-
-  renderStubGroupsButton() {
-    return <span onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-      <Popup
-        trigger={open => (
-          <div className="stub_group_add_button">Stub groups</div>
-        )}
-        closeOnDocumentClick={true}
-        keepTooltipInside={true}
-        >
-        {this.renderStubGroups()}
-      </Popup>
-    </span>;
-  }
-
-  renderStubGroups() {
-    return <div key={1}>test</div>;
   }
 }
