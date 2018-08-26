@@ -7,6 +7,7 @@ export interface JsonViewProps {
   obj: any;
   isEditable: boolean;
   expandLevel: number;
+
   onObjChanged: (obj: any) => void;
   onCollapsedPressed: (obj: any) => void;
   willStartEditing?: () => void;

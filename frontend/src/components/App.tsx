@@ -30,9 +30,7 @@ class AppDataHolder extends DataHolder {
 export class App extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props);
-
     this.updateHolder = this.updateHolder.bind(this);
-    this.onStubGroupsUpdated = this.onStubGroupsUpdated.bind(this);
 
     const dataHolder = new AppDataHolder(this);
     this.state = {
@@ -43,15 +41,6 @@ export class App extends React.Component<AppProps, AppState> {
   updateHolder() {
     this.setState({
       dataHolder: this.state.dataHolder,
-    });
-  }
-
-  onStubGroupsUpdated(stubGroups: StubGroup[]) {
-    const holder = this.state.dataHolder;
-    holder.setStubGroups(stubGroups);
-
-    this.setState({
-      dataHolder: holder,
     });
   }
 

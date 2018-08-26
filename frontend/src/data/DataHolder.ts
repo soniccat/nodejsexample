@@ -16,44 +16,31 @@ export default class DataHolder {
   stubGroups?: StubGroup[]; // StubGroupViewer
   stubGroupsError?: Error;
 
-  // StubGroups
+  // setters
 
-  setStubGroups(stubGroups: StubGroup[]) {
+  private setStubGroups(stubGroups: StubGroup[]) {
     this.stubGroups = stubGroups;
     this.syncWithStubGroups();
     this.onDataUpdated();
   }
 
-  setStubGroupsError(error: Error) {
+  private setStubGroupsError(error: Error) {
     this.stubGroupsError = error;
-    this.onStubGroupsErrorUpdated();
     this.onDataUpdated();
   }
-
-  onStubGroupsErrorUpdated() {
-  }
-
-  loadStubGroups() {
-    const call = buildStubGroupsCall();
-
-    loadCommand(call).then((response) => {
-      this.setStubGroups(response.data);
-      return response.data;
-    }).catch((err) => {
-      this.setStubGroupsError(err);
-      return err;
-    });
-  }
-
-  onDataUpdated() {
-  }
-
-  // Requests
 
   private setRequests(requests: Request[]) {
     this.requests = requests;
     this.syncWithRequests();
     this.onDataUpdated();
+  }
+
+  private setRequestsError(error: Error) {
+    this.requestsError = error;
+    this.onDataUpdated();
+  }
+
+  onDataUpdated() {
   }
 
   // return an old value
@@ -63,6 +50,8 @@ export default class DataHolder {
     this.onDataUpdated();
     return oldRequest;
   }
+
+  // Data synching
 
   private syncWithRequests() {
     // build a temporary map
@@ -122,15 +111,6 @@ export default class DataHolder {
     });
 
     return oldValue;
-  }
-
-  setRequestsError(error: Error) {
-    this.requestsError = error;
-    this.onRequestErrorUpdated();
-    this.onDataUpdated();
-  }
-
-  onRequestErrorUpdated() {
   }
 
   // Public Actions
@@ -201,6 +181,18 @@ export default class DataHolder {
     return loadCommand(options).then((response) => {
       this.setRequests([response.data].concat(this.requests));
       return response.data;
+    });
+  }
+
+  loadStubGroups() {
+    const call = buildStubGroupsCall();
+
+    loadCommand(call).then((response) => {
+      this.setStubGroups(response.data);
+      return response.data;
+    }).catch((err) => {
+      this.setStubGroupsError(err);
+      return err;
     });
   }
 }
