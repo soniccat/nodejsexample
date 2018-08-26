@@ -1,12 +1,10 @@
 import * as React from 'react';
-import Request from 'Model/Request';
 import { RequestViewer } from 'Components/RequestViewer';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'Node/react-tabs/style/react-tabs';
 import { StubGroupViewer } from 'Components/StubGroupViewer';
 import DataHolder from 'Data/DataHolder';
 import StubGroup from 'Model/StubGroup';
-import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
 export interface AppProps {
 }
