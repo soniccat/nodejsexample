@@ -4,7 +4,6 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'Node/react-tabs/style/react-tabs';
 import { StubGroupViewer } from 'UI/containers/StubGroupViewer';
 import DataHolder from 'Data/DataHolder';
-import StubGroup from 'Model/StubGroup';
 
 export interface AppProps {
 }

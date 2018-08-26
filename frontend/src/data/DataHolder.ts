@@ -1,7 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import Request from 'Model/Request';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
-import { buildStubGroupsCall } from 'Utils/StubGroupCalls';
+import { buildStubGroupsCall, buildAddRequestCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -113,6 +113,23 @@ export default class DataHolder {
     return oldValue;
   }
 
+  stubGroupById(id: number): StubGroup | undefined {
+    return this.stubGroups.find(obj => obj.id === id);
+  }
+
+  requestById(id: number): Request | undefined {
+    let request = this.requests.find(obj => obj.id === id);
+    if (request === undefined) {
+      this.stubGroups.forEach((group) => {
+        if (request === undefined) {
+          request = group.requests.find(obj => obj.id === id);
+        }
+      });
+    }
+
+    return request;
+  }
+
   // === Public Actions
 
   loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
@@ -192,6 +209,22 @@ export default class DataHolder {
       return response.data;
     }).catch((err) => {
       this.setStubGroupsError(err);
+      return err;
+    });
+  }
+
+  addRequestInStubGroups(stubGroupId: number, requestId: number) {
+    const call = buildAddRequestCall(stubGroupId, requestId);
+    const stubGroup = this.stubGroupById(stubGroupId);
+    const request = this.requestById(requestId);
+    stubGroup.requests.push(request);
+    this.onDataUpdated();
+
+    loadCommand(call).then((response) => {
+      return response.data;
+    }).catch((err) => {
+      stubGroup.requests = stubGroup.requests.filter(obj => obj !== request);
+      this.onDataUpdated();
       return err;
     });
   }

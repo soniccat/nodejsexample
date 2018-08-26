@@ -55,6 +55,11 @@ export class StubGroupTable {
       });
   }
 
+  async addRequest(stubId: number, requestId: number): Promise<any[]> {
+    const query = `insert into ${relationTableName} values(null, ${stubId}, ${requestId})`;
+    return await this.dbConnection.queryPromise(query);
+  }
+
   normalizeStubGroups(groups: DbStubGroup[]): StubGroup[] {
     const result: StubGroup[] = [];
     const requestTable = new RequestTable(this.dbConnection);

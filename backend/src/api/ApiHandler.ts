@@ -13,6 +13,7 @@ import ApiCreateRequestCommand from 'main/api/ApiCreateRequestCommand';
 import ApiDeleteRequestCommand from 'main/api/ApiDeleteRequestCommand';
 import { StubGroupTable } from 'DB/StubGroupTable';
 import ApiStubGroupsCommand from 'main/api/ApiStubGroupsCommand';
+import ApiAddRequestInStubGroupCommand from 'main/api/ApiAddRequestInStubGroupCommand';
 
 class ApiHandler {
   dbConnection: DbConnection;
@@ -35,7 +36,8 @@ class ApiHandler {
       new ApiUpdateRequestCommand(this.requestTable, logger),
       new ApiCreateRequestCommand(this.requestTable, logger),
       new ApiDeleteRequestCommand(this.requestTable, logger),
-      new ApiStubGroupsCommand(this.stubGroupsTable, logger)];
+      new ApiStubGroupsCommand(this.stubGroupsTable, logger),
+      new ApiAddRequestInStubGroupCommand(this.stubGroupsTable, logger)];
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {

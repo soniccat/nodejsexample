@@ -8,3 +8,11 @@ export function buildStubGroupsCall() : ApiCall {
     path: 'stubgroups',
   });
 }
+
+export function buildAddRequestCall(stubGroupId: number, requestId: number) : ApiCall {
+  return buildApiCall({
+    method: 'POST',
+    path: `stubgroups/${stubGroupId}/requests/${requestId}`,
+    data: {},
+  });
+}
