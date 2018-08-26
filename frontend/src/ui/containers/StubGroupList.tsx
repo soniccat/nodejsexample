@@ -31,7 +31,12 @@ export class StubGroupList extends React.Component<StubGroupListProps, StubGroup
   }
 
   render() {
-    return <div>test</div>
+    const stubGroups = this.props.dataHolder.stubGroups ? this.props.dataHolder.stubGroups : [];
+    const rows = stubGroups.map((stub) => {
+      return <div key={stub.id}>{stub.name}</div>;
+    });
+
+    return <div>{rows}</div>;
   }
 }
 
