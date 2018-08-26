@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { RequestViewer } from 'Components/RequestViewer';
+import { RequestViewer } from 'UI/containers/RequestViewer';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'Node/react-tabs/style/react-tabs';
-import { StubGroupViewer } from 'Components/StubGroupViewer';
+import { StubGroupViewer } from 'UI/containers/StubGroupViewer';
 import DataHolder from 'Data/DataHolder';
 import StubGroup from 'Model/StubGroup';
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { isObject, isEmptyArray } from 'Utils/Tools';
-import ExpandButton from 'Elements/ExpandButton';
+import ExpandButton from './ExpandButton';
 import 'CSS/JsonView';
 
 export interface JsonViewProps {

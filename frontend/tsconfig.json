@@ -7,8 +7,7 @@
 
     "baseUrl": ".",
     "paths": {
-      "Components/*": ["src/components/*"],
-      "Elements/*": ["src/elements/*"],
+      "UI/*": ["src/ui/*"],
       "Data/*": ["src/data/*"],
       "Model/*": ["../model/*"],
       "Utils/*": ["src/utils/*"],

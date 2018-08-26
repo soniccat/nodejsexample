@@ -1,7 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import * as React from 'react';
 import Request from 'Model/Request';
-import { StubGroupRow } from 'Components/StubGroupRow';
+import { StubGroupRow } from 'UI/views/StubGroupRow';
 import DataHolder from 'Data/DataHolder';
 
 export interface StubGroupViewerProps {

@@ -1,7 +1,7 @@
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import Popup from 'reactjs-popup';
 import * as React from 'react';
-import RequestRow from 'Components/RequestRow';
+import RequestRow from 'UI/views/RequestRow';
 import Request from 'Model/Request';
 import DataHolder from 'Data/DataHolder';
 
