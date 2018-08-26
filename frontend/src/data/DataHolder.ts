@@ -16,7 +16,7 @@ export default class DataHolder {
   stubGroups?: StubGroup[]; // StubGroupViewer
   stubGroupsError?: Error;
 
-  // setters
+  // === Setters
 
   private setStubGroups(stubGroups: StubGroup[]) {
     this.stubGroups = stubGroups;
@@ -51,7 +51,7 @@ export default class DataHolder {
     return oldRequest;
   }
 
-  // Data synching
+  // === Data Synching
 
   private syncWithRequests() {
     // build a temporary map
@@ -113,7 +113,7 @@ export default class DataHolder {
     return oldValue;
   }
 
-  // Public Actions
+  // === Public Actions
 
   loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
     this.loadingRequestOptions = requestOptions;

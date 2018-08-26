@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Request from 'Model/Request';
 import DataHolder from 'Data/DataHolder';
-import Popup from 'reactjs-popup';
 
 export interface StubGroupListProps {
   request: Request;
