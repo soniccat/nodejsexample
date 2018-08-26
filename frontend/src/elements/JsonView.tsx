@@ -88,7 +88,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   removeKey(objKey: string, index: number) {
     const newObj = Object.assign({}, this.props.obj);
     delete newObj[objKey];
-    delete this.childRefs[index];
 
     this.setState({
       editingIndex: undefined,
@@ -129,9 +128,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     // TODO: use mutable-helpber
     const newExpandeStates = this.state.childExpandLevels;
     newExpandeStates[index] = newExpandeStates[index] > 0 ? 0 : 1;
-    if (newExpandeStates[index] === 0) {
-      delete this.childRefs[index];
-    }
 
     this.setState({
       childExpandLevels: newExpandeStates,
@@ -171,13 +167,9 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     return this.props.expandLevel > 0;
   }
 
-  private ensureRef(index: number): React.Ref<JsonView> {
-    let ref = this.childRefs[index];
-    if (ref === undefined) {
-      ref = React.createRef<JsonView>();
-      this.childRefs[index] = ref;
-    }
-
+  private createChildRef(index: number): React.Ref<JsonView> {
+    const ref = React.createRef<JsonView>();
+    this.childRefs[index] = ref;
     return ref;
   }
 
@@ -196,11 +188,11 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   render() {
     const cells = [];
+    this.childRefs = [];
 
     if (this.isExpanded()) {
       this.renderExpandedContent(cells);
     } else {
-      this.childRefs = [];
       cells.push(<div key={'collapsed'}
        onClick={this.onCollapsedPressed}>collapsed</div>);
     }
@@ -239,7 +231,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       const bodyKey = `${index}_value`;
       let element;
       if (isSubJson) {
-        const ref = this.ensureRef(index);
+        const ref = this.createChildRef(index);
         element = <div key={bodyKey} className="json_value">
           <JsonView obj={obj}
             isEditable={this.props.isEditable}

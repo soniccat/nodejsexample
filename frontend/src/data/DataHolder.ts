@@ -5,10 +5,13 @@ import { buildStubGroupsCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
+type TypeWithId = { id?: number };
+
 export default class DataHolder {
-  loadingRequestOptions: LoadRequestsOption;
   requests?: Request[]; // for RequestViewer
   requestsError?: Error;
+  loadingRequestOptions: LoadRequestsOption;
+  updatingReuests: {[id: number] : Request} = {};
 
   stubGroups?: StubGroup[]; // StubGroupViewer
   stubGroupsError?: Error;
@@ -17,15 +20,14 @@ export default class DataHolder {
 
   setStubGroups(stubGroups: StubGroup[]) {
     this.stubGroups = stubGroups;
-    this.onStubGroupsUpdated();
-  }
-
-  onStubGroupsUpdated() {
+    this.syncWithStubGroups();
+    this.onDataUpdated();
   }
 
   setStubGroupsError(error: Error) {
     this.stubGroupsError = error;
     this.onStubGroupsErrorUpdated();
+    this.onDataUpdated();
   }
 
   onStubGroupsErrorUpdated() {
@@ -43,23 +45,95 @@ export default class DataHolder {
     });
   }
 
-  // Requests
-
-  setRequests(requests: Request[]) {
-    this.requests = requests;
-    this.onRequestsUpdated();
+  onDataUpdated() {
   }
 
-  onRequestsUpdated() {
+  // Requests
+
+  private setRequests(requests: Request[]) {
+    this.requests = requests;
+    this.syncWithRequests();
+    this.onDataUpdated();
+  }
+
+  // return an old value
+  private setRequest(request: Request): Request {
+    const oldRequest = this.updateInList(request, this.requests);
+    this.syncWithRequest(request);
+    this.onDataUpdated();
+    return oldRequest;
+  }
+
+  private syncWithRequests() {
+    // build a temporary map
+    const requestMap: {[id: number] : Request} = {};
+    const requests = this.requests !== undefined ? this.requests : [];
+    requests.forEach((request: Request, index: number, array: Request[]) => {
+      requestMap[request.id] = request;
+    });
+
+    // update requests in stubGroups
+    const goups = this.stubGroups !== undefined ? this.stubGroups : [];
+    goups.forEach((group: StubGroup, index: number, array: StubGroup[]) => {
+      group.requests.forEach((request: Request, index: number, array: Request[]) => {
+        if (requestMap[request.id]) {
+          array[index] = requestMap[request.id];
+        }
+      });
+    });
+  }
+
+  private syncWithRequest(updatedRequest: Request) {
+    const requests = this.requests !== undefined ? this.requests : [];
+    this.updateInList(updatedRequest, requests);
+
+    const goups = this.stubGroups !== undefined ? this.stubGroups : [];
+    goups.forEach((group: StubGroup, index: number, array: StubGroup[]) => {
+      this.updateInList(updatedRequest, group.requests);
+    });
+  }
+
+  private syncWithStubGroups() {
+    // build a temporary map
+    const requestMap: {[id: number] : Request} = {};
+    const goups = this.stubGroups !== undefined ? this.stubGroups : [];
+    goups.forEach((group: StubGroup, index: number, array: StubGroup[]) => {
+      group.requests.forEach((request: Request, index: number, array: Request[]) => {
+        requestMap[request.id] = request;
+      });
+    });
+
+    // update requests
+    const requests = this.requests !== undefined ? this.requests : [];
+    requests.forEach((request: Request, index: number, array: Request[]) => {
+      if (requestMap[request.id]) {
+        array[index] = requestMap[request.id];
+      }
+    });
+  }
+
+  private updateInList<T extends TypeWithId>(updatedValue: T, list: T[]): T | undefined {
+    let oldValue: T | undefined;
+    list.forEach((value: T, index: number, array: T[]) => {
+      if (value.id === updatedValue.id) {
+        oldValue = value;
+        array[index] = updatedValue;
+      }
+    });
+
+    return oldValue;
   }
 
   setRequestsError(error: Error) {
     this.requestsError = error;
     this.onRequestErrorUpdated();
+    this.onDataUpdated();
   }
 
   onRequestErrorUpdated() {
   }
+
+  // Public Actions
 
   loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
     this.loadingRequestOptions = requestOptions;
@@ -80,6 +154,8 @@ export default class DataHolder {
 
   deleteRequest(row: Request): Promise<any> {
     let deleteIndex = -1;
+    this.updatingReuests[row.id] = undefined;
+
     this.setRequests(this.requests.filter((element: Request, index, array) => {
       const needKeep = element.id !== row.id;
       if (!needKeep) {
@@ -103,20 +179,19 @@ export default class DataHolder {
   }
 
   updateRequest(row: Request): Promise<any> {
-    let oldValue: Request | undefined;
-    this.setRequests(this.requests.map((value: Request, index: number, array: Request[]) => {
-      if (value.id === row.id) {
-        oldValue = value;
-        return row;
+    const oldValue = this.setRequest(row);
+
+    this.updatingReuests[row.id] = row;
+    return loadCommand(buildUpdateRequestCall(row)).then((response) => {
+      if (this.updatingReuests[row.id] === row) {
+        this.updatingReuests[row.id] = undefined;
       }
-
-      return value;
-    }));
-
-    return loadCommand(buildUpdateRequestCall(row)).catch((err) => {
-      this.setRequests(this.requests.map((value: Request, index: number, array: Request[]) => {
-        return (oldValue !== undefined && value.id === oldValue.id) ? oldValue : value;
-      }));
+      return response.data;
+    }).catch((err) => {
+      if (this.updatingReuests[row.id] === row) {
+        this.updatingReuests[row.id] = undefined;
+        this.setRequest(oldValue);
+      }
       return err;
     });
   }
