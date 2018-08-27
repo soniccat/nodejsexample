@@ -31,11 +31,11 @@ export class StubGroupList extends React.Component<StubGroupListProps, StubGroup
   }
 
   removeRequestFromStubGroup(stub: StubGroup) {
-
+    this.props.dataHolder.deleteRequestFromStubGroup(stub.id, this.props.request.id);
   }
 
   addRequestToStubGroup(stub: StubGroup) {
-    this.props.dataHolder.addRequestInStubGroups(stub.id, this.props.request.id);
+    this.props.dataHolder.addRequestInStubGroup(stub.id, this.props.request.id);
   }
 
   render() {

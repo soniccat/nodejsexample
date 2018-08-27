@@ -60,6 +60,11 @@ export class StubGroupTable {
     return await this.dbConnection.queryPromise(query);
   }
 
+  async deleteRequest(stubId: number, requestId: number): Promise<any[]> {
+    const query = `delete from ${relationTableName} where group_id=${stubId} and request_id=${requestId}`;
+    return await this.dbConnection.queryPromise(query);
+  }
+
   normalizeStubGroups(groups: DbStubGroup[]): StubGroup[] {
     const result: StubGroup[] = [];
     const requestTable = new RequestTable(this.dbConnection);

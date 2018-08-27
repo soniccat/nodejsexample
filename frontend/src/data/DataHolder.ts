@@ -1,7 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import Request from 'Model/Request';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
-import { buildStubGroupsCall, buildAddRequestCall } from 'Utils/StubGroupCalls';
+import { buildStubGroupsCall, buildAddRequestToStubGroupCall, buildDeleteRequestFromStubGroupCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -213,8 +213,8 @@ export default class DataHolder {
     });
   }
 
-  addRequestInStubGroups(stubGroupId: number, requestId: number) {
-    const call = buildAddRequestCall(stubGroupId, requestId);
+  addRequestInStubGroup(stubGroupId: number, requestId: number) {
+    const call = buildAddRequestToStubGroupCall(stubGroupId, requestId);
     const stubGroup = this.stubGroupById(stubGroupId);
     const request = this.requestById(requestId);
     stubGroup.requests.push(request);
@@ -224,6 +224,29 @@ export default class DataHolder {
       return response.data;
     }).catch((err) => {
       stubGroup.requests = stubGroup.requests.filter(obj => obj !== request);
+      this.onDataUpdated();
+      return err;
+    });
+  }
+
+  deleteRequestFromStubGroup(stubGroupId: number, requestId: number) {
+    const call = buildDeleteRequestFromStubGroupCall(stubGroupId, requestId);
+    const stubGroup = this.stubGroupById(stubGroupId);
+    const request = this.requestById(requestId);
+    let requestIndex = -1;
+    stubGroup.requests = stubGroup.requests.filter((obj:Request, index: number) => {
+      requestIndex = index;
+      return obj.id !== requestId;
+    });
+    this.onDataUpdated();
+
+    loadCommand(call).then((response) => {
+      return response.data;
+    }).catch((err) => {
+      const insertIndex = requestIndex < stubGroup.requests.length ? requestIndex : -1;
+      if (insertIndex !== -1) {
+        stubGroup.requests = stubGroup.requests.filter(obj => obj !== request);
+      }
       this.onDataUpdated();
       return err;
     });
