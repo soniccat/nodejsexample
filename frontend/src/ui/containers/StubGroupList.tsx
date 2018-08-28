@@ -2,6 +2,7 @@ import * as React from 'react';
 import Request from 'Model/Request';
 import DataHolder from 'Data/DataHolder';
 import StubGroup from 'Model/StubGroup';
+import 'CSS/StubGroupList';
 
 export interface StubGroupListProps {
   request: Request;
@@ -44,11 +45,11 @@ export class StubGroupList extends React.Component<StubGroupListProps, StubGroup
       const isAdded = stub.requests.find((value: Request, index: number, obj: Request[]) => {
         return this.props.request.id === value.id;
       }) !== undefined;
-      return <div key={stub.id}>
+      return <div key={stub.id} className="stub_group_list_row">
         <input type="checkbox"
         onChange={() => isAdded ? this.removeRequestFromStubGroup(stub) : this.addRequestToStubGroup(stub)}
         checked={isAdded}/>
-        <div>{stub.name}</div>
+        <div className="stub_group_list_name">{stub.name}</div>
       </div>;
     });
 

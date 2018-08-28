@@ -46,7 +46,7 @@ class DbConnection {
     });
   }
 
-  wrapString(value: string) {
+  wrapString(value: string): string {
     return `${Client.escape(value, true)}`;
   }
 }

@@ -65,6 +65,16 @@ export class StubGroupTable {
     return await this.dbConnection.queryPromise(query);
   }
 
+  async createStubGroup(name: string): Promise<StubGroup> {
+    const dbName = this.dbConnection.wrapString(name);
+    return this.dbConnection.queryPromise(`insert into ${tableName} values(null, ${dbName}, null)`)
+    .then((obj) => {
+      return this.dbConnection.queryPromise(`select * from ${tableName} where id=LAST_INSERT_ID()`);
+    }).then((rows) => {
+      return this.createStubGroupObj(rows[0]);
+    });
+  }
+
   normalizeStubGroups(groups: DbStubGroup[]): StubGroup[] {
     const result: StubGroup[] = [];
     const requestTable = new RequestTable(this.dbConnection);
@@ -91,12 +101,16 @@ export class StubGroupTable {
     let res = this.findGroupById(dbGroup.stub_group_id, groups);
     if (res === undefined) {
       const parent = dbGroup.stub_parent_group_id ? new StubGroup(dbGroup.stub_parent_group_id) : undefined;
-      res = new StubGroup(dbGroup.stub_group_id, dbGroup.stub_name);
+      res = this.createStubGroupObj(dbGroup);
       res.parent = parent;
       groups.push(res);
     }
 
     return res;
+  }
+
+  createStubGroupObj(dbGroup: DbStubGroup) {
+    return new StubGroup(dbGroup.stub_group_id, dbGroup.stub_name);
   }
 
   findGroupById(id: number, groups: StubGroup[]): StubGroup | undefined {

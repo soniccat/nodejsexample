@@ -42,7 +42,7 @@ class ApiDeleteRequestInStubGroupCommand implements ApiCommand {
 
   async handleStubGroups(res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.deletRequestInStubGroup()
-    .then((rows: StubGroup[]) => {
+    .then((rows) => {
       setResponse(res, 200, JSON.stringify(rows));
     })
     .catch((err) => {
@@ -54,7 +54,7 @@ class ApiDeleteRequestInStubGroupCommand implements ApiCommand {
     });
   }
 
-  async deletRequestInStubGroup(): Promise<StubGroup[]> {
+  async deletRequestInStubGroup(): Promise<any> {
     return this.stubGroupsTable.deleteRequest(this.stubGropupId, this.requestId);
   }
 }

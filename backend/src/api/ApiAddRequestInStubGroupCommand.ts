@@ -42,8 +42,8 @@ class ApiAddRequestInStubGroupCommand implements ApiCommand {
 
   async handleStubGroups(res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.addRequestInStubGroup()
-    .then((rows: StubGroup[]) => {
-      setResponse(res, 200, JSON.stringify(rows));
+    .then((rows) => {
+      setResponse(res, 200);
     })
     .catch((err) => {
       this.logger.log(LogLevel.ERROR, `ApiAddRequestInStubGroupCommand.handleStubGroups error: ${util.inspect(err)}`);
@@ -54,7 +54,7 @@ class ApiAddRequestInStubGroupCommand implements ApiCommand {
     });
   }
 
-  async addRequestInStubGroup(): Promise<StubGroup[]> {
+  async addRequestInStubGroup(): Promise<any> {
     return this.stubGroupsTable.addRequest(this.stubGropupId, this.requestId);
   }
 }
