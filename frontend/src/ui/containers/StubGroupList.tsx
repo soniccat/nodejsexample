@@ -54,6 +54,9 @@ export class StubGroupList extends React.Component<StubGroupListProps, StubGroup
     if (e.key === 'Enter') {
       e.preventDefault();
       this.props.dataHolder.createStubGroup(this.state.newGroupName);
+      this.setState({
+        newGroupName: '',
+      });
     }
   }
 
@@ -72,7 +75,7 @@ export class StubGroupList extends React.Component<StubGroupListProps, StubGroup
     });
 
     rows.push(<div key="input" className="stub_group_list_create_row">
-      <input type="field" onChange={this.onNameChanged} onKeyDown={this.onEnterPressed}/>
+      <input type="field" value={this.state.newGroupName} onChange={this.onNameChanged} onKeyDown={this.onEnterPressed}/>
     </div>);
 
     return <div>{rows}</div>;
