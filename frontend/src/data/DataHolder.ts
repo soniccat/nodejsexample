@@ -1,7 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import Request from 'Model/Request';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
-import { buildStubGroupsCall, buildAddRequestToStubGroupCall, buildDeleteRequestFromStubGroupCall } from 'Utils/StubGroupCalls';
+import { buildStubGroupsCall, buildAddRequestToStubGroupCall, buildDeleteRequestFromStubGroupCall, buildCreateStubGroupCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -56,13 +56,13 @@ export default class DataHolder {
   private syncWithRequests() {
     // build a temporary map
     const requestMap: {[id: number] : Request} = {};
-    const requests = this.requests !== undefined ? this.requests : [];
+    const requests = this.requests != null ? this.requests : [];
     requests.forEach((request: Request, index: number, array: Request[]) => {
       requestMap[request.id] = request;
     });
 
     // update requests in stubGroups
-    const goups = this.stubGroups !== undefined ? this.stubGroups : [];
+    const goups = this.stubGroups != null ? this.stubGroups : [];
     goups.forEach((group: StubGroup, index: number, array: StubGroup[]) => {
       group.requests.forEach((request: Request, index: number, array: Request[]) => {
         if (requestMap[request.id]) {
@@ -73,10 +73,10 @@ export default class DataHolder {
   }
 
   private syncWithRequest(updatedRequest: Request) {
-    const requests = this.requests !== undefined ? this.requests : [];
+    const requests = this.requests != null ? this.requests : [];
     this.updateInList(updatedRequest, requests);
 
-    const goups = this.stubGroups !== undefined ? this.stubGroups : [];
+    const goups = this.stubGroups != null ? this.stubGroups : [];
     goups.forEach((group: StubGroup, index: number, array: StubGroup[]) => {
       this.updateInList(updatedRequest, group.requests);
     });
@@ -85,7 +85,7 @@ export default class DataHolder {
   private syncWithStubGroups() {
     // build a temporary map
     const requestMap: {[id: number] : Request} = {};
-    const goups = this.stubGroups !== undefined ? this.stubGroups : [];
+    const goups = this.stubGroups != null ? this.stubGroups : [];
     goups.forEach((group: StubGroup, index: number, array: StubGroup[]) => {
       group.requests.forEach((request: Request, index: number, array: Request[]) => {
         requestMap[request.id] = request;
@@ -93,7 +93,7 @@ export default class DataHolder {
     });
 
     // update requests
-    const requests = this.requests !== undefined ? this.requests : [];
+    const requests = this.requests != null ? this.requests : [];
     requests.forEach((request: Request, index: number, array: Request[]) => {
       if (requestMap[request.id]) {
         array[index] = requestMap[request.id];
@@ -201,10 +201,10 @@ export default class DataHolder {
     });
   }
 
-  loadStubGroups() {
+  loadStubGroups(): Promise<any> {
     const call = buildStubGroupsCall();
 
-    loadCommand(call).then((response) => {
+    return loadCommand(call).then((response) => {
       this.setStubGroups(response.data);
       return response.data;
     }).catch((err) => {
@@ -247,6 +247,19 @@ export default class DataHolder {
       if (insertIndex !== -1) {
         stubGroup.requests = stubGroup.requests.filter(obj => obj !== request);
       }
+      this.onDataUpdated();
+      return err;
+    });
+  }
+
+  createStubGroup(name: string): Promise<any> {
+    const call = buildCreateStubGroupCall(name);
+
+    return loadCommand(call).then((response) => {
+      this.stubGroups.push(response.data);
+      this.onDataUpdated();
+      return response.data;
+    }).catch((err) => {
       this.onDataUpdated();
       return err;
     });

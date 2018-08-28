@@ -61,7 +61,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_delete_button" onClick={this.onDeleteClicked}>
             DEL
           </div>
-          {(this.props.request.isStub && this.props.stubGroupPopupContent !== undefined) ? this.renderStubGroupsButton() : undefined}
+          {(this.props.request.isStub && this.props.stubGroupPopupContent != null) ? this.renderStubGroupsButton() : undefined}
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>

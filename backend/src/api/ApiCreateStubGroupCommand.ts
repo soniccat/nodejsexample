@@ -33,7 +33,7 @@ class ApiCreateStubGroupCommand implements ApiCommand {
   canRun(requestInfo: ApiCommandInfo): boolean {
     return requestInfo.components.length === 1 &&
     requestInfo.method === 'POST' &&
-    requestInfo.body !== undefined &&
+    requestInfo.body != null &&
     requestInfo.components[0] === 'stubgroups';
   }
 

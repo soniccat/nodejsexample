@@ -24,3 +24,11 @@ export function buildDeleteRequestFromStubGroupCall(stubGroupId: number, request
     data: {},
   });
 }
+
+export function buildCreateStubGroupCall(name: string): ApiCall {
+  return buildApiCall({
+    method: 'POST',
+    path: `stubgroups`,
+    data: { name },
+  });
+}

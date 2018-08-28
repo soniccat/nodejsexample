@@ -36,7 +36,7 @@ export default class ApiRequestsCommand implements ApiCommand {
 
   canRun(requestInfo: ApiCommandInfo): boolean {
     return requestInfo.components.length === 1 &&
-    requestInfo.body !== undefined &&
+    requestInfo.body != null &&
     requestInfo.method === 'POST' &&
     requestInfo.components[0] === 'requests';
   }

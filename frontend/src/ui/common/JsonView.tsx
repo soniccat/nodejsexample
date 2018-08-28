@@ -151,7 +151,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private handleWillStartEditing() {
-    if (this.props.willStartEditing !== undefined) {
+    if (this.props.willStartEditing != null) {
       this.props.willStartEditing();
     } else {
       this.stopEditing();
@@ -301,7 +301,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   renderJsonValue(objKey: string, index: number, tagKey: string, value: any) {
     let textarea;
-    if (this.state.editingIndex === index && this.state.editingKeyValue !== undefined) {
+    if (this.state.editingIndex === index && this.state.editingKeyValue != null) {
       textarea = this.renderJsonValueTextArea(objKey);
     }
 
