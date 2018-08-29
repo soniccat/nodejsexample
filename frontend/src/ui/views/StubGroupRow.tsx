@@ -9,6 +9,7 @@ export interface StubGroupRowProps {
   stubGroup: StubGroup;
   isExpanded: boolean;
 
+  onStubGroupDeleteClicked: (stubGroup: StubGroup) => void;
   onRequestChanged: (request: Request, stubGroup: StubGroup) => void;
   onRequestDeleteClicked: (request: Request, stubGroup: StubGroup) => void;
 }
@@ -24,10 +25,16 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
     this.onStubGroupHeaderPressed = this.onStubGroupHeaderPressed.bind(this);
+    this.onStubGroupDeleteClicked = this.onStubGroupDeleteClicked.bind(this);
 
     this.state = {
       isExpanded: props.isExpanded,
     };
+  }
+
+  onStubGroupDeleteClicked(e: React.MouseEvent<Element>) {
+    e.stopPropagation();
+    this.props.onStubGroupDeleteClicked(this.props.stubGroup);
   }
 
   onRequestChanged(request: Request) {
@@ -38,6 +45,12 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
     this.props.onRequestDeleteClicked(request, this.props.stubGroup);
   }
 
+  onStubGroupHeaderPressed() {
+    this.setState({
+      isExpanded: !this.state.isExpanded,
+    });
+  }
+
   render() {
     return <div className="stub_group_row">
       <div className="stub_group_header" onClick={this.onStubGroupHeaderPressed}>
@@ -45,15 +58,12 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
         <div className="stub_group_name">
           {this.props.stubGroup.name}
         </div>
+        <div className="stub_group_delete_button" onClick={this.onStubGroupDeleteClicked}>
+          DEL
+        </div>
       </div>
       {this.state.isExpanded ? this.renderExtra() : undefined }
     </div>;
-  }
-
-  onStubGroupHeaderPressed() {
-    this.setState({
-      isExpanded: !this.state.isExpanded,
-    });
   }
 
   renderExtra() {

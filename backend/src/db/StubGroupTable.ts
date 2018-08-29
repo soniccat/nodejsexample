@@ -75,6 +75,10 @@ export class StubGroupTable {
     });
   }
 
+  async deleteStubGroup(id: number): Promise<any> {
+    return this.dbConnection.queryPromise(`delete from ${tableName} where id=${id}`);
+  }
+
   normalizeStubGroups(groups: DbStubGroup[]): StubGroup[] {
     const result: StubGroup[] = [];
     const requestTable = new RequestTable(this.dbConnection);

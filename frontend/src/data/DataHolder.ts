@@ -1,7 +1,7 @@
 import StubGroup from 'Model/StubGroup';
 import Request from 'Model/Request';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
-import { buildStubGroupsCall, buildAddRequestToStubGroupCall, buildDeleteRequestFromStubGroupCall, buildCreateStubGroupCall } from 'Utils/StubGroupCalls';
+import { buildStubGroupsCall, buildAddRequestToStubGroupCall, buildDeleteRequestFromStubGroupCall, buildCreateStubGroupCall, buildDeleteStubGroupCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -232,22 +232,27 @@ export default class DataHolder {
   deleteRequestFromStubGroup(stubGroupId: number, requestId: number) {
     const call = buildDeleteRequestFromStubGroupCall(stubGroupId, requestId);
     const stubGroup = this.stubGroupById(stubGroupId);
-    const request = this.requestById(requestId);
+    let request: Request | undefined;
     let requestIndex = -1;
     stubGroup.requests = stubGroup.requests.filter((obj:Request, index: number) => {
-      requestIndex = index;
-      return obj.id !== requestId;
+      if (obj.id === requestId) {
+        request = obj;
+        requestIndex = index;
+        return false;
+      }
+
+      return true;
     });
     this.onDataUpdated();
 
     loadCommand(call).then((response) => {
       return response.data;
     }).catch((err) => {
-      const insertIndex = requestIndex < stubGroup.requests.length ? requestIndex : -1;
-      if (insertIndex !== -1) {
-        stubGroup.requests = stubGroup.requests.filter(obj => obj !== request);
+      if (request != null) {
+        const insertIndex = requestIndex < stubGroup.requests.length ? requestIndex : stubGroup.requests.length;
+        stubGroup.requests.splice(insertIndex, 0, request);
+        this.onDataUpdated();
       }
-      this.onDataUpdated();
       return err;
     });
   }
@@ -261,6 +266,33 @@ export default class DataHolder {
       return response.data;
     }).catch((err) => {
       this.onDataUpdated();
+      return err;
+    });
+  }
+
+  deleteStubGroup(id: number): Promise<any> {
+    const call = buildDeleteStubGroupCall(id);
+    let stubGroupIndex = -1;
+    let stubGroup: StubGroup | undefined;
+    this.stubGroups = this.stubGroups.filter((obj: StubGroup, index: number) => {
+      if (obj.id === id) {
+        stubGroup = obj;
+        stubGroupIndex = index;
+        return false;
+      }
+
+      return true;
+    });
+    this.onDataUpdated();
+
+    return loadCommand(call).then((response) => {
+      return response.data;
+    }).catch((err) => {
+      if (stubGroup != null) {
+        const insertIndex = stubGroupIndex < this.stubGroups.length ? stubGroupIndex : this.stubGroups.length;
+        this.stubGroups.splice(insertIndex, 0, stubGroup);
+        this.onDataUpdated();
+      }
       return err;
     });
   }

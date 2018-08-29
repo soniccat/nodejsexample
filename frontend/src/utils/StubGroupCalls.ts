@@ -32,3 +32,10 @@ export function buildCreateStubGroupCall(name: string): ApiCall {
     data: { name },
   });
 }
+
+export function buildDeleteStubGroupCall(id: number): ApiCall {
+  return buildApiCall({
+    method: 'DELETE',
+    path: `stubgroups/${id}`,
+  });
+}

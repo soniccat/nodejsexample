@@ -9,8 +9,6 @@ import StubGroup from 'Model/StubGroup';
 // SPEC:
 //
 // stubgroups/<groupId>/requests/<requestId> (DELETE) - fetch requests from db
-// body:
-//  {}
 // response:
 //  none
 
