@@ -1,6 +1,6 @@
-import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'Utils/requesttools';
+import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody, getUrlString } from 'Utils/requesttools';
 import ResponseInfo from 'Data/request/ResponseInfo';
-import SendInfo, { extractSendInfo } from 'Data/request/SendInfo';
+import SendInfo, { extractSendInfo, SendInfoBuilder } from 'Data/request/SendInfo';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as https from 'https';
 import * as url from 'url';
@@ -10,19 +10,16 @@ import { RequestInfo } from 'Data/request/RequestInfo';
 
 class Proxy {
   logger: ILogger;
-  redirectHost: string;
 
-  constructor(redirectHost: string, logger: ILogger) {
-    this.redirectHost = redirectHost;
+  constructor(logger: ILogger) {
     this.logger = logger;
   }
 
-  async handleRequest(originalRequest: http.IncomingMessage, originalResponse: http.ServerResponse): Promise<RequestInfo> {
-    this.logger.log(LogLevel.DEBUG, `start ${originalRequest.url}`);
+  async handleRequest(sendInfo: SendInfo, originalResponse: http.ServerResponse): Promise<RequestInfo> {
+    this.logger.log(LogLevel.DEBUG, `start ${getUrlString(sendInfo)}`);
 
-    const sendInfo: SendInfo = await extractSendInfo(originalRequest);
     const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendInfo);
-    this.logger.log(LogLevel.DEBUG, `end ${originalRequest.url}`);
+    this.logger.log(LogLevel.DEBUG, `end ${getUrlString(sendInfo)}`);
 
     this.fillOriginalResponseInfo(originalResponse, responseInfo);
     return { sendInfo, responseInfo };
@@ -94,10 +91,10 @@ class Proxy {
   async handleOriginalResponseEndPromise(responseInfo: ResponseInfo) {
     if (responseInfo.originalBody && isZipContent(responseInfo.headers)) {
       return handleUnzipPromise(responseInfo.originalBody as Buffer)
-        .then(decoded => Object.assign({ body: decoded }, responseInfo));
+        .then(decoded => Object.assign(responseInfo, { body: decoded }));
     }
 
-    const result = Object.assign({ body: responseInfo.originalBody }, responseInfo);
+    const result = Object.assign(responseInfo, { body: responseInfo.originalBody });
     return Promise.resolve(result);
   }
 }

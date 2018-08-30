@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as url from 'url';
 import { readPostBodyPromise } from 'Utils/requesttools';
 
-class SendInfo {
+export default class SendInfo {
   host: string;
   path: string;
   port: number;
@@ -12,21 +12,31 @@ class SendInfo {
   body?: string | Buffer | object;
 }
 
-export async function extractSendInfo(request: http.IncomingMessage): Promise<SendInfo> {
-  const sendInfo = this.getSendInfo(request);
+export class SendInfoBuilder {
+  private redirectHost: string;
+
+  constructor(redirectHost: string) {
+    this.redirectHost = redirectHost;
+  }
+
+  async build(request: http.IncomingMessage): Promise<SendInfo> {
+    return extractSendInfo(request, this.redirectHost);
+  }
+}
+
+export async function extractSendInfo(request: http.IncomingMessage, redirectHost: string): Promise<SendInfo> {
+  const sendInfo = getSendInfo(request, redirectHost);
   sendInfo.body = await readPostBodyPromise(request);
 
   return sendInfo;
 }
 
-export function getSendInfo(req: http.IncomingMessage): SendInfo {
+export function getSendInfo(req: http.IncomingMessage, redirectHost: string): SendInfo {
   if (req.url === undefined) {
     throw new Error(`getSendInfo: url is empty`);
   }
 
   const reqUrl = url.parse(req.url);
-  const redirectHost = this.redirectHost;
-
   if (reqUrl.host === undefined) {
     throw new Error(`getSendInfo: url host is empty ${reqUrl}`);
   }
@@ -62,5 +72,3 @@ export function getSendInfo(req: http.IncomingMessage): SendInfo {
     method: (req.method ? req.method : 'unknown'),
   };
 }
-
-export default SendInfo;

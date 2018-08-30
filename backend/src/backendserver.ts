@@ -19,6 +19,7 @@ import { RequestInfo } from 'Data/request/RequestInfo';
 import { LogLevel } from 'Logger/ILogger';
 import { StubGroupTable } from 'DB/StubGroupTable';
 import SessionManager from 'main/session/SessionManager';
+import SendInfo, { SendInfoBuilder } from 'Data/request/SendInfo';
 
 // Config
 const host = 'news360.com';
@@ -36,7 +37,8 @@ if (!databaseUser || !databasePass) {
 const consoleLogger = new ConsoleLogger();
 const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), consoleLogger]);
 
-const proxy = new Proxy('news360.com', logger);
+const sendInfoBuilder = new SendInfoBuilder(host);
+const proxy = new Proxy(logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const stubGroupTable = new StubGroupTable(dbConnection);
@@ -50,19 +52,25 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
     apiHandler.handleRequest(req, res).then((res) => {
       res.end();
     });
-  } else if (sessionManager.isActive) {
-    sessionManager.process(req).then((res) => {
-
-    }).catch((e) => {
-      handleReuestWithProxy(req, res);
-    });
   } else {
-    handleReuestWithProxy(req, res);
+    sendInfoBuilder.build(req).then((sendInfo) => {
+      if (sessionManager.isActive) {
+        sessionManager.process(sendInfo, res).then((res) => {
+          res.end();
+        }).catch((e) => {
+          handleReuestWithProxy(sendInfo, res);
+        });
+      } else {
+        handleReuestWithProxy(sendInfo, res);
+      }
+    }).catch((e) => {
+      logger.log(LogLevel.ERROR, `sendInfoBuilder.build error ${util.inspect(e)} for ${req.url}`);
+    });
   }
 });
 
-function handleReuestWithProxy(req: http.IncomingMessage, res: http.ServerResponse) {
-  proxy.handleRequest(req, res)
+function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerResponse) {
+  proxy.handleRequest(sendInfo, res)
       .then((requestInfo: RequestInfo) => {
         res.end();
         if (needWriteRequestRow(requestInfo)) {
