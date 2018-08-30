@@ -1,4 +1,5 @@
 import * as url from 'url';
+import * as util from 'util';
 import { readPostBodyPromise } from 'Utils/requesttools';
 import RequestTable from 'DB/RequestTable';
 import DbConnection from 'DB/DbConnection';
@@ -57,7 +58,7 @@ class ApiHandler {
   }
 
   async extractRequestData(req: http.IncomingMessage): Promise<ApiCommandInfo> {
-    const apiRequestInfo = await this.extractApiRequestInfo(req);
+    const apiRequestInfo = await this.extractApiCommandInfo(req);
     const body = await readPostBodyPromise(req);
 
     if (body !== undefined) {
@@ -67,8 +68,8 @@ class ApiHandler {
     return apiRequestInfo;
   }
 
-  async extractApiRequestInfo(req: http.IncomingMessage): Promise<ApiCommandInfo> {
-    return new Promise<ApiCommandInfo>((resolve, request) => {
+  async extractApiCommandInfo(req: http.IncomingMessage): Promise<ApiCommandInfo> {
+    return new Promise<ApiCommandInfo>((resolve, reject) => {
       if (req.url === undefined) {
         throw new Error('handleRequest: request without url');
       }
@@ -103,6 +104,7 @@ class ApiHandler {
       }
     }
 
+    this.logger.log(LogLevel.DEBUG, `ApiHandler handle: not found command for ${util.inspect(requestInfo)}`);
     setNotFoundResponse(res);
     return res;
   }

@@ -1,6 +1,6 @@
 import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody } from 'Utils/requesttools';
 import ResponseInfo from 'Data/request/ResponseInfo';
-import SendInfo from 'Data/request/SendInfo';
+import SendInfo, { extractSendInfo } from 'Data/request/SendInfo';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as https from 'https';
 import * as url from 'url';
@@ -20,7 +20,7 @@ class Proxy {
   async handleRequest(originalRequest: http.IncomingMessage, originalResponse: http.ServerResponse): Promise<RequestInfo> {
     this.logger.log(LogLevel.DEBUG, `start ${originalRequest.url}`);
 
-    const sendInfo: SendInfo = await this.prepareSendRequestInfo(originalRequest);
+    const sendInfo: SendInfo = await extractSendInfo(originalRequest);
     const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendInfo);
     this.logger.log(LogLevel.DEBUG, `end ${originalRequest.url}`);
 
@@ -28,62 +28,11 @@ class Proxy {
     return { sendInfo, responseInfo };
   }
 
-  async prepareSendRequestInfo(request: http.IncomingMessage): Promise<SendInfo> {
-    const sendInfo = this.getSendInfo(request);
-    sendInfo.body = await readPostBodyPromise(request);
-
-    return sendInfo;
-  }
-
   fillOriginalResponseInfo(originalResponse: http.ServerResponse, responseInfo: ResponseInfo) {
     originalResponse.writeHead(responseInfo.statusCode, responseInfo.headers);
     if (responseInfo.originalBody) {
       originalResponse.write(responseInfo.originalBody);
     }
-  }
-
-  getSendInfo(req: http.IncomingMessage): SendInfo {
-    if (req.url === undefined) {
-      throw new Error(`getSendInfo: url is empty`);
-    }
-
-    const reqUrl = url.parse(req.url);
-    const redirectHost = this.redirectHost;
-
-    if (reqUrl.host === undefined) {
-      throw new Error(`getSendInfo: url host is empty ${reqUrl}`);
-    }
-
-    if (reqUrl.path === undefined) {
-      throw new Error(`getSendInfo: url path is empty ${reqUrl}`);
-    }
-
-    const needRedirect = reqUrl.host == null || reqUrl.host === 'localhost';
-    const host = needRedirect ? redirectHost : reqUrl.host;
-    const path = reqUrl.path;
-    const defaultHeaders = req.headers;
-
-    defaultHeaders['accept-encoding'] = 'gzip';
-    if (needRedirect) {
-      defaultHeaders.host = redirectHost;
-    }
-
-    // to avoid caching
-    delete defaultHeaders['if-modified-since'];
-    delete defaultHeaders['if-none-match'];
-    delete defaultHeaders.origin;
-    delete defaultHeaders.referer;
-
-    let headers = needRedirect ? defaultHeaders : req.headers;
-    headers = headers ? headers : {};
-
-    return {
-      host,
-      path,
-      headers,
-      port: 443,
-      method: (req.method ? req.method : 'unknown'),
-    };
   }
 
   async prepareResponseInfoPromise(sendInfo: SendInfo): Promise<ResponseInfo> {
