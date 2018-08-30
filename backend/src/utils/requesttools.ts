@@ -2,7 +2,7 @@ import * as util from 'util';
 import * as zlib from 'zlib';
 import * as http from 'http';
 import SendInfo from 'Data/request/SendInfo';
-import { isString } from 'Utils/objectTools';
+import { isString, isObject } from 'Utils/objectTools';
 
 export async function readPostBodyPromise(request: http.IncomingMessage): Promise<Buffer | undefined> {
   return new Promise<Buffer | undefined>((resolve, reject) => {
@@ -12,15 +12,15 @@ export async function readPostBodyPromise(request: http.IncomingMessage): Promis
   });
 }
 
-export function readPostBody(request: http.IncomingMessage, callback: (buffer?: Buffer) => void) {
+export function readPostBody(request: http.IncomingMessage, callback: (buffer?: Buffer | string | object) => void) {
   if (request.method !== 'POST') {
     callback(undefined);
   } else {
-    readBody(request, callback);
+    readBody(request, buffer => callback(processBuffer(buffer)));
   }
 }
 
-export function readBody(request: http.IncomingMessage, callback: (buffer: Buffer) => void) {
+export function readBody(request: http.IncomingMessage, callback: (buffer: Buffer | string | undefined) => void) {
   const bufferData: Buffer[] = [];
   const stringData: string[] = [];
 
@@ -33,17 +33,87 @@ export function readBody(request: http.IncomingMessage, callback: (buffer: Buffe
   });
 
   request.on('end', () => {
-    let result: Buffer;
+    let result: Buffer | string | undefined;
     if (stringData.length) {
-      result = new Buffer(stringData.join());
+      result = stringData.join();
     } else if (bufferData.length) {
       result = Buffer.concat(bufferData);
     } else {
-      result = new Buffer('');
+      result = undefined;
     }
 
     callback(result);
   });
+}
+
+export function processBuffer(body: any): Buffer | string | object | undefined {
+  let result: Buffer | string | object | undefined;
+  const isBufferResponse = body instanceof Buffer;
+  if (isBufferResponse) {
+    // TODO: find a better way to work with string buffer
+    const buffer: Buffer = body as Buffer;
+    const isResponseBodyString = isBufferResponse && isValidUTF8Buffer(buffer);
+    if (isResponseBodyString) {
+      const responseString = buffer.toString();
+      const jsonObj = tryParseJsonString(responseString);
+      if (jsonObj) {
+        result = jsonObj;
+      } else {
+        result = responseString;
+      }
+    } else {
+      // TODO: need to support blobs
+      // response_data = body;
+      result = body;
+    }
+  } else {
+    const isStr = isString(body);
+    if (isStr) {
+      const jsonObj = tryParseJsonString(body as string);
+      if (jsonObj) {
+        result = jsonObj;
+      } else {
+        result = body;
+      }
+    } else {
+      result = body;
+    }
+  }
+
+  return result;
+}
+
+export function isBodyJson(body: Buffer | string | object | undefined): boolean {
+  return isObject(body);
+}
+
+export function bodyToString(body: Buffer | string | object | undefined): string | undefined {
+  let result: Buffer | string | object | undefined = undefined;
+  const isObj = isObject(body);
+  if (isObj) {
+    result = JSON.stringify(body);
+  } else if (isString(body)) {
+    result = body;
+  } else if (body instanceof Buffer) {
+    result = body.toString();
+  }
+
+  return result;
+}
+
+function tryParseJsonString(str: string): any {
+  let parsed: any;
+  try {
+    parsed = JSON.parse(str);
+  } catch (e) {
+    parsed = undefined;
+  }
+
+  return parsed;
+}
+
+function isValidUTF8Buffer(buf: Buffer) {
+  return Buffer.compare(new Buffer(buf.toString(), 'utf8'), buf) === 0;
 }
 
 export function getUrlString(requestInfo: SendInfo) {

@@ -1,6 +1,6 @@
-import { getUrlString } from 'Utils/requesttools';
+import { getUrlString, isBodyJson, bodyToString } from 'Utils/requesttools';
 import DbConnection from 'DB/DbConnection';
-import { isString } from 'Utils/objectTools';
+import { isString, isObject } from 'Utils/objectTools';
 import { RequestInfo } from 'Data/request/RequestInfo';
 import Request from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
@@ -126,9 +126,8 @@ class RequestTable {
     let bodyStringIsJson = false;
     const bodyData = 'NULL';
     if (obj.body) {
-      const bodyInfo = this.getBodyInfo(obj.body);
-      bodyStringIsJson = bodyInfo.isJson;
-      bodyString = bodyInfo.string;
+      bodyStringIsJson = isBodyJson(obj.body);
+      bodyString = this.getBodyValue(obj.body);
     }
     // SQL
     query += `${bodyString},
@@ -141,9 +140,8 @@ class RequestTable {
     let responseStringIsJson = false;
     const responseData = 'NULL';
     if (obj.responseBody) {
-      const bodyInfo = this.getBodyInfo(obj.responseBody);
-      responseStringIsJson = bodyInfo.isJson;
-      responseString = bodyInfo.string;
+      responseStringIsJson = isBodyJson(obj.responseBody);
+      responseString = this.getBodyValue(obj.responseBody);
     }
     // SQL
     query += `${responseString},
@@ -167,9 +165,8 @@ class RequestTable {
     let bodyStringIsJson = false;
     const bodyData = 'NULL';
     if (obj.body) {
-      const bodyInfo = this.getBodyInfo(obj.body);
-      bodyStringIsJson = bodyInfo.isJson;
-      bodyString = bodyInfo.string;
+      bodyStringIsJson = isBodyJson(obj.body);
+      bodyString = this.getBodyValue(obj.body);
     }
     // SQL
     query += `body_string=${bodyString},
@@ -182,9 +179,8 @@ class RequestTable {
     let responseStringIsJson = false;
     const responseData = 'NULL';
     if (obj.responseBody) {
-      const bodyInfo = this.getBodyInfo(obj.responseBody);
-      responseStringIsJson = bodyInfo.isJson;
-      responseString = bodyInfo.string;
+      responseStringIsJson = isBodyJson(obj.responseBody);
+      responseString = this.getBodyValue(obj.responseBody);
     }
     // SQL
     query += `response_string=${responseString},
@@ -219,51 +215,13 @@ class RequestTable {
     return (obj ? this.wrapString(JSON.stringify(obj)) : 'NULL');
   }
 
-  getBodyInfo(body: string | object) {
-    const result = {
-      isJson: false,
-      string: 'NULL',
-    };
-
-    const isBufferResponse = body instanceof Buffer;
-    if (isBufferResponse) {
-      // TODO: find a better way to work with string buffer
-      const buffer: Buffer = body as Buffer;
-      const isResponseBodyString = isBufferResponse && this.isValidUTF8Buffer(buffer);
-      if (isResponseBodyString) {
-        const responseString = buffer.toString();
-
-        result.isJson = this.isJsonString(responseString);
-        result.string = this.wrapString(responseString);
-      } else {
-        // TODO: need to support blobs
-        // response_data = body;
-      }
-    } else {
-      const isStr = isString(body);
-
-      result.isJson = isStr ? this.isJsonString(body as string) : true;
-      result.string = isStr ? body as string : this.wrapString(JSON.stringify(body));
-    }
-
-    return result;
+  getBodyValue(body: Buffer | string | object | undefined): string {
+    const str = bodyToString(body);
+    return str ? this.wrapString(str) : 'NULL';
   }
 
   wrapString(str: string) {
     return this.dbConnection.wrapString(str);
-  }
-
-  isValidUTF8Buffer(buf: Buffer) {
-    return Buffer.compare(new Buffer(buf.toString(), 'utf8'), buf) === 0;
-  }
-
-  isJsonString(str: string) {
-    try {
-      JSON.parse(str);
-    } catch (e) {
-      return false;
-    }
-    return true;
   }
 
   getHttpMethodCode(name: string) {

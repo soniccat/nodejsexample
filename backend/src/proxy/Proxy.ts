@@ -1,4 +1,4 @@
-import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody, getUrlString } from 'Utils/requesttools';
+import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody, getUrlString, processBuffer, bodyToString } from 'Utils/requesttools';
 import ResponseInfo from 'Data/request/ResponseInfo';
 import SendInfo, { extractSendInfo, SendInfoBuilder } from 'Data/request/SendInfo';
 import ILogger, { LogLevel } from 'Logger/ILogger';
@@ -7,6 +7,7 @@ import * as url from 'url';
 import * as http from 'http';
 import * as util from 'util';
 import { RequestInfo } from 'Data/request/RequestInfo';
+import { isObject } from 'Utils/objectTools';
 
 class Proxy {
   logger: ILogger;
@@ -74,7 +75,7 @@ class Proxy {
     });
 
     if (sendInfo.body) {
-      creq.write(sendInfo.body);
+      creq.write(bodyToString(sendInfo.body));
     }
 
     creq.end();
@@ -91,10 +92,11 @@ class Proxy {
   async handleOriginalResponseEndPromise(responseInfo: ResponseInfo) {
     if (responseInfo.originalBody && isZipContent(responseInfo.headers)) {
       return handleUnzipPromise(responseInfo.originalBody as Buffer)
+        .then(decoded => processBuffer(decoded))
         .then(decoded => Object.assign(responseInfo, { body: decoded }));
     }
 
-    const result = Object.assign(responseInfo, { body: responseInfo.originalBody });
+    const result = Object.assign(responseInfo, { body: processBuffer(responseInfo.originalBody) });
     return Promise.resolve(result);
   }
 }

@@ -7,6 +7,7 @@ import SendInfo, { extractSendInfo, SendInfoBuilder } from 'Data/request/SendInf
 import ResponseInfo from 'Data/request/ResponseInfo';
 import Request from 'Model/Request';
 import { isObject } from 'Utils/objectTools';
+import { bodyToString } from 'Utils/requesttools';
 
 export default class SessionManager {
   logger: ILogger;
@@ -45,11 +46,12 @@ export default class SessionManager {
     });
   }
 
-  async process(sendInfo: SendInfo, response: http.ServerResponse): Promise<any> {
+  async process(sendInfo: SendInfo, response: http.ServerResponse): Promise<http.ServerResponse> {
     const request = this.findRequest(sendInfo);
 
     if (request != null) {
-      return this.fillResponseInfo(request, response);
+      this.fillResponseInfo(request, response);
+      return response;
     }
 
     throw 'Can\'t process ${request}';
@@ -101,9 +103,9 @@ export default class SessionManager {
   }
 
   fillResponseInfo(request: Request, response: http.ServerResponse) {
-    response.writeHead(request.responseStatus, request.headers);
+    response.writeHead(request.responseStatus, request.responseHeaders);
     if (request.body) {
-      response.write(request.body);
+      response.write(bodyToString(request.responseBody));
     }
   }
 }

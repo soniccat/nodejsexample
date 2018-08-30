@@ -57,6 +57,7 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       if (sessionManager.isActive) {
         sessionManager.process(sendInfo, res).then((res) => {
           res.end();
+          logger.log(LogLevel.DEBUG, `stub applied for ${sendInfo.path}`);
         }).catch((e) => {
           handleReuestWithProxy(sendInfo, res);
         });

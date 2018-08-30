@@ -4,10 +4,10 @@ export default class Request {
   port: number;
   method: string;
   headers: {[index: string]: any};
-  body: string | object | undefined;
+  body?: string | Buffer | object;
   responseStatus: number;
   responseHeaders: {[index: string]: any};
-  responseBody: string | object | undefined;
+  responseBody?: string | Buffer | object;
   isStub: boolean;
 
   static checkType(obj): obj is Request {
