@@ -18,6 +18,7 @@ import LoggerCollection from 'Logger/LoggerCollection';
 import { RequestInfo } from 'Data/request/RequestInfo';
 import { LogLevel } from 'Logger/ILogger';
 import { StubGroupTable } from 'DB/StubGroupTable';
+import SessionManager from 'main/session/SessionManager';
 
 // Config
 const host = 'news360.com';
@@ -38,19 +39,30 @@ const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), 
 const proxy = new Proxy('news360.com', logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
-const stubGroupDb = new StubGroupTable(dbConnection);
+const stubGroupTable = new StubGroupTable(dbConnection);
 const apiHandler = new ApiHandler(dbConnection, apiPath, logger);
+const sessionManager = new SessionManager(stubGroupTable, logger);
 
 const severPort = process.env.SERVER_PORT;
 
 const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
   if (isApiRequest(req)) {
-    apiHandler.handleRequest(req, res)
-    .then((res) => {
+    apiHandler.handleRequest(req, res).then((res) => {
       res.end();
     });
+  } else if (sessionManager.isActive) {
+    sessionManager.process(req).then((res) => {
+
+    }).catch((e) => {
+      handleReuestWithProxy(req, res);
+    });
   } else {
-    proxy.handleRequest(req, res)
+    handleReuestWithProxy(req, res);
+  }
+});
+
+function handleReuestWithProxy(req: http.IncomingMessage, res: http.ServerResponse) {
+  proxy.handleRequest(req, res)
       .then((requestInfo: RequestInfo) => {
         res.end();
         if (needWriteRequestRow(requestInfo)) {
@@ -59,8 +71,7 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
           });
         }
       });
-  }
-});
+}
 
 server.on('error', (err) => {
   logger.log(LogLevel.ERROR, `server error ${err}`);
@@ -80,7 +91,9 @@ dbConnection.connect((err) => {
     throw err;
   }
 
-  stubGroupDb.loadStubGroups().then(() => {
+  stubGroupTable.loadStubGroups().then(() => {
+    sessionManager.start([36086]);
+
     server.listen(severPort, () => {
     });
   });
