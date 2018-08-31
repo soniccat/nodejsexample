@@ -64,11 +64,10 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
         logger.log(LogLevel.ERROR, `sessionManager.process error ${util.inspect(e)} for ${req.url}`);
         return handleReuestWithProxy(sendInfo, res);
       });
-    }).then((response) => {
-      response.end();
     }).catch((e) => {
-      res.end();
       logger.log(LogLevel.ERROR, `sendInfoBuilder.build error ${util.inspect(e)} for ${req.url}`);
+    }).then((o) => {
+      res.end();
     });
   }
 });
