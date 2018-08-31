@@ -4,9 +4,11 @@ import Request from 'Model/Request';
 import { StubGroupRow } from 'UI/views/StubGroupRow';
 import DataHolder from 'Data/DataHolder';
 import { throws } from 'assert';
+import SessionHolder from 'Data/SessionHolder';
 
 export interface StubGroupViewerProps {
   dataHolder: DataHolder;
+  sessionHolder: SessionHolder;
 }
 
 export interface StubGroupViewerState {
@@ -48,9 +50,10 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
 
   render() {
     const stubGroups = this.props.dataHolder.stubGroups ? this.props.dataHolder.stubGroups : [];
-    const rows = stubGroups.map(row => (<StubGroupRow
-      key={row.id}
-      stubGroup={row}
+    const rows = stubGroups.map(group => (<StubGroupRow
+      key={group.id}
+      stubGroup={group}
+      isActive={this.props.sessionHolder.isStubGroupActive(group)}
       isExpanded={false}
       onStubGroupDeleteClicked={this.onStubGroupDeleteClicked}
       onRequestChanged={this.onRequestChanged}

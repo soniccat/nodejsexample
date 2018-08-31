@@ -8,6 +8,7 @@ import 'CSS/StubGroupRow';
 export interface StubGroupRowProps {
   stubGroup: StubGroup;
   isExpanded: boolean;
+  isActive: boolean;
 
   onStubGroupDeleteClicked: (stubGroup: StubGroup) => void;
   onRequestChanged: (request: Request, stubGroup: StubGroup) => void;
@@ -60,6 +61,9 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
         </div>
         <div className="stub_group_delete_button" onClick={this.onStubGroupDeleteClicked}>
           DEL
+        </div>
+        <div className="stub_group_status">
+          {this.props.isActive ? 'STOP' : 'START'}
         </div>
       </div>
       {this.state.isExpanded ? this.renderExtra() : undefined }

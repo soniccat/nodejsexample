@@ -4,12 +4,14 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'Node/react-tabs/style/react-tabs';
 import { StubGroupViewer } from 'UI/containers/StubGroupViewer';
 import DataHolder from 'Data/DataHolder';
+import SessionHolder from 'Data/SessionHolder';
 
 export interface AppProps {
 }
 
 export interface AppState {
   dataHolder: DataHolder;
+  sessionHolder: SessionHolder;
 }
 
 class AppDataHolder extends DataHolder {
@@ -22,25 +24,52 @@ class AppDataHolder extends DataHolder {
 
   onDataUpdated() {
     super.onDataUpdated();
-    this.component.updateHolder();
+    this.component.updateDataHolder();
+  }
+}
+
+class AppSessionHolder extends SessionHolder {
+  component: App;
+
+  constructor(component: App) {
+    super();
+    this.component = component;
+  }
+
+  onDataUpdated() {
+    super.onDataUpdated();
+    this.component.updateSessionHolder();
   }
 }
 
 export class App extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props);
-    this.updateHolder = this.updateHolder.bind(this);
+    this.updateDataHolder = this.updateDataHolder.bind(this);
 
     const dataHolder = new AppDataHolder(this);
+    const sessionHolder = new AppSessionHolder(this);
+
     this.state = {
       dataHolder,
+      sessionHolder,
     };
   }
 
-  updateHolder() {
+  updateDataHolder() {
     this.setState({
       dataHolder: this.state.dataHolder,
     });
+  }
+
+  updateSessionHolder() {
+    this.setState({
+      sessionHolder: this.state.sessionHolder,
+    });
+  }
+
+  componentDidMount() {
+    this.state.sessionHolder.loadInfo();
   }
 
   render() {
@@ -55,7 +84,7 @@ export class App extends React.Component<AppProps, AppState> {
           <RequestViewer dataHolder={this.state.dataHolder}/>
         </TabPanel>
         <TabPanel>
-          <StubGroupViewer dataHolder={this.state.dataHolder}/>
+          <StubGroupViewer dataHolder={this.state.dataHolder} sessionHolder={this.state.sessionHolder}/>
         </TabPanel>
       </Tabs>
     </div>;
