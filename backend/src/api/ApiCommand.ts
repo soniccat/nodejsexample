@@ -6,7 +6,7 @@ export interface ApiCommand {
   canRun(requestInfo: ApiCommandInfo): boolean;
 }
 
-export function setResponse(res: http.ServerResponse, code: number, body?: string) {
+export function setResponse(res: http.ServerResponse, code: number, body?: string): http.ServerResponse {
   res.writeHead(code, {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json',
@@ -15,6 +15,8 @@ export function setResponse(res: http.ServerResponse, code: number, body?: strin
   if (body) {
     res.write(body);
   }
+
+  return res;
 }
 
 export function setNotFoundResponse(res) {

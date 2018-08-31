@@ -18,6 +18,8 @@ import ApiAddRequestInStubGroupCommand from 'main/api/ApiAddRequestInStubGroupCo
 import ApiDeleteRequestInStubGroupCommand from 'main/api/ApiDeleteRequestInStubGroupCommand';
 import ApiCreateStubGroupCommand from 'main/api/ApiCreateStubGroupCommand';
 import ApiDeleteStubGroupCommand from 'main/api/ApiDeleteStubGroupCommand';
+import ApiSessionCommand from 'main/api/ApiSessionCommand';
+import SessionManager from 'main/session/SessionManager';
 
 class ApiHandler {
   dbConnection: DbConnection;
@@ -25,14 +27,16 @@ class ApiHandler {
   logger: ILogger;
   requestTable: RequestTable;
   stubGroupsTable: StubGroupTable;
+  sessionManager: SessionManager;
   commands: ApiCommand[];
 
-  constructor(dbConnection: DbConnection, apiPath: string, logger: ILogger) {
+  constructor(dbConnection: DbConnection, sessionManager: SessionManager, apiPath: string, logger: ILogger) {
     this.dbConnection = dbConnection;
     this.apiPath = apiPath;
     this.logger = logger;
     this.requestTable = new RequestTable(this.dbConnection);
     this.stubGroupsTable = new StubGroupTable(this.dbConnection);
+    this.sessionManager = sessionManager;
 
     this.commands = [
       new ApiOptionsCommand(),
@@ -46,7 +50,9 @@ class ApiHandler {
       new ApiAddRequestInStubGroupCommand(this.stubGroupsTable, logger),
       new ApiDeleteRequestInStubGroupCommand(this.stubGroupsTable, logger),
       new ApiCreateStubGroupCommand(this.stubGroupsTable, logger),
-      new ApiDeleteStubGroupCommand(this.stubGroupsTable, logger)];
+      new ApiDeleteStubGroupCommand(this.stubGroupsTable, logger),
+
+      new ApiSessionCommand(this.sessionManager, logger)];
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {

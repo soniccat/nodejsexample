@@ -42,8 +42,8 @@ const proxy = new Proxy(logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const stubGroupTable = new StubGroupTable(dbConnection);
-const apiHandler = new ApiHandler(dbConnection, apiPath, logger);
 const sessionManager = new SessionManager(stubGroupTable, logger);
+const apiHandler = new ApiHandler(dbConnection, sessionManager, apiPath, logger);
 
 const severPort = process.env.SERVER_PORT;
 
