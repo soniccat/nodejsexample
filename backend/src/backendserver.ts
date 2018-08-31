@@ -54,31 +54,34 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
     });
   } else {
     sendInfoBuilder.build(req).then((sendInfo) => {
-      if (sessionManager.isActive) {
-        sessionManager.process(sendInfo, res).then((res) => {
-          res.end();
+      return sessionManager.process(sendInfo, res).then((response) => {
+        if (response != null) {
           logger.log(LogLevel.DEBUG, `stub applied for ${sendInfo.path}`);
-        }).catch((e) => {
-          handleReuestWithProxy(sendInfo, res);
-        });
-      } else {
-        handleReuestWithProxy(sendInfo, res);
-      }
+          return response;
+        }
+        return handleReuestWithProxy(sendInfo, res);
+      }).catch((e) => {
+        logger.log(LogLevel.ERROR, `sessionManager.process error ${util.inspect(e)} for ${req.url}`);
+        return handleReuestWithProxy(sendInfo, res);
+      });
+    }).then((response) => {
+      response.end();
     }).catch((e) => {
+      res.end();
       logger.log(LogLevel.ERROR, `sendInfoBuilder.build error ${util.inspect(e)} for ${req.url}`);
     });
   }
 });
 
-function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerResponse) {
-  proxy.handleRequest(sendInfo, res)
+async function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
+  return proxy.handleRequest(sendInfo, res)
       .then((requestInfo: RequestInfo) => {
-        res.end();
         if (needWriteRequestRow(requestInfo)) {
           requestDb.writeRequestAsRequestInfo(requestInfo).then((rows:any[]) => {
             logger.log(LogLevel.DEBUG, `added to DB ${requestInfo.sendInfo.path}`);
           });
         }
+        return res;
       });
 }
 

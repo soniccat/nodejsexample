@@ -46,15 +46,16 @@ export default class SessionManager {
     });
   }
 
-  async process(sendInfo: SendInfo, response: http.ServerResponse): Promise<http.ServerResponse> {
-    const request = this.findRequest(sendInfo);
+  async process(sendInfo: SendInfo, response: http.ServerResponse): Promise<http.ServerResponse | undefined> {
+    const request = this.isActive ? this.findRequest(sendInfo) : undefined;
+    let result: http.ServerResponse | undefined;
 
     if (request != null) {
       this.fillResponseInfo(request, response);
-      return response;
+      result = response;
     }
 
-    throw 'Can\'t process ${request}';
+    return result;
   }
 
   findRequest(sendInfo: SendInfo): Request | undefined {
