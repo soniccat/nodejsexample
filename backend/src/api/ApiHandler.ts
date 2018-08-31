@@ -6,7 +6,7 @@ import DbConnection from 'DB/DbConnection';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as http from 'http';
 import ApiCommandInfo from 'main/api/ApiCommandInfo';
-import { ApiCommand, setNotFoundResponse } from 'main/api/ApiCommand';
+import { ApiCommand, setNotFoundResponse, setResponse } from 'main/api/ApiCommand';
 import ApiOptionsCommand from 'main/api/ApiOptionsCommand';
 import ApiRequestsCommand from 'main/api/ApiRequestsCommand';
 import ApiUpdateRequestCommand from 'main/api/ApiUpdateRequestCommand';
@@ -20,6 +20,7 @@ import ApiCreateStubGroupCommand from 'main/api/ApiCreateStubGroupCommand';
 import ApiDeleteStubGroupCommand from 'main/api/ApiDeleteStubGroupCommand';
 import ApiSessionCommand from 'main/api/ApiSessionCommand';
 import SessionManager from 'main/session/SessionManager';
+import ApiSessionAddStubGroupsCommand from 'main/api/ApiSessionAddStubGroupsCommand';
 
 class ApiHandler {
   dbConnection: DbConnection;
@@ -52,7 +53,8 @@ class ApiHandler {
       new ApiCreateStubGroupCommand(this.stubGroupsTable, logger),
       new ApiDeleteStubGroupCommand(this.stubGroupsTable, logger),
 
-      new ApiSessionCommand(this.sessionManager, logger)];
+      new ApiSessionCommand(this.sessionManager, logger),
+      new ApiSessionAddStubGroupsCommand(this.sessionManager, logger)];
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {
@@ -106,7 +108,10 @@ class ApiHandler {
 
     for (const command of this.commands) {
       if (command.canRun(requestInfo)) {
-        return command.run(requestInfo, res);
+        return command.run(requestInfo, res).catch((err) => {
+          this.logger.log(LogLevel.ERROR, `${command.constructor.name}.run error: ${util.inspect(err)}`);
+          setResponse(res, 500);
+        }).then(_ => res);
       }
     }
 

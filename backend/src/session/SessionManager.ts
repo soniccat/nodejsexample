@@ -6,6 +6,7 @@ import * as http from 'http';
 import SendInfo, { extractSendInfo, SendInfoBuilder } from 'Data/request/SendInfo';
 import ResponseInfo from 'Data/request/ResponseInfo';
 import Request from 'Model/Request';
+import SessionInfo from 'Model/SessionInfo';
 import { isObject } from 'Utils/objectTools';
 import { bodyToString } from 'Utils/requesttools';
 
@@ -13,8 +14,7 @@ export default class SessionManager {
   logger: ILogger;
   stubGroupTable: StubGroupTable;
 
-  stubGroups: StubGroup[];
-  isActive: boolean;
+  stubGroups: StubGroup[] = [];
 
   constructor(table: StubGroupTable, logger: ILogger) {
     this.logger = logger;
@@ -22,22 +22,24 @@ export default class SessionManager {
   }
 
   async start(stubGroupIds: number[]) {
-    if (!this.isActive) {
-      this.isActive = true;
-
-      this.loadStubGroups(stubGroupIds).then((groups) => {
-        this.stubGroups = groups;
+    const notActiveIds = stubGroupIds.filter(id => this.stubGroups.find(o => o.id === id) === undefined);
+    if (notActiveIds.length) {
+      return this.loadStubGroups(notActiveIds).then((groups) => {
+        this.stubGroups = this.stubGroups.concat(groups);
       }).catch((e) => {
         this.logger.log(LogLevel.ERROR, `Can't start SessionManager ${util.inspect(e)}`);
-        this.isActive = false;
       });
-    } else {
-      this.logger.log(LogLevel.WARNING, `SessionManager is already started`);
     }
+
+    return Promise.resolve();
   }
 
-  stop() {
-    this.isActive = false;
+  stop(stubGroupIds: number[]) {
+    this.stubGroups = this.stubGroups.filter(o => stubGroupIds.find(id => id === o.id) === undefined);
+  }
+
+  isActive(): boolean {
+    return this.stubGroups.length > 0;
   }
 
   async loadStubGroups(ids: number[]): Promise<StubGroup[]> {
@@ -108,5 +110,11 @@ export default class SessionManager {
     if (request.body) {
       response.write(bodyToString(request.responseBody));
     }
+  }
+
+  sessionInfo(): SessionInfo {
+    return {
+      stubGroupIds: this.stubGroups.map(o => o.id),
+    };
   }
 }

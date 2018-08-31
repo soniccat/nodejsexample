@@ -59,11 +59,11 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
         <div className="stub_group_name">
           {this.props.stubGroup.name}
         </div>
-        <div className="stub_group_delete_button" onClick={this.onStubGroupDeleteClicked}>
-          DEL
-        </div>
         <div className="stub_group_status">
           {this.props.isActive ? 'STOP' : 'START'}
+        </div>
+        <div className="stub_group_delete_button" onClick={this.onStubGroupDeleteClicked}>
+          DEL
         </div>
       </div>
       {this.state.isExpanded ? this.renderExtra() : undefined }

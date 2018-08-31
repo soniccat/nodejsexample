@@ -35,14 +35,7 @@ class ApiStubGroupsCommand implements ApiCommand {
   async handleStubGroups(res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.loadStubGroups()
     .then((rows: StubGroup[]) => {
-      setResponse(res, 200, JSON.stringify(rows));
-    })
-    .catch((err) => {
-      this.logger.log(LogLevel.ERROR, `LoadRequestsOption.handleRequests error: ${util.inspect(err)}`);
-      setResponse(res, 500);
-    })
-    .then(() => {
-      return res;
+      return setResponse(res, 200, JSON.stringify(rows));
     });
   }
 

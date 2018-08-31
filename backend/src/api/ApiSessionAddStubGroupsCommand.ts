@@ -10,11 +10,13 @@ import SessionManager from 'main/session/SessionManager';
 
 // SPEC:
 //
-// session (GET) - fetch info of the current session
+// session/stubgroups (POST) - add stub groups to session
+// body:
+//  {stubGroupIds:number[]}
 // response:
 //  SessionInfo
 
-class ApiSessionCommand implements ApiCommand {
+class ApiSessionAddStubGroupsCommand implements ApiCommand {
   logger: ILogger;
   manager: SessionManager;
 
@@ -24,14 +26,18 @@ class ApiSessionCommand implements ApiCommand {
   }
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    return this.fillResponse(res);
+    const ids = requestInfo.body!['stubGroupIds'] as number[];
+    return this.manager.start(ids).then((o) => {
+      return this.fillResponse(res);
+    });
   }
 
   canRun(requestInfo: ApiCommandInfo): boolean {
-    return requestInfo.components.length === 1 &&
-    requestInfo.body === undefined &&
-    requestInfo.method === 'GET' &&
-    requestInfo.components[0] === 'session';
+    return requestInfo.components.length === 2 &&
+    requestInfo.body !== undefined &&
+    requestInfo.method === 'POST' &&
+    requestInfo.components[0] === 'session' &&
+    requestInfo.components[1] === 'stubgroups';
   }
 
   async fillResponse(res: http.ServerResponse): Promise<http.ServerResponse> {
@@ -39,4 +45,4 @@ class ApiSessionCommand implements ApiCommand {
   }
 }
 
-export default ApiSessionCommand;
+export default ApiSessionAddStubGroupsCommand;

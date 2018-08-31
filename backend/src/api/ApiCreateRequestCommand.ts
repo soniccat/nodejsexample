@@ -43,14 +43,7 @@ export default class ApiCreateRequestCommand implements ApiCommand {
     .then(this.requestTable.getLastInsertedIndex)
     .then((insertedId) => {
       const resBody = JSON.stringify(Object.assign(requestRow, { id: insertedId }));
-      setResponse(res, 200, resBody);
-    })
-    .catch((err) => {
-      this.logger.log(LogLevel.ERROR, `ApiCreateRequestCommand.handleCreateRequest error: ${util.inspect(err)}`);
-      setResponse(res, 500);
-    })
-    .then(() => {
-      return res;
+      return setResponse(res, 200, resBody);
     });
   }
 }

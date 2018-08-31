@@ -40,14 +40,7 @@ class ApiCreateStubGroupCommand implements ApiCommand {
   async handleCreateStubGroup(res: http.ServerResponse): Promise<http.ServerResponse> {
     return this.createStubGroup()
     .then((rows: StubGroup) => {
-      setResponse(res, 200, JSON.stringify(rows));
-    })
-    .catch((err) => {
-      this.logger.log(LogLevel.ERROR, `ApiCreateStubGroupCommand.handleStubGroups error: ${util.inspect(err)}`);
-      setResponse(res, 500);
-    })
-    .then(() => {
-      return res;
+      return setResponse(res, 200, JSON.stringify(rows));
     });
   }
 
