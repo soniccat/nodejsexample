@@ -59,10 +59,12 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
           logger.log(LogLevel.DEBUG, `stub applied for ${sendInfo.path}`);
           return response;
         }
-        return handleReuestWithProxy(sendInfo, res);
       }).catch((e) => {
         logger.log(LogLevel.ERROR, `sessionManager.process error ${util.inspect(e)} for ${req.url}`);
-        return handleReuestWithProxy(sendInfo, res);
+        return undefined;
+      }).then((response) => {
+        // keep response if it was processed successfully by sessionManager
+        return response != null ? response : handleReuestWithProxy(sendInfo, res);
       });
     }).catch((e) => {
       logger.log(LogLevel.ERROR, `sendInfoBuilder.build error ${util.inspect(e)} for ${req.url}`);
