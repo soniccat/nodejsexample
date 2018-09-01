@@ -19,7 +19,7 @@ export function setResponse(res: http.ServerResponse, code: number, body?: strin
   return res;
 }
 
-export function setNotFoundResponse(res): http.ServerResponse {
+export function setNotFoundResponse(res: http.ServerResponse): http.ServerResponse {
   res.writeHead(404);
   return res;
 }

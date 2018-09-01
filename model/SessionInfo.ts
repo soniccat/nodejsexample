@@ -1,3 +1,3 @@
 export default class SessionInfo {
-  stubGroupIds: number[];
+  stubGroupIds: number[] = [];
 }

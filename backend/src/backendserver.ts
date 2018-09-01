@@ -3,7 +3,6 @@
 // webpack --config ./webpack.dev.js && node ./dist/main.js
 
 import * as http from 'http';
-import * as https from 'https';
 import * as url from 'url';
 import * as util from 'util';
 
@@ -12,7 +11,6 @@ import DbConnection from 'DB/DbConnection';
 import RequestTable from 'DB/RequestTable';
 import ApiHandler from 'main/api/ApiHandler';
 import ConsoleLogger from 'Logger/ConsoleLogger';
-import EmptyLogger from 'Logger/EmptyLogger';
 import RequestLoggerExtension from 'Logger/RequestLoggerExtension';
 import LoggerCollection from 'Logger/LoggerCollection';
 import { RequestInfo } from 'Data/request/RequestInfo';
@@ -33,7 +31,6 @@ if (!databaseUser || !databasePass) {
   throw new Error('setup your DB_USER and DB_PASS environment variables');
 }
 
-//
 const consoleLogger = new ConsoleLogger();
 const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), consoleLogger]);
 
@@ -59,6 +56,7 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
           logger.log(LogLevel.DEBUG, `stub applied for ${sendInfo.path}`);
           return response;
         }
+        return undefined;
       }).catch((e) => {
         logger.log(LogLevel.ERROR, `sessionManager.process error ${util.inspect(e)} for ${req.url}`);
         return undefined;

@@ -1,13 +1,11 @@
-import { readPostBodyPromise, handleUnzipPromise, isZipContent, readBody, getUrlString, processBuffer, bodyToString } from 'Utils/requesttools';
+import { handleUnzipPromise, isZipContent, readBody, getUrlString, processBuffer, bodyToString } from 'Utils/requesttools';
 import ResponseInfo from 'Data/request/ResponseInfo';
-import SendInfo, { extractSendInfo, SendInfoBuilder } from 'Data/request/SendInfo';
+import SendInfo from 'Data/request/SendInfo';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as https from 'https';
-import * as url from 'url';
 import * as http from 'http';
 import * as util from 'util';
 import { RequestInfo } from 'Data/request/RequestInfo';
-import { isObject } from 'Utils/objectTools';
 
 class Proxy {
   logger: ILogger;

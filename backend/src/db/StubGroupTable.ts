@@ -1,7 +1,6 @@
 import StubGroup from 'Model/StubGroup';
 import DbConnection from 'DB/DbConnection';
 import RequestTable, { DbRequestRow } from 'DB/RequestTable';
-import Request from 'Model/Request';
 
 const tableName = 'stub_group';
 const relationTableName = 'stub_group_requests';
@@ -34,9 +33,9 @@ create table if not exists stub_group_requests (
 
 /* tslint:disable:variable-name */
 class DbStubGroup extends DbRequestRow {
-  stub_group_id: number;
-  stub_name: string;
-  stub_parent_group_id: number;
+  stub_group_id: number = -1;
+  stub_name: string = '';
+  stub_parent_group_id: number = -1;
 }
 /* tslint:enable:variable-name */
 

@@ -1,6 +1,4 @@
 import LoggerExtension from 'Logger/LoggerExtension';
-import ResponseInfo from 'Data/request/ResponseInfo';
-import SendInfo from 'Data/request/SendInfo';
 import * as util from 'util';
 import { getUrlString } from 'Utils/requesttools';
 import { RequestInfo } from 'Data/request/RequestInfo';

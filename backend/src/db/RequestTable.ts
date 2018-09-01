@@ -1,6 +1,5 @@
 import { getUrlString, isBodyJson, bodyToString } from 'Utils/requesttools';
 import DbConnection from 'DB/DbConnection';
-import { isString, isObject } from 'Utils/objectTools';
 import { RequestInfo } from 'Data/request/RequestInfo';
 import Request from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
@@ -31,22 +30,22 @@ create table if not exists request (
 
 /* tslint:disable:variable-name */
 export class DbRequestRow {
-  id: number;
-  session_id: number;
-  date: string;
-  url: string;
-  port: number;
-  method: number;
+  id: number = -1;
+  session_id: number = -1;
+  date: string = '';
+  url: string = '';
+  port: number = 0;
+  method: number = 0;
   headers?: string;
   body_string?: string;
-  body_string_is_json: boolean;
+  body_string_is_json: boolean = false;
   body_data?: any;
-  response_status: number;
+  response_status: number = 0;
   response_headers?: string;
   response_string?: string;
-  response_string_is_json: boolean;
+  response_string_is_json: boolean = false;
   response_data?: any;
-  is_stub: number;
+  is_stub: number = 0;
 }
 /* tslint:enable:variable-name */
 
@@ -153,7 +152,6 @@ class RequestTable {
   }
 
   private buildUpdateRequestQuery(obj: Request) {
-    const sessionId = 1;
     // SQL
     let query = `UPDATE ${tableName} SET
         url=${this.wrapString(obj.url)},

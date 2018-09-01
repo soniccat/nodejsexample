@@ -1,18 +1,20 @@
-import * as util from 'util';
 import * as zlib from 'zlib';
 import * as http from 'http';
 import SendInfo from 'Data/request/SendInfo';
 import { isString, isObject } from 'Utils/objectTools';
 
-export async function readPostBodyPromise(request: http.IncomingMessage): Promise<Buffer | undefined> {
-  return new Promise<Buffer | undefined>((resolve, reject) => {
-    readPostBody(request, (buffer: Buffer | undefined) => {
+export type ReadBody = Buffer | string | undefined;
+export type ProcessedBody = Buffer | string | object | undefined;
+
+export async function readPostBodyPromise(request: http.IncomingMessage): Promise<ProcessedBody> {
+  return new Promise<ProcessedBody>((resolve, reject) => {
+    readPostBody(request, (buffer: ProcessedBody) => {
       resolve(buffer);
     });
   });
 }
 
-export function readPostBody(request: http.IncomingMessage, callback: (buffer?: Buffer | string | object) => void) {
+export function readPostBody(request: http.IncomingMessage, callback: (buffer: ProcessedBody) => void) {
   if (request.method !== 'POST') {
     callback(undefined);
   } else {
@@ -20,7 +22,7 @@ export function readPostBody(request: http.IncomingMessage, callback: (buffer?: 
   }
 }
 
-export function readBody(request: http.IncomingMessage, callback: (buffer: Buffer | string | undefined) => void) {
+export function readBody(request: http.IncomingMessage, callback: (buffer: ReadBody) => void) {
   const bufferData: Buffer[] = [];
   const stringData: string[] = [];
 
@@ -33,7 +35,7 @@ export function readBody(request: http.IncomingMessage, callback: (buffer: Buffe
   });
 
   request.on('end', () => {
-    let result: Buffer | string | undefined;
+    let result: ReadBody;
     if (stringData.length) {
       result = stringData.join();
     } else if (bufferData.length) {
@@ -46,8 +48,8 @@ export function readBody(request: http.IncomingMessage, callback: (buffer: Buffe
   });
 }
 
-export function processBuffer(body: any): Buffer | string | object | undefined {
-  let result: Buffer | string | object | undefined;
+export function processBuffer(body: any): ProcessedBody {
+  let result: ProcessedBody;
   const isBufferResponse = body instanceof Buffer;
   if (isBufferResponse) {
     // TODO: find a better way to work with string buffer
@@ -83,12 +85,12 @@ export function processBuffer(body: any): Buffer | string | object | undefined {
   return result;
 }
 
-export function isBodyJson(body: Buffer | string | object | undefined): boolean {
+export function isBodyJson(body: ProcessedBody): boolean {
   return isObject(body);
 }
 
-export function bodyToString(body: Buffer | string | object | undefined): string | undefined {
-  let result: Buffer | string | object | undefined = undefined;
+export function bodyToString(body: ProcessedBody): string | undefined {
+  let result: ProcessedBody = undefined;
   const isObj = isObject(body);
   if (isObj) {
     result = JSON.stringify(body);

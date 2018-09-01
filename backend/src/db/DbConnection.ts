@@ -21,7 +21,7 @@ class DbConnection {
     this.database.end(callback);
   }
 
-  async queryPromise(query): Promise<any[]> {
+  async queryPromise(query: string): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       this.query(query, (err: Client.MysqlError | null, rows: any[]) => {
         if (err) {
@@ -33,7 +33,7 @@ class DbConnection {
     });
   }
 
-  query(query, callback?: (err: Client.MysqlError | null, ...args: any[]) => void) {
+  query(query: string, callback?: (err: Client.MysqlError | null, ...args: any[]) => void) {
     this.database.query(query, (err, rows) => {
       if (err) {
         console.log(`DbConnection error: ${err}`);

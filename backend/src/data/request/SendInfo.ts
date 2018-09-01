@@ -1,14 +1,13 @@
-import * as https from 'https';
 import * as http from 'http';
 import * as url from 'url';
 import { readPostBodyPromise } from 'Utils/requesttools';
 
 export default class SendInfo {
-  host: string;
-  path: string;
-  port: number;
-  headers: {[header: string]: string | string[] | number | undefined};
-  method: string;
+  host: string = '';
+  path: string = '';
+  port: number = 0;
+  headers: {[header: string]: string | string[] | number | undefined} = {};
+  method: string = '';
   body?: string | Buffer | object;
 }
 

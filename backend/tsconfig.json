@@ -3,7 +3,10 @@
     "module": "commonjs",
     "target": "es6",
     "sourceMap": true,
-    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "strict": true,
+    "noUnusedLocals": true,
 
     "baseUrl": ".",
     "paths": {

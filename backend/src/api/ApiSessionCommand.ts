@@ -1,11 +1,7 @@
 import { ApiCommand, setResponse } from 'main/api/ApiCommand';
-import ILogger, { LogLevel } from 'Logger/ILogger';
-import { StubGroupTable } from 'DB/StubGroupTable';
+import ILogger from 'Logger/ILogger';
 import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import * as http from 'http';
-import * as util from 'util';
-import StubGroup from 'Model/StubGroup';
-import SessionInfo from 'Model/SessionInfo';
 import SessionManager from 'main/session/SessionManager';
 
 // SPEC:

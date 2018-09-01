@@ -1,11 +1,7 @@
 import { ApiCommand, setResponse } from 'main/api/ApiCommand';
-import ILogger, { LogLevel } from 'Logger/ILogger';
-import { StubGroupTable } from 'DB/StubGroupTable';
+import ILogger from 'Logger/ILogger';
 import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import * as http from 'http';
-import * as util from 'util';
-import StubGroup from 'Model/StubGroup';
-import SessionInfo from 'Model/SessionInfo';
 import SessionManager from 'main/session/SessionManager';
 
 // SPEC:
@@ -26,7 +22,11 @@ class ApiSessionAddStubGroupsCommand implements ApiCommand {
   }
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    const ids = requestInfo.body!['stubGroupIds'] as number[];
+    const ids = requestInfo.body instanceof Object ? requestInfo.body['stubGroupIds'] as number[] : undefined;
+    if (ids == null) {
+      throw 'ApiSessionAddStubGroupsCommand wrong body, stubGroupId is not found';
+    }
+
     return this.manager.start(ids).then((o) => {
       return this.fillResponse(res);
     });

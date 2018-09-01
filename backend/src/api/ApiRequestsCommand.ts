@@ -3,9 +3,8 @@ import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import Request from 'Model/Request';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 import * as http from 'http';
-import * as util from 'util';
 import RequestTable from 'DB/RequestTable';
-import ILogger, { LogLevel } from 'Logger/ILogger';
+import ILogger from 'Logger/ILogger';
 
 // SPEC:
 //
