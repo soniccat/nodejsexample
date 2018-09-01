@@ -13,6 +13,17 @@ import StubGroup from 'Model/StubGroup';
 // response:
 //  StubGroup obj
 
+interface MyType {
+  'name': string;
+}
+
+interface MyTypeConstructor {
+  new (o: any): MyType;
+  readonly prototype: {[field: string]:string};
+}
+
+declare var MyType: MyTypeConstructor;
+
 class ApiCreateStubGroupCommand implements ApiCommand {
   logger: ILogger;
   stubGroupsTable: StubGroupTable;
@@ -23,7 +34,7 @@ class ApiCreateStubGroupCommand implements ApiCommand {
   }
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    const name = requestInfo.body instanceof Object ? requestInfo.body['name'] : undefined;
+    const name = requestInfo.body instanceof MyType ? requestInfo.body['name'] : undefined;
     if (name == null) {
       throw 'ApiCreateStubGroupCommand invalid body, name is not found';
     }

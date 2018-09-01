@@ -14,19 +14,20 @@ class ApiDeleteRequestInStubGroupCommand implements ApiCommand {
   logger: ILogger;
   stubGroupsTable: StubGroupTable;
 
-  requestId: number;
-  stubGropupId: number;
-
   constructor(stubGroupsTable: StubGroupTable, logger: ILogger) {
     this.stubGroupsTable = stubGroupsTable;
     this.logger = logger;
   }
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    this.stubGropupId = parseInt(requestInfo.components[1], 10);
-    this.requestId = parseInt(requestInfo.components[3], 10);
+    const stubGropupId = parseInt(requestInfo.components[1], 10);
+    const requestId = parseInt(requestInfo.components[3], 10);
 
-    return this.handleStubGroups(res);
+    if (stubGropupId == null || requestId == null) {
+      throw 'ApiDeleteRequestInStubGroupCommand wrong url parameters stubGropupId=${stubGropupId} requestId=${requestId}';
+    }
+
+    return this.handleStubGroups(stubGropupId, requestId, res);
   }
 
   canRun(requestInfo: ApiCommandInfo): boolean {
@@ -36,15 +37,11 @@ class ApiDeleteRequestInStubGroupCommand implements ApiCommand {
     requestInfo.components[2] === 'requests';
   }
 
-  async handleStubGroups(res: http.ServerResponse): Promise<http.ServerResponse> {
-    return this.deletRequestInStubGroup()
+  async handleStubGroups(stubGropupId: number, requestId: number, res: http.ServerResponse): Promise<http.ServerResponse> {
+    return this.stubGroupsTable.deleteRequest(stubGropupId, requestId)
     .then((rows) => {
       return setResponse(res, 200, JSON.stringify(rows));
     });
-  }
-
-  async deletRequestInStubGroup(): Promise<any> {
-    return this.stubGroupsTable.deleteRequest(this.stubGropupId, this.requestId);
   }
 }
 

@@ -15,16 +15,18 @@ class ApiDeleteStubGroupCommand implements ApiCommand {
   logger: ILogger;
   stubGroupsTable: StubGroupTable;
 
-  stubGroupId: number;
-
   constructor(stubGroupsTable: StubGroupTable, logger: ILogger) {
     this.stubGroupsTable = stubGroupsTable;
     this.logger = logger;
   }
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    this.stubGroupId = parseInt(requestInfo.components[1], 10);
-    return this.handleDeleteStubGroup(res);
+    const stubGroupId = parseInt(requestInfo.components[1], 10);
+    if (stubGroupId == null) {
+      throw 'ApiDeleteStubGroupCommand wrong stubGroupId=${stubGroupId} parameter';
+    }
+
+    return this.deleteStubGroup(stubGroupId, res);
   }
 
   canRun(requestInfo: ApiCommandInfo): boolean {
@@ -33,15 +35,11 @@ class ApiDeleteStubGroupCommand implements ApiCommand {
     requestInfo.components[0] === 'stubgroups';
   }
 
-  async handleDeleteStubGroup(res: http.ServerResponse): Promise<http.ServerResponse> {
-    return this.createStubGroup()
+  async deleteStubGroup(stubGroupId: number, res: http.ServerResponse): Promise<http.ServerResponse> {
+    return this.stubGroupsTable.deleteStubGroup(stubGroupId)
     .then((rows: StubGroup) => {
       return setResponse(res, 200, JSON.stringify(rows));
     });
-  }
-
-  async createStubGroup(): Promise<StubGroup> {
-    return this.stubGroupsTable.deleteStubGroup(this.stubGroupId);
   }
 }
 

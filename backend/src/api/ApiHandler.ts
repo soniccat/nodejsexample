@@ -69,7 +69,7 @@ class ApiHandler {
     const apiRequestInfo = await this.extractApiCommandInfo(req);
     const body = await readPostBodyPromise(req);
 
-    if (body !== undefined) {
+    if (body != null) {
       apiRequestInfo.body = body;
     }
 

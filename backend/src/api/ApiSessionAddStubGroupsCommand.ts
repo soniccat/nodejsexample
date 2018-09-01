@@ -12,6 +12,17 @@ import SessionManager from 'main/session/SessionManager';
 // response:
 //  SessionInfo
 
+interface MyType {
+  'stubGroupIds': number[];
+}
+
+interface MyTypeConstructor {
+  new (o: any): MyType;
+  readonly prototype: MyType;
+}
+
+declare var MyType: MyTypeConstructor;
+
 class ApiSessionAddStubGroupsCommand implements ApiCommand {
   logger: ILogger;
   manager: SessionManager;
@@ -22,7 +33,7 @@ class ApiSessionAddStubGroupsCommand implements ApiCommand {
   }
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
-    const ids = requestInfo.body instanceof Object ? requestInfo.body['stubGroupIds'] as number[] : undefined;
+    const ids = requestInfo.body instanceof MyType ? requestInfo.body['stubGroupIds'] : undefined;
     if (ids == null) {
       throw 'ApiSessionAddStubGroupsCommand wrong body, stubGroupId is not found';
     }
