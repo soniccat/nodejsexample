@@ -10,20 +10,16 @@ export function buildSessionCall() : ApiCall {
 
 export function buildAddStubGroupCall(ids: number[]) : ApiCall {
   return buildApiCall({
-    method: 'POST',
-    path: 'session/stubgroups',
-    data: {
-      stubGroupIds: ids,
-    },
+    method: 'PATCH',
+    path: 'session',
+    data: [{ op: 'add', path: '/stubGroupIds', values: ids }],
   });
 }
 
 export function buildRemoveStubGroupCall(ids: number[]) : ApiCall {
   return buildApiCall({
-    method: 'DELETE',
-    path: 'session/stubgroups',
-    data: {
-      stubGroupIds: ids,
-    },
+    method: 'PATCH',
+    path: 'session',
+    data: [{ op: 'remove', path: '/stubGroupIds', values: ids }],
   });
 }

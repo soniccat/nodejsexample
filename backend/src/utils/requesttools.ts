@@ -15,7 +15,7 @@ export async function readPostBodyPromise(request: http.IncomingMessage): Promis
 }
 
 export function readPostBody(request: http.IncomingMessage, callback: (buffer: ProcessedBody) => void) {
-  if (request.method !== 'POST') {
+  if (request.method !== 'POST' && request.method !== 'PATCH') {
     callback(undefined);
   } else {
     readBody(request, buffer => callback(processBuffer(buffer)));
