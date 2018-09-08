@@ -21,6 +21,8 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
     this.onStubGroupDeleteClicked = this.onStubGroupDeleteClicked.bind(this);
+    this.onStubGroupStartClicked = this.onStubGroupStartClicked.bind(this);
+    this.onStubGroupStopClicked = this.onStubGroupStopClicked.bind(this);
 
     this.state = {
     };
@@ -30,6 +32,14 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
 
   componentDidMount() {
     this.loadStubGroups();
+  }
+
+  onStubGroupStartClicked(group: StubGroup) {
+    this.props.sessionHolder.start([group.id]);
+  }
+
+  onStubGroupStopClicked(group: StubGroup) {
+    this.props.sessionHolder.stop([group.id]);
   }
 
   onStubGroupDeleteClicked(group: StubGroup) {
@@ -56,6 +66,8 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
       isActive={this.props.sessionHolder.isStubGroupActive(group)}
       isExpanded={false}
       onStubGroupDeleteClicked={this.onStubGroupDeleteClicked}
+      onStubGroupStartClicked={this.onStubGroupStartClicked}
+      onStubGroupStopClicked={this.onStubGroupStopClicked}
       onRequestChanged={this.onRequestChanged}
       onRequestDeleteClicked={this.onRequestDeleteClicked}/>));
     return (

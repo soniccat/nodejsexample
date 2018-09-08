@@ -6,13 +6,13 @@ import SessionManager from 'main/session/SessionManager';
 
 // SPEC:
 //
-// session/stubgroups (POST) - add stub groups to session
+// session/stubgroups (DELETE) - remove stub groups to session
 // body:
 //  {stubGroupIds:number[]}
 // response:
 //  SessionInfo
 
-class ApiSessionAddStubGroupsCommand implements ApiCommand {
+class ApiSessionRemoveStubGroupsCommand implements ApiCommand {
   logger: ILogger;
   manager: SessionManager;
 
@@ -24,10 +24,10 @@ class ApiSessionAddStubGroupsCommand implements ApiCommand {
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     const ids = (requestInfo.body as any).stubGroupIds;
     if (ids == null) {
-      throw 'ApiSessionAddStubGroupsCommand wrong body, stubGroupId is not found';
+      throw 'ApiSessionRemoveStubGroupsCommand wrong body, stubGroupId is not found';
     }
 
-    return this.manager.start(ids).then((o) => {
+    return this.manager.stop(ids).then((o) => {
       return this.fillResponse(res);
     });
   }
@@ -35,7 +35,7 @@ class ApiSessionAddStubGroupsCommand implements ApiCommand {
   canRun(requestInfo: ApiCommandInfo): boolean {
     return requestInfo.components.length === 2 &&
     requestInfo.body !== undefined &&
-    requestInfo.method === 'POST' &&
+    requestInfo.method === 'DELETE' &&
     requestInfo.components[0] === 'session' &&
     requestInfo.components[1] === 'stubgroups';
   }
@@ -45,4 +45,4 @@ class ApiSessionAddStubGroupsCommand implements ApiCommand {
   }
 }
 
-export default ApiSessionAddStubGroupsCommand;
+export default ApiSessionRemoveStubGroupsCommand;

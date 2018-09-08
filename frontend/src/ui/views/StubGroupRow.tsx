@@ -10,6 +10,8 @@ export interface StubGroupRowProps {
   isExpanded: boolean;
   isActive: boolean;
 
+  onStubGroupStartClicked: (stubGroup: StubGroup) => void;
+  onStubGroupStopClicked: (stubGroup: StubGroup) => void;
   onStubGroupDeleteClicked: (stubGroup: StubGroup) => void;
   onRequestChanged: (request: Request, stubGroup: StubGroup) => void;
   onRequestDeleteClicked: (request: Request, stubGroup: StubGroup) => void;
@@ -25,12 +27,22 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
 
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
+    this.onToggleStatusClicked = this.onToggleStatusClicked.bind(this);
     this.onStubGroupHeaderPressed = this.onStubGroupHeaderPressed.bind(this);
     this.onStubGroupDeleteClicked = this.onStubGroupDeleteClicked.bind(this);
 
     this.state = {
       isExpanded: props.isExpanded,
     };
+  }
+
+  onToggleStatusClicked(e: React.MouseEvent<Element>) {
+    e.stopPropagation();
+    if (this.props.isActive) {
+      this.props.onStubGroupStopClicked(this.props.stubGroup);
+    } else {
+      this.props.onStubGroupStartClicked(this.props.stubGroup);
+    }
   }
 
   onStubGroupDeleteClicked(e: React.MouseEvent<Element>) {
@@ -59,7 +71,7 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
         <div className="stub_group_name">
           {this.props.stubGroup.name}
         </div>
-        <div className="stub_group_status">
+        <div className="stub_group_status" onClick={this.onToggleStatusClicked}>
           {this.props.isActive ? 'STOP' : 'START'}
         </div>
         <div className="stub_group_delete_button" onClick={this.onStubGroupDeleteClicked}>

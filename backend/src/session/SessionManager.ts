@@ -35,6 +35,7 @@ export default class SessionManager {
 
   stop(stubGroupIds: number[]) {
     this.stubGroups = this.stubGroups.filter(o => stubGroupIds.find(id => id === o.id) === undefined);
+    return Promise.resolve();
   }
 
   isActive(): boolean {

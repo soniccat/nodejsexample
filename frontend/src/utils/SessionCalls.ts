@@ -7,3 +7,23 @@ export function buildSessionCall() : ApiCall {
     path: 'session',
   });
 }
+
+export function buildAddStubGroupCall(ids: number[]) : ApiCall {
+  return buildApiCall({
+    method: 'POST',
+    path: 'session/stubgroups',
+    data: {
+      stubGroupIds: ids,
+    },
+  });
+}
+
+export function buildRemoveStubGroupCall(ids: number[]) : ApiCall {
+  return buildApiCall({
+    method: 'DELETE',
+    path: 'session/stubgroups',
+    data: {
+      stubGroupIds: ids,
+    },
+  });
+}
