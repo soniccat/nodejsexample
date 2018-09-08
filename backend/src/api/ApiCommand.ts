@@ -7,10 +7,9 @@ export interface ApiCommand {
 }
 
 export function setResponse(res: http.ServerResponse, code: number, body?: string): http.ServerResponse {
-  res.writeHead(code, {
-    'Access-Control-Allow-Origin': '*',
+  res.writeHead(code, Object.assign({
     'Content-Type': 'application/json',
-  });
+  }, baseHead()));
 
   if (body) {
     res.write(body);
@@ -20,6 +19,10 @@ export function setResponse(res: http.ServerResponse, code: number, body?: strin
 }
 
 export function setNotFoundResponse(res: http.ServerResponse): http.ServerResponse {
-  res.writeHead(404);
+  res.writeHead(404, baseHead());
   return res;
+}
+
+function baseHead() {
+  return { 'Access-Control-Allow-Origin': '*' };
 }
