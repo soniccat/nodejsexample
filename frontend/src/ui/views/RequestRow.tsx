@@ -31,6 +31,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onDeleteClicked = this.onDeleteClicked.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
+    this.onNameChanged = this.onNameChanged.bind(this);
 
     this.state = {
       isExpanded: props.isExpanded,
@@ -54,9 +55,6 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_response_status">
             {this.props.request.responseStatus}
           </div>
-          <div className="request_name">
-            {this.props.request.name ? this.props.request.name : 'Set name'}
-          </div>
           {!this.props.request.isStub ?
             <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
                             Create stub
@@ -65,6 +63,17 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
             DEL
           </div>
           {(this.props.request.isStub && this.props.stubGroupPopupContent != null) ? this.renderStubGroupsButton() : undefined}
+          <div className="request_name">
+            {this.props.request.name ? this.props.request.name : 'Set name'}
+            <div className="request_name_text" onClick={e => e.stopPropagation()}>
+              <textarea
+                value={this.props.request.name}
+                onChange={(event) => {
+                  this.onNameChanged(event.target.value);
+                }}
+                onKeyPress={this.handleKeyPress} />
+            </div>
+          </div>
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
@@ -180,6 +189,16 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   onDeleteClicked(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
     this.props.onDeleteClicked(this.props.request);
+  }
+
+  onNameChanged(name: string) {
+    this.onObjChanged(Object.assign({}, this.props.request, { name }));
+  }
+
+  private handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
   }
 }
 
