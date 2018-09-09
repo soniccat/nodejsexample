@@ -19,6 +19,7 @@ export interface RequestRowState {
   isExpanded: boolean;
   isSentExpanded: boolean;
   isReceivedExpanded: boolean;
+  editingName?: string;
 }
 
 export class RequestRow extends React.Component<RequestRowProps, RequestRowState> {
@@ -32,6 +33,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onDeleteClicked = this.onDeleteClicked.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
     this.onNameChanged = this.onNameChanged.bind(this);
+    this.handleNameKeyPress = this.handleNameKeyPress.bind(this);
 
     this.state = {
       isExpanded: props.isExpanded,
@@ -63,21 +65,34 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
             DEL
           </div>
           {(this.props.request.isStub && this.props.stubGroupPopupContent != null) ? this.renderStubGroupsButton() : undefined}
-          <div className="request_name">
-            {this.props.request.name ? this.props.request.name : 'Set name'}
-            <div className="request_name_text" onClick={e => e.stopPropagation()}>
+          <div className="request_name" onClick={e => this.onNameClicked(e)}>
+            {this.renderNameValue()}
+            {this.state.editingName ? <div className="request_name_text">
               <textarea
-                value={this.props.request.name}
+                autoFocus={true}
+                value={this.state.editingName}
                 onChange={(event) => {
                   this.onNameChanged(event.target.value);
                 }}
-                onKeyPress={this.handleKeyPress} />
-            </div>
+                onKeyPress={this.handleNameKeyPress} />
+            </div> : undefined}
           </div>
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
     );
+  }
+
+  renderNameValue(): string {
+    let name;
+    if (this.state.editingName) {
+      name = this.state.editingName;
+    } else if (this.props.request.name) {
+      name = this.props.request.name;
+    } else {
+      name = 'Set name';
+    }
+    return name;
   }
 
   renderStubGroupsButton() {
@@ -191,13 +206,34 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.props.onDeleteClicked(this.props.request);
   }
 
-  onNameChanged(name: string) {
-    this.onObjChanged(Object.assign({}, this.props.request, { name }));
+  startNameEditing() {
+    this.setState({
+      editingName: this.props.request.name ? this.props.request.name : '',
+    });
   }
 
-  private handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  stopNameEditing() {
+    this.onObjChanged(Object.assign({}, this.props.request, { name: this.state.editingName }));
+    this.setState({
+      editingName: undefined,
+    });
+  }
+
+  onNameClicked(e: React.MouseEvent<HTMLDivElement>) {
+    e.stopPropagation();
+    this.startNameEditing();
+  }
+
+  onNameChanged(name: string) {
+    this.setState({
+      editingName: name,
+    });
+  }
+
+  private handleNameKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter') {
       e.preventDefault();
+      this.stopNameEditing();
     }
   }
 }
