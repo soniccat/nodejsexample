@@ -76,12 +76,18 @@ async function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerRespons
   return proxy.handleRequest(sendInfo, res)
       .then((requestInfo: RequestInfo) => {
         if (needWriteRequestRow(requestInfo)) {
-          requestDb.writeRequestAsRequestInfo(requestInfo).then((rows:any[]) => {
+          const name = getDateString();
+          requestDb.writeRequestAsRequestInfo(name, requestInfo).then((rows:any[]) => {
             logger.log(LogLevel.DEBUG, `added to DB ${requestInfo.sendInfo.path}`);
           });
         }
         return res;
       });
+}
+
+function getDateString(): string {
+  const d = new Date();
+  return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
 }
 
 server.on('error', (err) => {
@@ -103,8 +109,6 @@ dbConnection.connect((err) => {
   }
 
   stubGroupTable.loadStubGroups().then(() => {
-    sessionManager.start([36086]);
-
     server.listen(severPort, () => {
     });
   });

@@ -24,7 +24,8 @@ create table if not exists request (
   response_string longtext null,
   response_string_is_json boolean,
   response_data mediumblob null,
-  is_stub boolean
+  is_stub boolean,
+  name varchar(2048) not null,
 ) engine=InnoDB default charset utf8;
 */
 
@@ -46,6 +47,7 @@ export class DbRequestRow {
   response_string_is_json: boolean = false;
   response_data?: any;
   is_stub: number = 0;
+  name: string = '';
 }
 /* tslint:enable:variable-name */
 
@@ -66,8 +68,9 @@ class RequestTable {
       });
   }
 
-  async writeRequestAsRequestInfo(requestInfo: RequestInfo): Promise<any[]> {
+  async writeRequestAsRequestInfo(name: string, requestInfo: RequestInfo): Promise<any[]> {
     return this.writeRequest({
+      name,
       url: getUrlString(requestInfo.sendInfo),
       port: requestInfo.sendInfo.port,
       method: requestInfo.sendInfo.method,
@@ -146,7 +149,8 @@ class RequestTable {
     query += `${responseString},
         ${responseStringIsJson},
         ${responseData},
-        ${obj.isStub}
+        ${obj.isStub},
+        ${this.wrapString(obj.name)}
         );`;
     return query;
   }
@@ -184,7 +188,8 @@ class RequestTable {
     query += `response_string=${responseString},
         response_string_is_json=${responseStringIsJson},
         response_data=${responseData},
-        is_stub=${obj.isStub}`;
+        is_stub=${obj.isStub},
+        name=${this.wrapString(obj.name)}`;
 
     // WHERE
     query += ` WHERE id=${obj.id};`;
@@ -226,6 +231,8 @@ class RequestTable {
     switch (name) {
       case 'GET': return 1;
       case 'POST': return 2;
+      case 'DELET': return 3;
+      case 'PATCH': return 4;
       default: return 0;
     }
   }
@@ -234,6 +241,8 @@ class RequestTable {
     switch (code) {
       case 1: return 'GET';
       case 2: return 'POST';
+      case 3: return 'DELETE';
+      case 4: return 'PATCH';
       default: return 'UNKNOWN';
     }
   }
@@ -274,6 +283,7 @@ class RequestTable {
       responseStatus: request.response_status,
       responseHeaders: request.response_headers ? JSON.parse(request.response_headers) : {},
       isStub: request.is_stub !== 0,
+      name: request.name,
     };
   }
 }

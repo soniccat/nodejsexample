@@ -1,3 +1,4 @@
+
 export default class Request {
   id?: number;
   url: string = '';
@@ -9,6 +10,7 @@ export default class Request {
   responseHeaders: {[index: string]: any} = {};
   responseBody?: string | Buffer | object;
   isStub: boolean = false;
+  name: string = '';
 
   static checkType(obj: any): obj is Request {
     return typeof obj.url === `string`
@@ -17,6 +19,7 @@ export default class Request {
     && obj.headers
     && typeof obj.responseStatus === `number`
     && obj.responseHeaders
-    && typeof obj.isStub === `boolean`;
+    && typeof obj.isStub === `boolean`
+    && typeof obj.name === 'string';
   }
 }

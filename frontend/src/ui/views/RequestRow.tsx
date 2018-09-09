@@ -54,6 +54,9 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <div className="request_response_status">
             {this.props.request.responseStatus}
           </div>
+          <div className="request_name">
+            {this.props.request.name ? this.props.request.name : 'Set name'}
+          </div>
           {!this.props.request.isStub ?
             <div className="request_create_stub_button" onClick={this.onCreateStubClicked}>
                             Create stub
