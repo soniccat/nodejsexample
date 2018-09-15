@@ -64,7 +64,10 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
             DEL
           </div>
           {(this.props.request.isStub && this.props.stubGroupPopupContent != null) ? this.renderStubGroupsButton() : undefined}
-          <InputView className="request_name" value={this.props.request.name} onValueChanged = {this.onNameChanged}/>
+          <InputView className="request_name"
+          value={this.props.request.name}
+          emptyValue="Set Name"
+          onValueChanged = {this.onNameChanged}/>
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>

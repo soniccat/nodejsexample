@@ -3,8 +3,10 @@ import 'CSS/InputView';
 
 interface InputViewProp {
   value: string;
+  emptyValue?: string;
   className: string;
 
+  onEditingStarted?: () => void;
   onValueChanged: (newValue: string) => void;
 }
 
@@ -26,13 +28,19 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
     this.setState({
       editingValue: this.props.value ? this.props.value : '',
     });
+
+    if (this.props.onEditingStarted) {
+      this.props.onEditingStarted();
+    }
   }
 
   stopEditing() {
-    this.props.onValueChanged(this.state.editingValue);
-    this.setState({
-      editingValue: undefined,
-    });
+    if (this.state.editingValue !== undefined) {
+      this.props.onValueChanged(this.state.editingValue);
+      this.setState({
+        editingValue: undefined,
+      });
+    }
   }
 
   onClicked(e: React.MouseEvent<HTMLDivElement>) {
@@ -56,14 +64,16 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
   render() {
     return <div className={this.props.className + ' input_view'} onClick={e => this.onClicked(e)}>
       {this.renderValue()}
-      {this.state.editingValue ? <div className="input_view_editing">
+      {this.state.editingValue !== undefined ? <div className="input_view_editing">
         <textarea
           autoFocus={true}
           value={this.state.editingValue}
           onChange={(event) => {
             this.onValueChanged(event.target.value);
           }}
-          onKeyPress={this.handleNameKeyPress} />
+          onKeyPress={this.handleNameKeyPress}
+          role="textbox"
+          tabIndex={0}/>
       </div> : undefined}
     </div>;
   }
@@ -74,8 +84,10 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
       name = this.state.editingValue;
     } else if (this.props.value) {
       name = this.props.value;
+    } else if (this.props.emptyValue) {
+      name = this.props.emptyValue;
     } else {
-      name = 'Set name';
+      name = '';
     }
     return name;
   }

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { isObject, isEmptyArray } from 'Utils/Tools';
 import ExpandButton from './ExpandButton';
+import InputView from './InputView';
 import 'CSS/JsonView';
 
 export interface JsonViewProps {
@@ -17,11 +18,11 @@ export interface JsonViewState {
   childExpandLevels: {[index: number] : number};
   editingIndex: number;
   editingKeyName: string;
-  editingKeyValue: any;
 }
 
 export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   childRefs: {[index: number] : React.RefObject<JsonView>};
+  inputViewRef?: React.RefObject<InputView>;
   childIndexes: {[key: string] : number};
   nextChildIndex: number = 1;
 
@@ -34,6 +35,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.handleWillStartEditing = this.handleWillStartEditing.bind(this);
     this.onCollapsedPressed = this.onCollapsedPressed.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
+    this.onEditingStarted = this.onEditingStarted.bind(this);
 
     const expandedStates : {[key: number] : number} = {};
     const keys = Object.keys(this.props.obj);
@@ -46,7 +48,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       childExpandLevels: expandedStates,
       editingIndex: undefined,
       editingKeyName: undefined,
-      editingKeyValue: undefined,
     };
   }
 
@@ -54,10 +55,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   onKeyClicked(objKey: string, index: number) {
     this.startKeyEditing(objKey, index);
-  }
-
-  onValueClicked(objKey: string, index: number) {
-    this.startValueEditing(objKey, index);
   }
 
   // Actions
@@ -98,22 +95,17 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.props.onObjChanged(newObj);
   }
 
-  private startValueEditing(objKey: string, index: number) {
-    this.handleWillStartEditing();
+  // private startValueEditing(objKey: string, index: number) {
+  //   this.handleWillStartEditing();
 
-    this.setState({
-      editingIndex: index,
-      editingKeyValue: this.props.obj[objKey],
-    });
-  }
+  //   this.setState({
+  //     editingIndex: index,
+  //     editingKeyValue: this.props.obj[objKey],
+  //   });
+  // }
 
   changeValue(objKey: string, newValue: any) {
     const newObj = Object.assign({}, this.props.obj, { [objKey]: newValue });
-
-    this.setState({
-      editingKeyValue: newValue,
-    });
-
     this.props.onObjChanged(newObj);
   }
 
@@ -121,7 +113,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.setState({
       editingIndex: undefined,
       editingKeyName: undefined,
-      editingKeyValue: undefined,
     });
   }
 
@@ -272,7 +263,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   private renderKey(objKey: string, index: number, isSubJson: boolean): any {
     let textarea;
-    if (this.state.editingIndex === index && this.state.editingKeyValue === undefined) {
+    if (this.state.editingIndex === index) {
       textarea = <div key={'' + 'editing_key'}>
         <textarea
         autoFocus={true}
@@ -300,39 +291,20 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   renderJsonValue(objKey: string, index: number, tagKey: string, value: any) {
-    let textarea;
-    if (this.state.editingIndex === index && this.state.editingKeyValue != null) {
-      textarea = this.renderJsonValueTextArea(objKey);
-    }
-
-    return (<div
+    return (<InputView
       key={tagKey}
       className="json_value"
-      onClick={() => { this.onValueClicked(objKey, index); }}
-      onKeyPress={() => {
-        if (textarea === undefined) {
-          this.onValueClicked(objKey, index);
-        }
-      }
-    }
-      role="textbox"
-      tabIndex={0}>
-        <div>{value}</div>
-        {textarea}
-    </div>);
+      value={value}
+      onEditingStarted={this.onEditingStarted}
+      onValueChanged={(newValue) => {
+        this.changeValue(objKey, newValue);
+      }}
+      />
+    );
   }
 
-  renderJsonValueTextArea(objKey:string) {
-    return (<div key="editing_value">
-      <textarea
-        autoFocus={true}
-        value={this.state.editingKeyValue}
-        onChange={(event) => {
-          this.changeValue(objKey, event.target.value);
-        }}
-        onKeyPress={this.handleKeyPress}
-      />
-    </div>);
+  onEditingStarted() {
+    this.handleWillStartEditing();
   }
 }
 
