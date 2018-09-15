@@ -21,15 +21,13 @@ export interface JsonViewState {
 }
 
 export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
-  childRefs: {[index: number] : React.RefObject<JsonView>};
-  inputViewRef?: React.RefObject<InputView>;
-  childIndexes: {[key: string] : number};
+  childRefs: {[index: number] : React.RefObject<JsonView>} = {};
+  inputViewRefs: React.RefObject<InputView>[] = [];
+  childIndexes: {[key: string] : number} = {};
   nextChildIndex: number = 1;
 
   constructor(props: JsonViewProps) {
     super(props);
-    this.childRefs = {};
-    this.childIndexes = {};
 
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleWillStartEditing = this.handleWillStartEditing.bind(this);
@@ -131,6 +129,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       this.childRefs[index].current.stopEditing();
     }
 
+    this.inputViewRefs.forEach(o => o.current.stopEditing());
     this.finishEditing();
   }
 
@@ -165,6 +164,12 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     return ref;
   }
 
+  private createInputViewRef() {
+    const ref = React.createRef<InputView>();
+    this.inputViewRefs.push(ref);
+    return ref;
+  }
+
   ensureChildIndex(objKey: string): number {
     let index = this.childIndexes[objKey];
     if (index === undefined) {
@@ -181,6 +186,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   render() {
     const cells = [];
     this.childRefs = [];
+    this.inputViewRefs = [];
 
     if (this.isExpanded()) {
       this.renderExpandedContent(cells);
@@ -291,6 +297,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   renderJsonValue(objKey: string, index: number, tagKey: string, value: any) {
+    const ref = this.createInputViewRef();
     return (<InputView
       key={tagKey}
       className="json_value"
@@ -299,6 +306,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       onValueChanged={(newValue) => {
         this.changeValue(objKey, newValue);
       }}
+      ref={ref}
       />
     );
   }
