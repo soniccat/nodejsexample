@@ -36,7 +36,9 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
 
   stopEditing() {
     if (this.state.editingValue !== undefined) {
-      this.props.onValueChanged(this.state.editingValue);
+      if (this.state.editingValue !== this.props.value) {
+        this.props.onValueChanged(this.state.editingValue);
+      }
       this.setState({
         editingValue: undefined,
       });
@@ -62,7 +64,10 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
   }
 
   render() {
-    return <div className={this.props.className + ' input_view'} onClick={e => this.onClicked(e)}>
+    return <div className={this.props.className + ' input_view'} 
+      onClick={e => this.onClicked(e)}
+      role="textbox"
+      tabIndex={0}>
       {this.renderValue()}
       {this.state.editingValue !== undefined ? <div className="input_view_editing">
         <textarea
@@ -72,8 +77,7 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
             this.onValueChanged(event.target.value);
           }}
           onKeyPress={this.handleNameKeyPress}
-          role="textbox"
-          tabIndex={0}/>
+          />
       </div> : undefined}
     </div>;
   }

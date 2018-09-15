@@ -49,22 +49,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     };
   }
 
-  // Events
-
-  onKeyClicked(objKey: string, index: number) {
-    this.startKeyEditing(objKey, index);
-  }
-
   // Actions
-
-  private startKeyEditing(objKey: string, index: number) {
-    this.handleWillStartEditing();
-
-    this.setState({
-      editingIndex: index,
-      editingKeyName: objKey,
-    });
-  }
 
   changeKey(oldObjKey: string, newObjKey: string, index: number) {
     const obj = this.props.obj;
@@ -81,7 +66,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.props.onObjChanged(newObj);
   }
 
-  removeKey(objKey: string, index: number) {
+  removeKey(objKey: string) {
     const newObj = Object.assign({}, this.props.obj);
     delete newObj[objKey];
 
@@ -92,15 +77,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
     this.props.onObjChanged(newObj);
   }
-
-  // private startValueEditing(objKey: string, index: number) {
-  //   this.handleWillStartEditing();
-
-  //   this.setState({
-  //     editingIndex: index,
-  //     editingKeyValue: this.props.obj[objKey],
-  //   });
-  // }
 
   changeValue(objKey: string, newValue: any) {
     const newObj = Object.assign({}, this.props.obj, { [objKey]: newValue });
@@ -240,7 +216,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
             ref={ref}/>
         </div>;
       } else {
-        element = this.renderJsonValue(objKey, index, bodyKey, obj);
+        element = this.renderJsonValue(objKey, bodyKey, obj);
       }
 
       cells.push(element);
@@ -262,41 +238,27 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   private renderDeleteButton(objKey: string, index: number, isSubJson: boolean): any {
     return <div key={`${index}_delete_button`}
       className={`json_delete${isSubJson ? ' sub_json' : ''}`}
-      onClick={() => { this.removeKey(objKey, index); } }
+      onClick={() => { this.removeKey(objKey); } }
       role="button"
       tabIndex={0}>(del)</div>;
   }
 
   private renderKey(objKey: string, index: number, isSubJson: boolean): any {
-    let textarea;
-    if (this.state.editingIndex === index) {
-      textarea = <div key={'' + 'editing_key'}>
-        <textarea
-        autoFocus={true}
-        value={this.state.editingKeyName}
-        onChange={(event) => {
-          this.changeKey(objKey, event.target.value, index);
-        } }
-        onKeyPress={this.handleKeyPress} />
-      </div>;
-    }
-
-    return <div key={`${index}_key`}
+    const ref = this.createInputViewRef();
+    return (<InputView
+      key={`${index}_key`}
       className={`json_key${isSubJson ? ' sub_json' : ''}`}
-      onClick={() => {
-        if (textarea === undefined) {
-          this.onKeyClicked(objKey, index);
-        }
-      }
-    }
-      role="textbox"
-      tabIndex={0}>
-        <div>{objKey}</div>
-        {textarea}
-    </div>;
+      value={objKey}
+      onEditingStarted={this.onEditingStarted}
+      onValueChanged={(newValue) => {
+        this.changeKey(objKey, newValue, index);
+      }}
+      ref={ref}
+      />
+    );
   }
 
-  renderJsonValue(objKey: string, index: number, tagKey: string, value: any) {
+  renderJsonValue(objKey: string, tagKey: string, value: any) {
     const ref = this.createInputViewRef();
     return (<InputView
       key={tagKey}
