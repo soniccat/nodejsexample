@@ -29,16 +29,17 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   constructor(props: JsonViewProps) {
     super(props);
 
-    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleWillStartEditing = this.handleWillStartEditing.bind(this);
     this.onCollapsedPressed = this.onCollapsedPressed.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
     this.onEditingStarted = this.onEditingStarted.bind(this);
 
     const expandedStates : {[key: number] : number} = {};
+    this.ensureChildIndexes();
+
     const keys = Object.keys(this.props.obj);
     for (let i = 0; i < keys.length; i += 1) {
-      const index = this.ensureChildIndex(keys[i]);
+      const index = this.childIndexes[keys[i]];
       expandedStates[index] = this.defaultChildExpandLevel();
     }
 
@@ -83,15 +84,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.props.onObjChanged(newObj);
   }
 
-  finishEditing() {
-    this.setState({
-      editingIndex: undefined,
-      editingKeyName: undefined,
-    });
-  }
-
   expandChild(index: number) {
-    // TODO: use mutable-helpber
     const newExpandeStates = this.state.childExpandLevels;
     newExpandeStates[index] = newExpandeStates[index] > 0 ? 0 : 1;
 
@@ -109,11 +102,11 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.finishEditing();
   }
 
-  private handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      this.finishEditing();
-    }
+  finishEditing() {
+    this.setState({
+      editingIndex: undefined,
+      editingKeyName: undefined,
+    });
   }
 
   private handleWillStartEditing() {
@@ -181,11 +174,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderExpandedContent(cells: any[]) {
-    const keys = Object.keys(this.props.obj).sort();
-
+    const keys = this.getKeys();
     for (let i = 0; i < keys.length; i += 1) {
       const objKey = keys[i];
-      const index = this.ensureChildIndex(keys[i]);
+      const index = this.childIndexes[keys[i]];
       const obj = this.props.obj[objKey];
       const isSubJson = isObject(obj) && !isEmptyArray(obj);
 
@@ -223,6 +215,20 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     }
   }
 
+  private getKeys(): string[] {
+    this.ensureChildIndexes();
+    return Object.keys(this.props.obj).sort((a:string, b:string) => {
+      return this.childIndexes[a] - this.childIndexes[b];
+    });
+  }
+
+  private ensureChildIndexes() {
+    const keys = Object.keys(this.props.obj);
+    for (let i = 0; i < keys.length; i += 1) {
+      this.ensureChildIndex(keys[i]);
+    }
+  }
+
   private onObjChanged(objKey: string, obj: any) {
     const newObj = Object.assign({}, this.props.obj, { [objKey]: obj });
     this.props.onObjChanged(newObj);
@@ -249,6 +255,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       key={`${index}_key`}
       className={`json_key${isSubJson ? ' sub_json' : ''}`}
       value={objKey}
+      emptyValue="-no value-"
       onEditingStarted={this.onEditingStarted}
       onValueChanged={(newValue) => {
         this.changeKey(objKey, newValue, index);
@@ -264,6 +271,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       key={tagKey}
       className="json_value"
       value={value}
+      emptyValue="-no value-"
       onEditingStarted={this.onEditingStarted}
       onValueChanged={(newValue) => {
         this.changeValue(objKey, newValue);
