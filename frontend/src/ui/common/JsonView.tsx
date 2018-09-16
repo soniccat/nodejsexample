@@ -157,7 +157,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.childRefs = [];
     this.inputViewRefs = [];
 
-    if (this.isExpanded()) {
+    if (isEmptyArray(this.props.obj)) {
+      cells.push(<div key={'empty_array'}
+       onClick={this.onEmptyArrayPressed}>empty-array</div>);
+    } else if (this.isExpanded()) {
       this.renderExpandedContent(cells);
     } else {
       cells.push(<div key={'collapsed'}
@@ -173,13 +176,17 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     this.props.onCollapsedPressed(this.props.obj);
   }
 
+  private onEmptyArrayPressed() {
+    // TODO;
+  }
+
   private renderExpandedContent(cells: any[]) {
     const keys = this.getKeys();
     for (let i = 0; i < keys.length; i += 1) {
       const objKey = keys[i];
       const index = this.childIndexes[keys[i]];
       const obj = this.props.obj[objKey];
-      const isSubJson = isObject(obj) && !isEmptyArray(obj);
+      const isSubJson = isObject(obj) || isEmptyArray(obj);
 
       if (isSubJson) {
         cells.push(this.renderExpandButton(this.state.childExpandLevels[index] > 0, index, isSubJson));
