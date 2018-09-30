@@ -3,10 +3,8 @@ import { isObject, isEmptyArray } from 'Utils/Tools';
 import ExpandButton from './ExpandButton';
 import InputView from './InputView';
 import 'CSS/JsonView';
-import { ensureRef, RefDictType } from 'Utils/refTools';
-
-type ChildRefDictType = RefDictType<JsonView>;
-type InputRefDictType = RefDictType<InputView>;
+import { ensureRef } from 'Utils/RefTools';
+import { InputRefDictType, ChildRefDictType } from 'Utils/types';
 
 export interface JsonViewProps {
   obj: any;
