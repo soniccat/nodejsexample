@@ -21,7 +21,9 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
     this.onValueChanged = this.onValueChanged.bind(this);
     this.handleNameKeyPress = this.handleNameKeyPress.bind(this);
 
-    this.state = {};
+    this.state = {
+      editingValue: undefined,
+    };
   }
 
   startEditing() {
@@ -35,7 +37,7 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
   }
 
   stopEditing() {
-    if (this.state.editingValue !== undefined) {
+    if (this.isEditing()) {
       if (this.state.editingValue !== this.props.value) {
         this.props.onValueChanged(this.state.editingValue);
       }
@@ -45,9 +47,15 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
     }
   }
 
+  isEditing(): Boolean {
+    return this.state.editingValue !== undefined;
+  }
+
   onClicked(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
-    this.startEditing();
+    if (!this.isEditing()) {
+      this.startEditing();
+    }
   }
 
   onValueChanged(value: string) {

@@ -4,7 +4,7 @@ import ExpandButton from './ExpandButton';
 import InputView from './InputView';
 import 'CSS/JsonView';
 import { ensureRef } from 'Utils/RefTools';
-import { InputRefDictType, ChildRefDictType } from 'Utils/types';
+import { InputRefDictType, JsonViewRefDictType } from 'Utils/types';
 
 export interface JsonViewProps {
   obj: any;
@@ -23,7 +23,7 @@ export interface JsonViewState {
 }
 
 export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
-  childRefs: ChildRefDictType = {};
+  childRefs: JsonViewRefDictType = {};
   inputViewRefs: InputRefDictType = {};
   childIndexes: {[key: string] : number} = {};
   nextChildIndex: number = 1;
@@ -132,7 +132,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     return this.props.expandLevel > 0;
   }
 
-  private ensureChildRef(index: number, newChildRef: ChildRefDictType): React.Ref<JsonView> {
+  private ensureChildRef(index: number, newChildRef: JsonViewRefDictType): React.Ref<JsonView> {
     return ensureRef(index, this.childRefs, newChildRef);
   }
 
@@ -180,7 +180,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderExpandedContent(cells: any[]) {
-    const newChildRefs:ChildRefDictType = {};
+    const newChildRefs:JsonViewRefDictType = {};
     const newInputRefs:InputRefDictType = {};
 
     const keys = this.getKeys();
@@ -224,6 +224,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     }
 
     this.childRefs = newChildRefs;
+    this.inputViewRefs = newInputRefs;
   }
 
   private getKeys(): string[] {
@@ -277,7 +278,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   renderJsonValue(objKey: string, tagKey: string, value: any, newChildRefDict: InputRefDictType) {
-    const ref = this.ensureInputViewRef(objKey + '_key', newChildRefDict);
+    const ref = this.ensureInputViewRef(objKey + '_value', newChildRefDict);
     return (<InputView
       key={tagKey}
       className="json_value"

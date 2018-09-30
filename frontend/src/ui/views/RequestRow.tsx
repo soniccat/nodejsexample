@@ -6,7 +6,6 @@ import { isObject } from 'Utils/Tools';
 import ExpandButton from 'UI/common/ExpandButton';
 import 'CSS/RequestRow';
 import Popup from 'reactjs-popup';
-import { throws } from 'assert';
 
 export interface RequestRowProps {
   request: Request;

@@ -4,6 +4,8 @@ import RequestRow from 'UI/views/RequestRow';
 import Request from 'Model/Request';
 import DataHolder from 'Data/DataHolder';
 import { StubGroupList } from 'UI/containers/StubGroupList';
+import { RequestRowRefDictType } from 'Utils/types';
+import { ensureRef } from 'Utils/RefTools';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
@@ -21,7 +23,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     },
   };
 
-  rowRefs: {[index:number]:React.RefObject<RequestRow>} = {};
+  rowRefs: RequestRowRefDictType = {};
 
   constructor(props: RequestViewerProps) {
     super(props);
@@ -35,21 +37,6 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.state = {
       requestOptions: this.props.requestOptions,
     };
-  }
-
-  // Actions
-
-  private prepareRowRefs() {
-    const newRefs: {[index:number]:React.RefObject<RequestRow>} = {};
-    this.getRenderRequests().forEach((o) => {
-      newRefs[o.id] = this.ensureRowRef(o.id);
-    });
-
-    this.rowRefs = newRefs;
-  }
-
-  private ensureRowRef(id: number): React.RefObject<RequestRow> {
-    return this.rowRefs[id] ? this.rowRefs[id] : React.createRef<RequestRow>();
   }
 
   // Events
@@ -92,8 +79,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   // Render
 
   render() {
-    this.prepareRowRefs();
-
+    const newRefs: RequestRowRefDictType = {};
     const requests = this.getRenderRequests();
     const rows = requests.map(request => (<RequestRow
       key={request.id}
@@ -104,8 +90,10 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       onDeleteClicked={this.onRequestDeleteClicked}
       onStartNameEditing={this.handleWillStartNameEditing}
       stubGroupPopupContent={<StubGroupList dataHolder={this.props.dataHolder} request={request}/>}
-      ref={this.rowRefs[request.id]}
+      ref={ensureRef(request.id, this.rowRefs, newRefs)}
     />));
+
+    this.rowRefs = newRefs;
 
     return (
       <div>
