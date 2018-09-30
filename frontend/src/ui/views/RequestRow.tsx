@@ -6,6 +6,7 @@ import { isObject } from 'Utils/Tools';
 import ExpandButton from 'UI/common/ExpandButton';
 import 'CSS/RequestRow';
 import Popup from 'reactjs-popup';
+import { throws } from 'assert';
 
 export interface RequestRowProps {
   request: Request;
@@ -13,6 +14,7 @@ export interface RequestRowProps {
   onCreateStubClicked?: (request: Request) => void;
   onRequestChanged: (request: Request) => void;
   onDeleteClicked: (request: Request) => void;
+  onStartNameEditing: (request: Request) => void;
   stubGroupPopupContent?: JSX.Element;
 }
 
@@ -23,6 +25,8 @@ export interface RequestRowState {
 }
 
 export class RequestRow extends React.Component<RequestRowProps, RequestRowState> {
+  inputViewRef?: React.RefObject<InputView>;
+
   constructor(props: RequestRowProps) {
     super(props);
 
@@ -32,7 +36,10 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onDeleteClicked = this.onDeleteClicked.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
+    this.onStartNameEditing = this.onStartNameEditing.bind(this);
     this.onNameChanged = this.onNameChanged.bind(this);
+
+    this.inputViewRef = React.createRef<InputView>();
 
     this.state = {
       isExpanded: props.isExpanded,
@@ -67,15 +74,27 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           <InputView className="request_name"
           value={this.props.request.name}
           emptyValue="Set Name"
-          onValueChanged = {this.onNameChanged}/>
+          onEditingStarted = {this.onStartNameEditing}
+          onValueChanged = {this.onNameChanged}
+          ref={this.inputViewRef}/>
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
     );
   }
 
+  onStartNameEditing() {
+    this.props.onStartNameEditing(this.props.request);
+  }
+
   onNameChanged(name: string) {
     this.onObjChanged(Object.assign({}, this.props.request, { name }));
+  }
+
+  stopEditing() {
+    if (this.inputViewRef.current) {
+      this.inputViewRef.current.stopEditing();
+    }
   }
 
   renderStubGroupsButton() {

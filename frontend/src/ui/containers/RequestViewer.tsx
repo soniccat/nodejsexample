@@ -21,6 +21,8 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     },
   };
 
+  rowRefs: {[index:number]:React.RefObject<RequestRow>} = {};
+
   constructor(props: RequestViewerProps) {
     super(props);
 
@@ -28,10 +30,26 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
+    this.handleWillStartNameEditing = this.handleWillStartNameEditing.bind(this);
 
     this.state = {
       requestOptions: this.props.requestOptions,
     };
+  }
+
+  // Actions
+
+  private prepareRowRefs() {
+    const newRefs: {[index:number]:React.RefObject<RequestRow>} = {};
+    this.getRenderRequests().forEach((o) => {
+      newRefs[o.id] = this.ensureRowRef(o.id);
+    });
+
+    this.rowRefs = newRefs;
+  }
+
+  private ensureRowRef(id: number): React.RefObject<RequestRow> {
+    return this.rowRefs[id] ? this.rowRefs[id] : React.createRef<RequestRow>();
   }
 
   // Events
@@ -59,8 +77,24 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.props.dataHolder.deleteRequest(row);
   }
 
+  private handleWillStartNameEditing() {
+    Object.keys(this.rowRefs).forEach((k) => {
+      this.rowRefs[k].current.stopEditing();
+    });
+  }
+
+  // Getters
+
+  private getRenderRequests() {
+    return this.props.dataHolder.requests ? this.props.dataHolder.requests : [];
+  }
+
+  // Render
+
   render() {
-    const requests = this.props.dataHolder.requests ? this.props.dataHolder.requests : [];
+    this.prepareRowRefs();
+
+    const requests = this.getRenderRequests();
     const rows = requests.map(request => (<RequestRow
       key={request.id}
       request={request}
@@ -68,7 +102,9 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       onCreateStubClicked={this.onCreateStubClicked}
       onRequestChanged={this.onRequestChanged}
       onDeleteClicked={this.onRequestDeleteClicked}
+      onStartNameEditing={this.handleWillStartNameEditing}
       stubGroupPopupContent={<StubGroupList dataHolder={this.props.dataHolder} request={request}/>}
+      ref={this.rowRefs[request.id]}
     />));
 
     return (

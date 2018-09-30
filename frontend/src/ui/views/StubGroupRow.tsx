@@ -64,6 +64,10 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
     });
   }
 
+  handleWillStartRequestNameEditing() {
+
+  }
+
   render() {
     return <div className="stub_group_row">
       <div className="stub_group_header" onClick={this.onStubGroupHeaderPressed}>
@@ -93,6 +97,7 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
       key={row.id}
       request={row}
       isExpanded={false}
+      onStartNameEditing={this.handleWillStartRequestNameEditing}
       onRequestChanged={this.onRequestChanged}
       onDeleteClicked={this.onRequestDeleteClicked}
     />));

@@ -64,7 +64,7 @@ export default class InputView extends React.Component<InputViewProp, InputViewS
   }
 
   render() {
-    return <div className={this.props.className + ' input_view'} 
+    return <div className={this.props.className + ' input_view'}
       onClick={e => this.onClicked(e)}
       role="textbox"
       tabIndex={0}>

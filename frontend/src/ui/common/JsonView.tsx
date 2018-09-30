@@ -3,6 +3,10 @@ import { isObject, isEmptyArray } from 'Utils/Tools';
 import ExpandButton from './ExpandButton';
 import InputView from './InputView';
 import 'CSS/JsonView';
+import { ensureRef, RefDictType } from 'Utils/refTools';
+
+type ChildRefDictType = RefDictType<JsonView>;
+type InputRefDictType = RefDictType<InputView>;
 
 export interface JsonViewProps {
   obj: any;
@@ -21,8 +25,8 @@ export interface JsonViewState {
 }
 
 export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
-  childRefs: {[index: number] : React.RefObject<JsonView>} = {};
-  inputViewRefs: React.RefObject<InputView>[] = [];
+  childRefs: ChildRefDictType = {};
+  inputViewRefs: InputRefDictType = {};
   childIndexes: {[key: string] : number} = {};
   nextChildIndex: number = 1;
 
@@ -98,7 +102,10 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       this.childRefs[index].current.stopEditing();
     }
 
-    this.inputViewRefs.forEach(o => o.current.stopEditing());
+    for (const k in this.inputViewRefs) {
+      this.inputViewRefs[k].current.stopEditing();
+    }
+
     this.finishEditing();
   }
 
@@ -127,16 +134,12 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     return this.props.expandLevel > 0;
   }
 
-  private createChildRef(index: number): React.Ref<JsonView> {
-    const ref = React.createRef<JsonView>();
-    this.childRefs[index] = ref;
-    return ref;
+  private ensureChildRef(index: number, newChildRef: ChildRefDictType): React.Ref<JsonView> {
+    return ensureRef(index, this.childRefs, newChildRef);
   }
 
-  private createInputViewRef() {
-    const ref = React.createRef<InputView>();
-    this.inputViewRefs.push(ref);
-    return ref;
+  private ensureInputViewRef(key: string, newChildRefDict: InputRefDictType): React.RefObject<InputView> {
+    return ensureRef(key, this.inputViewRefs, newChildRefDict);
   }
 
   ensureChildIndex(objKey: string): number {
@@ -154,8 +157,6 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   render() {
     const cells = [];
-    this.childRefs = [];
-    this.inputViewRefs = [];
 
     if (isEmptyArray(this.props.obj)) {
       cells.push(<div key={'empty_array'}
@@ -181,6 +182,9 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private renderExpandedContent(cells: any[]) {
+    const newChildRefs:ChildRefDictType = {};
+    const newInputRefs:InputRefDictType = {};
+
     const keys = this.getKeys();
     for (let i = 0; i < keys.length; i += 1) {
       const objKey = keys[i];
@@ -192,7 +196,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
         cells.push(this.renderExpandButton(this.state.childExpandLevels[index] > 0, index, isSubJson));
       }
 
-      cells.push(this.renderKey(objKey, index, isSubJson));
+      cells.push(this.renderKey(objKey, index, isSubJson, newInputRefs));
 
       if (this.props.isEditable) {
         cells.push(this.renderDeleteButton(objKey, index, isSubJson));
@@ -204,7 +208,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       const bodyKey = `${index}_value`;
       let element;
       if (isSubJson) {
-        const ref = this.createChildRef(index);
+        const ref = this.ensureChildRef(index, newChildRefs);
         element = <div key={bodyKey} className="json_value">
           <JsonView obj={obj}
             isEditable={this.props.isEditable}
@@ -215,11 +219,13 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
             ref={ref}/>
         </div>;
       } else {
-        element = this.renderJsonValue(objKey, bodyKey, obj);
+        element = this.renderJsonValue(objKey, bodyKey, obj, newInputRefs);
       }
 
       cells.push(element);
     }
+
+    this.childRefs = newChildRefs;
   }
 
   private getKeys(): string[] {
@@ -256,8 +262,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
       tabIndex={0}>(del)</div>;
   }
 
-  private renderKey(objKey: string, index: number, isSubJson: boolean): any {
-    const ref = this.createInputViewRef();
+  private renderKey(objKey: string, index: number, isSubJson: boolean, newChildRefDict: InputRefDictType): any {
+    const ref = this.ensureInputViewRef(objKey + '_key', newChildRefDict);
     return (<InputView
       key={`${index}_key`}
       className={`json_key${isSubJson ? ' sub_json' : ''}`}
@@ -272,8 +278,8 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
     );
   }
 
-  renderJsonValue(objKey: string, tagKey: string, value: any) {
-    const ref = this.createInputViewRef();
+  renderJsonValue(objKey: string, tagKey: string, value: any, newChildRefDict: InputRefDictType) {
+    const ref = this.ensureInputViewRef(objKey + '_key', newChildRefDict);
     return (<InputView
       key={tagKey}
       className="json_value"
