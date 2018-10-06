@@ -15,6 +15,22 @@ class Proxy {
   }
 
   async handleRequest(sendInfo: SendInfo, originalResponse: http.ServerResponse): Promise<RequestInfo> {
+    if (sendInfo.method === 'OPTIONS') {
+      const responseInfo = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PATCH',
+          'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
+        },
+        statusCode: 200,
+        body: undefined,
+        originalBody: undefined,
+      };
+
+      this.fillOriginalResponseInfo(originalResponse, responseInfo);
+      return { sendInfo, responseInfo };
+    }
+
     this.logger.log(LogLevel.DEBUG, `start ${getUrlString(sendInfo)}`);
 
     const responseInfo: ResponseInfo = await this.prepareResponseInfoPromise(sendInfo);
@@ -81,6 +97,7 @@ class Proxy {
 
   buildPoxyHeaders(cres: http.IncomingMessage) {
     const headers = cres.headers;
+    headers['Access-Control-Allow-Origin'] = '*';
     if (cres.headers['content-type']) {
       headers['Content-Type'] = cres.headers['content-type'];
     }

@@ -19,6 +19,8 @@ export default class HistoryHolder {
       data: request.body as object,
     }).then((response) => {
       console.log(response);
+    }).catch((err) => {
+      console.log(err);
     });
   }
 }
