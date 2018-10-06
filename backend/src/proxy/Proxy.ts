@@ -97,7 +97,7 @@ class Proxy {
 
   buildPoxyHeaders(cres: http.IncomingMessage) {
     const headers = cres.headers;
-    headers['Access-Control-Allow-Origin'] = '*';
+    headers['access-control-allow-origin'] = '*';
     if (cres.headers['content-type']) {
       headers['Content-Type'] = cres.headers['content-type'];
     }

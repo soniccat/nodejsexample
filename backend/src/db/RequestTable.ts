@@ -233,6 +233,7 @@ class RequestTable {
       case 'POST': return 2;
       case 'DELET': return 3;
       case 'PATCH': return 4;
+      case 'OPTIONS': return 5;
       default: return 0;
     }
   }
@@ -243,6 +244,7 @@ class RequestTable {
       case 2: return 'POST';
       case 3: return 'DELETE';
       case 4: return 'PATCH';
+      case 5: return 'OPTIONS';
       default: return 'UNKNOWN';
     }
   }
