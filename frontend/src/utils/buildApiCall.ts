@@ -1,5 +1,6 @@
 
-const server = 'http://' + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH + '/';
+const protocol = 'http://';
+const server = protocol + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH + '/';
 
 export interface ApiParameters {
   path: string;
@@ -23,6 +24,15 @@ export function buildApiCall(options: ApiParameters) : ApiCall {
   };
 
   return resultOptions;
+}
+
+export function buildProxyUrl(url: string) : string {
+  const urlObj = new URL(url);
+  urlObj.protocol = protocol;
+  urlObj.host = BACKEND_IP;
+  urlObj.port = `${BACKEND_PORT}`;
+
+  return urlObj.toString();
 }
 
 export default buildApiCall;
