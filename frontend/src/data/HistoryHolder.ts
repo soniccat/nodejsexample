@@ -7,6 +7,9 @@ type HistoryItem = Request;
 export default class HistoryHolder {
   items: HistoryItem[];
 
+  onDataUpdated() {
+  }
+
   runRequest(request: Request) {
     const proxyUrl = buildProxyUrl(request.url);
     loadCommand({

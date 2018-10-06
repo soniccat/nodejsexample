@@ -19,6 +19,7 @@ export interface StubGroupRowProps {
   onStubGroupStartNameEditing: (request: StubGroup) => void;
   onRequestChanged: (request: Request, stubGroup: StubGroup) => void;
   onRequestDeleteClicked: (request: Request, stubGroup: StubGroup) => void;
+  onRequestRunClicked: (request: Request, stubGroup: StubGroup) => void;
 }
 
 export interface StubGroupRowState {
@@ -33,6 +34,7 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
 
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
+    this.onRequestRunClicked = this.onRequestRunClicked.bind(this);
     this.onToggleStatusClicked = this.onToggleStatusClicked.bind(this);
     this.onStubGroupHeaderPressed = this.onStubGroupHeaderPressed.bind(this);
     this.onStubGroupDeleteClicked = this.onStubGroupDeleteClicked.bind(this);
@@ -66,6 +68,10 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
 
   onRequestDeleteClicked(request: Request) {
     this.props.onRequestDeleteClicked(request, this.props.stubGroup);
+  }
+
+  onRequestRunClicked(request: Request) {
+    this.props.onRequestRunClicked(request, this.props.stubGroup);
   }
 
   onStubGroupHeaderPressed() {
@@ -133,6 +139,7 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
       onStartNameEditing={this.handleWillStartRequestNameEditing}
       onRequestChanged={this.onRequestChanged}
       onDeleteClicked={this.onRequestDeleteClicked}
+      onRunClicked={this.onRequestRunClicked}
     />));
 
     return (

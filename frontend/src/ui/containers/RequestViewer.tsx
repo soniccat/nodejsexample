@@ -6,10 +6,12 @@ import DataHolder from 'Data/DataHolder';
 import { StubGroupList } from 'UI/containers/StubGroupList';
 import { RequestRowRefDictType } from 'Utils/types';
 import { ensureRef } from 'Utils/RefTools';
+import HistoryHolder from 'Data/HistoryHolder';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
   dataHolder: DataHolder;
+  historyHolder: HistoryHolder;
 }
 
 export interface RequestViewerState {
@@ -64,6 +66,10 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.props.dataHolder.deleteRequest(row);
   }
 
+  private onRunRequestClicked(request: Request) {
+    this.props.historyHolder.runRequest(request);
+  }
+
   private handleWillStartNameEditing() {
     Object.keys(this.rowRefs).forEach((k) => {
       this.rowRefs[k].current.stopEditing();
@@ -88,6 +94,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
       onCreateStubClicked={this.onCreateStubClicked}
       onRequestChanged={this.onRequestChanged}
       onDeleteClicked={this.onRequestDeleteClicked}
+      onRunClicked={this.onRunRequestClicked}
       onStartNameEditing={this.handleWillStartNameEditing}
       stubGroupPopupContent={<StubGroupList dataHolder={this.props.dataHolder} request={request}/>}
       ref={ensureRef(request.id, this.rowRefs, newRefs)}

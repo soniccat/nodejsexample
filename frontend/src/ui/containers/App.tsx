@@ -5,6 +5,7 @@ import 'Node/react-tabs/style/react-tabs';
 import { StubGroupViewer } from 'UI/containers/StubGroupViewer';
 import DataHolder from 'Data/DataHolder';
 import SessionHolder from 'Data/SessionHolder';
+import HistoryHolder from 'Data/HistoryHolder';
 
 export interface AppProps {
 }
@@ -12,7 +13,70 @@ export interface AppProps {
 export interface AppState {
   dataHolder: DataHolder;
   sessionHolder: SessionHolder;
+  historyHolder: HistoryHolder;
 }
+
+export class App extends React.Component<AppProps, AppState> {
+  constructor(props) {
+    super(props);
+    this.updateDataHolder = this.updateDataHolder.bind(this);
+
+    const dataHolder = new AppDataHolder(this);
+    const sessionHolder = new AppSessionHolder(this);
+    const historyHolder = new AppHistoryHolder(this);
+
+    this.state = {
+      dataHolder,
+      sessionHolder,
+      historyHolder,
+    };
+  }
+
+  updateDataHolder() {
+    this.setState({
+      dataHolder: this.state.dataHolder,
+    });
+  }
+
+  updateSessionHolder() {
+    this.setState({
+      sessionHolder: this.state.sessionHolder,
+    });
+  }
+
+  updateHistoryHolder() {
+    this.setState({
+      historyHolder: this.state.historyHolder,
+    });
+  }
+
+  componentDidMount() {
+    this.state.sessionHolder.loadInfo();
+  }
+
+  render() {
+    return <div>
+      <Tabs forceRenderTabPanel={true}>
+        <TabList>
+          <Tab>Requests</Tab>
+          <Tab>Stub Groups</Tab>
+        </TabList>
+
+        <TabPanel>
+          <RequestViewer dataHolder={this.state.dataHolder}
+            historyHolder={this.state.historyHolder}/>
+        </TabPanel>
+        <TabPanel>
+          <StubGroupViewer dataHolder={this.state.dataHolder}
+            sessionHolder={this.state.sessionHolder}
+            historyHolder={this.state.historyHolder}/>
+        </TabPanel>
+      </Tabs>
+    </div>;
+  }
+}
+
+// Holder wrappers
 
 class AppDataHolder extends DataHolder {
   component: App;
@@ -42,51 +106,16 @@ class AppSessionHolder extends SessionHolder {
   }
 }
 
-export class App extends React.Component<AppProps, AppState> {
-  constructor(props) {
-    super(props);
-    this.updateDataHolder = this.updateDataHolder.bind(this);
+class AppHistoryHolder extends HistoryHolder {
+  component: App;
 
-    const dataHolder = new AppDataHolder(this);
-    const sessionHolder = new AppSessionHolder(this);
-
-    this.state = {
-      dataHolder,
-      sessionHolder,
-    };
+  constructor(component: App) {
+    super();
+    this.component = component;
   }
 
-  updateDataHolder() {
-    this.setState({
-      dataHolder: this.state.dataHolder,
-    });
-  }
-
-  updateSessionHolder() {
-    this.setState({
-      sessionHolder: this.state.sessionHolder,
-    });
-  }
-
-  componentDidMount() {
-    this.state.sessionHolder.loadInfo();
-  }
-
-  render() {
-    return <div>
-      <Tabs forceRenderTabPanel={true}>
-        <TabList>
-          <Tab>Requests</Tab>
-          <Tab>Stub Groups</Tab>
-        </TabList>
-
-        <TabPanel>
-          <RequestViewer dataHolder={this.state.dataHolder}/>
-        </TabPanel>
-        <TabPanel>
-          <StubGroupViewer dataHolder={this.state.dataHolder} sessionHolder={this.state.sessionHolder}/>
-        </TabPanel>
-      </Tabs>
-    </div>;
+  onDataUpdated() {
+    super.onDataUpdated();
+    this.component.updateHistoryHolder();
   }
 }

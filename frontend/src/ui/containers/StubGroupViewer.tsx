@@ -6,10 +6,12 @@ import DataHolder from 'Data/DataHolder';
 import SessionHolder from 'Data/SessionHolder';
 import { StubGroupRowRefDictType } from 'Utils/types';
 import { ensureRef } from 'Utils/RefTools';
+import HistoryHolder from 'Data/HistoryHolder';
 
 export interface StubGroupViewerProps {
   dataHolder: DataHolder;
   sessionHolder: SessionHolder;
+  historyHolder: HistoryHolder;
 }
 
 export interface StubGroupViewerState {
@@ -69,6 +71,10 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     this.props.dataHolder.deleteRequestFromStubGroup(group.id, request.id);
   }
 
+  onRequestRunClicked(request: Request) {
+    this.props.historyHolder.runRequest(request);
+  }
+
   loadStubGroups() {
     this.props.dataHolder.loadStubGroups();
   }
@@ -88,6 +94,7 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
       onStubGroupStartNameEditing={this.onStubGroupStartNameEditing}
       onRequestChanged={this.onRequestChanged}
       onRequestDeleteClicked={this.onRequestDeleteClicked}
+      onRequestRunClicked={this.onRequestRunClicked}
       ref={ensureRef(group.id, this.rowRefs, newRefs)}
       />));
 

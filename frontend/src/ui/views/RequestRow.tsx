@@ -14,6 +14,7 @@ export interface RequestRowProps {
   onCreateStubClicked?: (request: Request) => void;
   onRequestChanged: (request: Request) => void;
   onDeleteClicked: (request: Request) => void;
+  onRunClicked: (request: Request) => void;
   onStartNameEditing: (request: Request) => void;
   stubGroupPopupContent?: JSX.Element;
 }
@@ -35,6 +36,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onReceivedShortClicked = this.onReceivedShortClicked.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onDeleteClicked = this.onDeleteClicked.bind(this);
+    this.onRunClicked = this.onRunClicked.bind(this);
     this.onObjChanged = this.onObjChanged.bind(this);
     this.onStartNameEditing = this.onStartNameEditing.bind(this);
     this.onNameChanged = this.onNameChanged.bind(this);
@@ -77,6 +79,9 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
           onEditingStarted = {this.onStartNameEditing}
           onValueChanged = {this.onNameChanged}
           ref={this.inputViewRef}/>
+          <div className="request_run_button" onClick={this.onRunClicked}>
+            Run
+          </div>
         </div>
         {this.state.isExpanded ? this.renderExtra() : undefined}
       </div>
@@ -206,6 +211,11 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   onDeleteClicked(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
     this.props.onDeleteClicked(this.props.request);
+  }
+
+  onRunClicked(e: React.MouseEvent<HTMLDivElement>) {
+    e.stopPropagation();
+    this.props.onRunClicked(this.props.request);
   }
 }
 
