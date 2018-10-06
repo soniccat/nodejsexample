@@ -17,6 +17,8 @@ export default class HistoryHolder {
       method: request.method,
       url: proxyUrl,
       data: request.body as object,
+    }).then((response) => {
+      console.log(response);
     });
   }
 }

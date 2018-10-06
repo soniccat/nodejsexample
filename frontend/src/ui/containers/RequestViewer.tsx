@@ -34,6 +34,7 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
+    this.onRunRequestClicked = this.onRunRequestClicked.bind(this);
     this.handleWillStartNameEditing = this.handleWillStartNameEditing.bind(this);
 
     this.state = {

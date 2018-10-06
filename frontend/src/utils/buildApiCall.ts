@@ -1,6 +1,7 @@
 
-const protocol = 'http://';
-const server = protocol + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH + '/';
+const apiProtocol = 'http://';
+const proxyProtocol = 'http://';
+const server = apiProtocol + BACKEND_IP + ':' + BACKEND_PORT + '/' + BACKEND_PATH + '/';
 
 export interface ApiParameters {
   path: string;
@@ -28,7 +29,7 @@ export function buildApiCall(options: ApiParameters) : ApiCall {
 
 export function buildProxyUrl(url: string) : string {
   const urlObj = new URL(url);
-  urlObj.protocol = protocol;
+  urlObj.protocol = proxyProtocol;
   urlObj.host = BACKEND_IP;
   urlObj.port = `${BACKEND_PORT}`;
 
