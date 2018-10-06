@@ -78,6 +78,16 @@ export class StubGroupTable {
     return this.dbConnection.queryPromise(`delete from ${tableName} where id=${id}`);
   }
 
+  async updateStubGroup(group: StubGroup): Promise<any[]> {
+    const parentId = group.parent ? `${group.parent.id}` : 'NULL';
+    const query = `UPDATE ${tableName} SET
+      name=${this.dbConnection.wrapString(group.name)},
+      parent_group_id=${parentId}
+      WHERE id=${group.id};`;
+
+    return this.dbConnection.queryPromise(query);
+  }
+
   normalizeStubGroups(groups: DbStubGroup[]): StubGroup[] {
     const result: StubGroup[] = [];
     const requestTable = new RequestTable(this.dbConnection);
@@ -134,9 +144,11 @@ export class StubGroupTable {
                    ${tableName}.name as stub_name,
                    ${tableName}.parent_group_id as stub_parent_group_id,
                    request.*
-    from ${tableName} left outer join ${relationTableName}
+    from ${tableName} left join ${relationTableName}
         left join request
         on ${relationTableName}.request_id=request.id
     on ${tableName}.id=${relationTableName}.group_id;`;
   }
 }
+
+export default StubGroupTable;

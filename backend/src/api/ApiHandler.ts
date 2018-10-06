@@ -21,6 +21,7 @@ import ApiDeleteStubGroupCommand from 'main/api/ApiDeleteStubGroupCommand';
 import ApiSessionCommand from 'main/api/ApiSessionCommand';
 import SessionManager from 'main/session/SessionManager';
 import ApiPatchSessionCommand from 'main/api/ApiPatchSessionCommand';
+import ApiUpdateStubGroupCommand from 'main/api/ApiUpdateStubGroupCommand';
 
 class ApiHandler {
   dbConnection: DbConnection;
@@ -52,6 +53,7 @@ class ApiHandler {
       new ApiDeleteRequestInStubGroupCommand(this.stubGroupsTable, logger),
       new ApiCreateStubGroupCommand(this.stubGroupsTable, logger),
       new ApiDeleteStubGroupCommand(this.stubGroupsTable, logger),
+      new ApiUpdateStubGroupCommand(this.stubGroupsTable, logger),
 
       new ApiSessionCommand(this.sessionManager, logger),
       new ApiPatchSessionCommand(this.sessionManager, logger),

@@ -33,6 +33,14 @@ export function buildCreateStubGroupCall(name: string): ApiCall {
   });
 }
 
+export function buildUpdateStubGroupCall(stubGroup: StubGroup): ApiCall {
+  return buildApiCall({
+    method: 'POST',
+    path: `stubgroups/${stubGroup.id}`,
+    data: stubGroup,
+  });
+}
+
 export function buildDeleteStubGroupCall(id: number): ApiCall {
   return buildApiCall({
     method: 'DELETE',

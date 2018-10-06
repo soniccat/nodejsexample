@@ -6,6 +6,7 @@ import { isObject } from 'Utils/Tools';
 import ExpandButton from 'UI/common/ExpandButton';
 import 'CSS/RequestRow';
 import Popup from 'reactjs-popup';
+import { InputViewRef } from 'Utils/types';
 
 export interface RequestRowProps {
   request: Request;
@@ -24,7 +25,7 @@ export interface RequestRowState {
 }
 
 export class RequestRow extends React.Component<RequestRowProps, RequestRowState> {
-  inputViewRef?: React.RefObject<InputView>;
+  inputViewRef?: InputViewRef;
 
   constructor(props: RequestRowProps) {
     super(props);

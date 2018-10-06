@@ -4,6 +4,8 @@ import Request from 'Model/Request';
 import RequestRow from 'UI/views/RequestRow';
 import ExpandButton from '../common/ExpandButton';
 import 'CSS/StubGroupRow';
+import { InputViewRef } from 'Utils/types';
+import InputView from 'UI/common/InputView';
 
 export interface StubGroupRowProps {
   stubGroup: StubGroup;
@@ -13,6 +15,8 @@ export interface StubGroupRowProps {
   onStubGroupStartClicked: (stubGroup: StubGroup) => void;
   onStubGroupStopClicked: (stubGroup: StubGroup) => void;
   onStubGroupDeleteClicked: (stubGroup: StubGroup) => void;
+  onStubGroupChanged: (stubGroup: StubGroup) => void;
+  onStubGroupStartNameEditing: (request: StubGroup) => void;
   onRequestChanged: (request: Request, stubGroup: StubGroup) => void;
   onRequestDeleteClicked: (request: Request, stubGroup: StubGroup) => void;
 }
@@ -22,6 +26,8 @@ export interface StubGroupRowState {
 }
 
 export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRowState> {
+  inputViewRef?: InputViewRef;
+
   constructor(props: StubGroupRowProps) {
     super(props);
 
@@ -30,6 +36,10 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
     this.onToggleStatusClicked = this.onToggleStatusClicked.bind(this);
     this.onStubGroupHeaderPressed = this.onStubGroupHeaderPressed.bind(this);
     this.onStubGroupDeleteClicked = this.onStubGroupDeleteClicked.bind(this);
+    this.onStartNameEditing = this.onStartNameEditing.bind(this);
+    this.onNameChanged = this.onNameChanged.bind(this);
+
+    this.inputViewRef = React.createRef<InputView>();
 
     this.state = {
       isExpanded: props.isExpanded,
@@ -68,12 +78,35 @@ export class StubGroupRow extends React.Component<StubGroupRowProps, StubGroupRo
 
   }
 
+  onStartNameEditing() {
+    this.props.onStubGroupStartNameEditing(this.props.stubGroup);
+  }
+
+  onNameChanged(name: string) {
+    this.onStubGroupChanged(Object.assign({}, this.props.stubGroup, { name }));
+  }
+
+  onStubGroupChanged(obj: StubGroup) {
+    this.props.onStubGroupChanged(obj);
+  }
+
+  stopEditing() {
+    if (this.inputViewRef.current) {
+      this.inputViewRef.current.stopEditing();
+    }
+  }
+
   render() {
     return <div className="stub_group_row">
       <div className="stub_group_header" onClick={this.onStubGroupHeaderPressed}>
         <ExpandButton className="stub_group_expand_mark" isExpanded={this.state.isExpanded}/>
         <div className="stub_group_name">
-          {this.props.stubGroup.name}
+          <InputView className="stub_group_name"
+          value={this.props.stubGroup.name}
+          emptyValue="Set Name"
+          onEditingStarted = {this.onStartNameEditing}
+          onValueChanged = {this.onNameChanged}
+          ref={this.inputViewRef}/>
         </div>
         <div className="stub_group_status" onClick={this.onToggleStatusClicked}>
           {this.props.isActive ? 'STOP' : 'START'}

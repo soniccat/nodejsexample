@@ -3,8 +3,9 @@ import * as React from 'react';
 import Request from 'Model/Request';
 import { StubGroupRow } from 'UI/views/StubGroupRow';
 import DataHolder from 'Data/DataHolder';
-import { throws } from 'assert';
 import SessionHolder from 'Data/SessionHolder';
+import { StubGroupRowRefDictType } from 'Utils/types';
+import { ensureRef } from 'Utils/RefTools';
 
 export interface StubGroupViewerProps {
   dataHolder: DataHolder;
@@ -15,6 +16,8 @@ export interface StubGroupViewerState {
 }
 
 export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubGroupViewerState> {
+  rowRefs: StubGroupRowRefDictType = {};
+
   constructor(props: StubGroupViewerProps) {
     super(props);
 
@@ -23,6 +26,8 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     this.onStubGroupDeleteClicked = this.onStubGroupDeleteClicked.bind(this);
     this.onStubGroupStartClicked = this.onStubGroupStartClicked.bind(this);
     this.onStubGroupStopClicked = this.onStubGroupStopClicked.bind(this);
+    this.onStubGroupChanged = this.onStubGroupChanged.bind(this);
+    this.onStubGroupStartNameEditing = this.onStubGroupStartNameEditing.bind(this);
 
     this.state = {
     };
@@ -46,6 +51,16 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
     this.props.dataHolder.deleteStubGroup(group.id);
   }
 
+  onStubGroupChanged(group: StubGroup) {
+    this.props.dataHolder.updateStubGroup(group);
+  }
+
+  onStubGroupStartNameEditing(group: StubGroup) {
+    Object.keys(this.rowRefs).forEach((k) => {
+      this.rowRefs[k].current.stopEditing();
+    });
+  }
+
   onRequestChanged(request: Request, group: StubGroup) {
     this.props.dataHolder.updateRequest(request);
   }
@@ -59,6 +74,7 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
   }
 
   render() {
+    const newRefs: StubGroupRowRefDictType = {};
     const stubGroups = this.props.dataHolder.stubGroups ? this.props.dataHolder.stubGroups : [];
     const rows = stubGroups.map(group => (<StubGroupRow
       key={group.id}
@@ -68,8 +84,15 @@ export class StubGroupViewer extends React.Component<StubGroupViewerProps, StubG
       onStubGroupDeleteClicked={this.onStubGroupDeleteClicked}
       onStubGroupStartClicked={this.onStubGroupStartClicked}
       onStubGroupStopClicked={this.onStubGroupStopClicked}
+      onStubGroupChanged={this.onStubGroupChanged}
+      onStubGroupStartNameEditing={this.onStubGroupStartNameEditing}
       onRequestChanged={this.onRequestChanged}
-      onRequestDeleteClicked={this.onRequestDeleteClicked}/>));
+      onRequestDeleteClicked={this.onRequestDeleteClicked}
+      ref={ensureRef(group.id, this.rowRefs, newRefs)}
+      />));
+
+    this.rowRefs = newRefs;
+
     return (
       <div>
         {rows}

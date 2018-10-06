@@ -1,7 +1,12 @@
 import StubGroup from 'Model/StubGroup';
 import Request from 'Model/Request';
 import { buildRequestsCall, buildCreateRequestCall, buildUpdateRequestCall, buildDeleteRequestCall } from 'Utils/RequestCalls';
-import { buildStubGroupsCall, buildAddRequestToStubGroupCall, buildDeleteRequestFromStubGroupCall, buildCreateStubGroupCall, buildDeleteStubGroupCall } from 'Utils/StubGroupCalls';
+import { buildStubGroupsCall,
+  buildAddRequestToStubGroupCall,
+  buildDeleteRequestFromStubGroupCall,
+  buildCreateStubGroupCall,
+  buildDeleteStubGroupCall,
+  buildUpdateStubGroupCall } from 'Utils/StubGroupCalls';
 import loadCommand from 'Utils/loadCommand';
 import { LoadRequestsOption } from 'Model/LoadRequestsOption';
 
@@ -12,6 +17,7 @@ export default class DataHolder {
   requestsError?: Error;
   loadingRequestOptions: LoadRequestsOption;
   updatingReuests: {[id: number] : Request} = {};
+  updatingStubGroups: {[id: number] : StubGroup} = {};
 
   stubGroups?: StubGroup[]; // StubGroupViewer
   stubGroupsError?: Error;
@@ -49,6 +55,13 @@ export default class DataHolder {
     this.syncWithRequest(request);
     this.onDataUpdated();
     return oldRequest;
+  }
+
+  private setStubGroup(stubGroup: StubGroup): StubGroup {
+    const oldStubGroup = this.updateInList(stubGroup, this.stubGroups);
+    this.syncWithStubGroup(stubGroup);
+    this.onDataUpdated();
+    return oldStubGroup;
   }
 
   // === Data Synching
@@ -99,6 +112,13 @@ export default class DataHolder {
         array[index] = requestMap[request.id];
       }
     });
+  }
+
+  private syncWithStubGroup(stubGroup: StubGroup) {
+    const stubGroups = this.stubGroups != null ? this.stubGroups : [];
+    this.updateInList(stubGroup, stubGroups);
+
+    // as only properties of stub grup might be changed, we don't look through inner requests
   }
 
   private updateInList<T extends TypeWithId>(updatedValue: T, list: T[]): T | undefined {
@@ -188,6 +208,24 @@ export default class DataHolder {
       if (this.updatingReuests[row.id] === row) {
         this.updatingReuests[row.id] = undefined;
         this.setRequest(oldValue);
+      }
+      return err;
+    });
+  }
+
+  updateStubGroup(stubGroup: StubGroup): Promise<any> {
+    const oldStubGroup = this.setStubGroup(stubGroup);
+
+    this.updatingStubGroups[stubGroup.id] = stubGroup;
+    return loadCommand(buildUpdateStubGroupCall(stubGroup)).then((response) => {
+      if (this.updatingStubGroups[stubGroup.id] === stubGroup) {
+        this.updatingStubGroups[stubGroup.id] = undefined;
+      }
+      return response.data;
+    }).catch((err) => {
+      if (this.updatingStubGroups[stubGroup.id] === stubGroup) {
+        this.updatingStubGroups[stubGroup.id] = undefined;
+        this.setStubGroup(oldStubGroup);
       }
       return err;
     });
