@@ -18,6 +18,7 @@ import { LogLevel } from 'Logger/ILogger';
 import { StubGroupTable } from 'DB/StubGroupTable';
 import SessionManager from 'main/session/SessionManager';
 import SendInfo, { SendInfoBuilder } from 'Data/request/SendInfo';
+import { IgnoreProxyStorageHeader } from 'Model/Request';
 
 // Config
 const host = 'news360.com';
@@ -115,7 +116,10 @@ dbConnection.connect((err) => {
 });
 
 function needWriteRequestRow(requestInfo: RequestInfo) {
-  return requestInfo.sendInfo.path && requestInfo.sendInfo.path.indexOf('api') !== -1;
+  return requestInfo.sendInfo.path &&
+    requestInfo.sendInfo.path.indexOf('api') !== -1 &&
+    requestInfo.sendInfo.method !== 'OPTIONS' &&
+    requestInfo.sendInfo.headers[IgnoreProxyStorageHeader] === undefined;
 }
 
 function isApiRequest(req: http.IncomingMessage) {

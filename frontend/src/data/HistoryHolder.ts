@@ -1,4 +1,4 @@
-import Request from 'Model/Request';
+import Request, { IgnoreProxyStorageHeader } from 'Model/Request';
 import loadCommand from 'Utils/loadCommand';
 import { buildProxyUrl } from 'Utils/buildApiCall';
 
@@ -13,7 +13,7 @@ export default class HistoryHolder {
   runRequest(request: Request) {
     const proxyUrl = buildProxyUrl(request.url);
     loadCommand({
-      headers: request.headers,
+      headers: { [IgnoreProxyStorageHeader]:'true', ...request.headers },
       method: request.method,
       url: proxyUrl,
       data: request.body as object,

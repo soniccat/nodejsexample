@@ -6,6 +6,7 @@ import * as https from 'https';
 import * as http from 'http';
 import * as util from 'util';
 import { RequestInfo } from 'Data/request/RequestInfo';
+import { IgnoreProxyStorageHeader } from 'Model/Request';
 
 class Proxy {
   logger: ILogger;
@@ -20,7 +21,7 @@ class Proxy {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PATCH',
-          'Access-Control-Allow-Headers': 'X-PINGOTHER, Content-Type',
+          'Access-Control-Allow-Headers': `X-PINGOTHER, Content-Type, ${IgnoreProxyStorageHeader}, user-agent`,
         },
         statusCode: 200,
         body: undefined,

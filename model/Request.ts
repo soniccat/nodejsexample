@@ -1,4 +1,6 @@
 
+export const IgnoreProxyStorageHeader = 'ignore-proxy-storage';
+
 export default class Request {
   id?: number;
   url: string = '';
