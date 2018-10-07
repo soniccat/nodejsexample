@@ -17,11 +17,12 @@ class Proxy {
 
   async handleRequest(sendInfo: SendInfo, originalResponse: http.ServerResponse): Promise<RequestInfo> {
     if (sendInfo.method === 'OPTIONS') {
+      // TODO: set that in settings
       const responseInfo = {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PATCH',
-          'Access-Control-Allow-Headers': `X-PINGOTHER, Content-Type, ${IgnoreProxyStorageHeader}`,
+          'Access-Control-Allow-Headers': `X-PINGOTHER, Content-Type, cache-control, upgrade-insecure-requests, ${IgnoreProxyStorageHeader}`,
         },
         statusCode: 200,
         body: undefined,

@@ -103,6 +103,9 @@ export function bodyToString(body: ProcessedBody): string | undefined {
   return result;
 }
 
+// export function bodyToBuffer(body: ProcessedBody): Buffer | undefined {
+// }
+
 function tryParseJsonString(str: string): any {
   let parsed: any;
   try {
@@ -141,6 +144,28 @@ export function unzip(buffer: zlib.InputType, completion: (result: Buffer | null
       completion(decoded, null);
     } else {
       completion(null, err);
+    }
+  });
+}
+
+export async function handleGzipPromise(buffer: zlib.InputType): Promise<Buffer | undefined> {
+  return new Promise<Buffer | undefined>((resolve, reject) => {
+    zip(buffer, (encoded, error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(encoded);
+      }
+    });
+  });
+}
+
+export function zip(buffer: zlib.InputType, completion: (result: Buffer | undefined, error: Error | undefined) => void) {
+  zlib.gzip(buffer, (err, encoded: Buffer) => {
+    if (!err) {
+      completion(encoded, undefined);
+    } else {
+      completion(undefined, err);
     }
   });
 }

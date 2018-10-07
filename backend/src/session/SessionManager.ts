@@ -7,7 +7,7 @@ import SendInfo from 'Data/request/SendInfo';
 import Request from 'Model/Request';
 import SessionInfo from 'Model/SessionInfo';
 import { isObject } from 'Utils/objectTools';
-import { bodyToString } from 'Utils/requesttools';
+import { bodyToString, isZipContent, handleGzipPromise } from 'Utils/requesttools';
 
 export default class SessionManager {
   logger: ILogger;
@@ -49,11 +49,11 @@ export default class SessionManager {
   }
 
   async process(sendInfo: SendInfo, response: http.ServerResponse): Promise<http.ServerResponse | undefined> {
-    const request = this.isActive ? this.findRequest(sendInfo) : undefined;
+    const matchedRequest = this.isActive ? this.findRequest(sendInfo) : undefined;
     let result: http.ServerResponse | undefined;
 
-    if (request != null) {
-      this.fillResponseInfo(request, response);
+    if (matchedRequest != null) {
+      await this.fillResponseInfo(sendInfo, matchedRequest, response);
       result = response;
     }
 
@@ -76,7 +76,8 @@ export default class SessionManager {
   }
 
   tryMatchRequest(sendInfo: SendInfo, request: Request): boolean {
-    return this.tryMatchObjects(sendInfo.headers, request.headers) && this.tryMatchObjects(sendInfo.body, request.body);
+    return sendInfo.method === request.method &&
+      this.tryMatchObjects(sendInfo.headers, request.headers) && this.tryMatchObjects(sendInfo.body, request.body);
   }
 
   tryMatchObjects(src: any, pattern: any): boolean {
@@ -105,11 +106,22 @@ export default class SessionManager {
     return src == pattern;
   }
 
-  fillResponseInfo(request: Request, response: http.ServerResponse) {
-    response.writeHead(request.responseStatus, request.responseHeaders);
-    if (request.body) {
-      response.write(bodyToString(request.responseBody));
+  async fillResponseInfo(sendInfo: SendInfo, matchedRequest: Request, response: http.ServerResponse) {
+    let contentLength = matchedRequest.responseHeaders['content-length'];
+    if (matchedRequest.responseBody) {
+      let body: string | Buffer | undefined = bodyToString(matchedRequest.responseBody);
+      if (isZipContent(matchedRequest.responseHeaders) && body) {
+        body = await handleGzipPromise(bodyToString(body) as string);
+        if (body) {
+          contentLength = `${body.length}`;
+        }
+      }
+
+      response.write(body);
     }
+
+    const resultHeaders = { ...matchedRequest.responseHeaders, 'content-length': contentLength };
+    response.writeHead(matchedRequest.responseStatus, resultHeaders);
   }
 
   sessionInfo(): SessionInfo {
