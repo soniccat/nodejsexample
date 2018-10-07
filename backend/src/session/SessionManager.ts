@@ -108,20 +108,23 @@ export default class SessionManager {
 
   async fillResponseInfo(sendInfo: SendInfo, matchedRequest: Request, response: http.ServerResponse) {
     let contentLength = matchedRequest.responseHeaders['content-length'];
+    let body: string | Buffer | undefined = undefined;
     if (matchedRequest.responseBody) {
-      let body: string | Buffer | undefined = bodyToString(matchedRequest.responseBody);
+      body = bodyToString(matchedRequest.responseBody);
       if (isZipContent(matchedRequest.responseHeaders) && body) {
         body = await handleGzipPromise(bodyToString(body) as string);
         if (body) {
           contentLength = `${body.length}`;
         }
       }
-
-      response.write(body);
     }
 
-    const resultHeaders = { ...matchedRequest.responseHeaders, 'content-length': contentLength };
+    const resultHeaders = { ...matchedRequest.responseHeaders,
+      'Access-Control-Allow-Origin': '*',
+      'content-length': contentLength };
+
     response.writeHead(matchedRequest.responseStatus, resultHeaders);
+    response.write(body);
   }
 
   sessionInfo(): SessionInfo {
