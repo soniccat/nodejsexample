@@ -10,7 +10,7 @@ class LoggerCollection implements ILogger {
   log(level: LogLevel, ...args: any[]) {
     for (const logger of this.loggers) {
       if (logger.canLog.apply(null, args)) {
-        logger.log.apply(null, [level].concat(args));
+        logger.log.apply(null, [level, ...args]);
         break;
       }
     }

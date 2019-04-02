@@ -9,7 +9,7 @@ class LoggerExtension implements ILogger {
 
   log(level: LogLevel, ...args: any[]) {
     if (this.innerLogger.canLog.apply(null, args)) {
-      this.innerLogger.log.apply(null, [level].concat(args));
+      this.innerLogger.log.apply(null, [level, ...args]);
     }
   }
 
