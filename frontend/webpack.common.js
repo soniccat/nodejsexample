@@ -64,7 +64,7 @@ module.exports = {
   //   "react-dom": "ReactDOM"
   // },
   plugins: [
-    new CleanWebpackPlugin(['dist']),
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: 'React app',
       inject: true,
