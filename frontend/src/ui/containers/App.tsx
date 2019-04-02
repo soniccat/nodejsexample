@@ -6,6 +6,7 @@ import { StubGroupViewer } from 'UI/containers/StubGroupViewer';
 import DataHolder from 'Data/DataHolder';
 import SessionHolder from 'Data/SessionHolder';
 import HistoryHolder from 'Data/HistoryHolder';
+import { LogViewer } from 'UI/containers/LogViewer';
 
 export interface AppProps {
 }
@@ -72,6 +73,7 @@ export class App extends React.Component<AppProps, AppState> {
             historyHolder={this.state.historyHolder}/>
         </TabPanel>
       </Tabs>
+      <LogViewer historyHolder={this.state.historyHolder}/>
     </div>;
   }
 }

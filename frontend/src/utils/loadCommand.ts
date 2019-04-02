@@ -1,7 +1,7 @@
 import * as axios from 'axios';
 import { ApiCall } from 'Utils/buildApiCall';
 
-export default async function loadCommand(options: ApiCall): Promise<any> {
+export default async function loadCommand(options: ApiCall): Promise<axios.AxiosResponse> {
   return axios.default(options);
 }
 
