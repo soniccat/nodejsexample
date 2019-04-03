@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { StubGroupRowRefDictType } from 'Utils/types';
 import HistoryHolder from 'Data/HistoryHolder';
-import { HistoryItemRow } from 'UI/views/HistoryItemRow';
+import { HistoryItemRequestRow } from 'UI/views/HistoryItemRequestRow';
 
 import 'CSS/LogViewer';
 
@@ -28,10 +28,10 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
 
   render() {
     const newRefs: StubGroupRowRefDictType = {};
-    const stubGroups = this.props.historyHolder.items ? this.props.historyHolder.items : [];
-    const rows = stubGroups.map(group => (<HistoryItemRow
-      key={group.id}
-      item={group}
+    const items = this.props.historyHolder.items ? this.props.historyHolder.items : [];
+    const rows = items.map((item, i) => (<HistoryItemRequestRow
+      key={i}
+      item={item}
       />));
 
     this.rowRefs = newRefs;

@@ -16,6 +16,7 @@ export interface RequestRowProps {
   onDeleteClicked: (request: Request) => void;
   onRunClicked: (request: Request) => void;
   onStartNameEditing: (request: Request) => void;
+  onExpandedChanged?: (isExanded: boolean) => void;
   stubGroupPopupContent?: JSX.Element;
 }
 
@@ -40,6 +41,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     this.onObjChanged = this.onObjChanged.bind(this);
     this.onStartNameEditing = this.onStartNameEditing.bind(this);
     this.onNameChanged = this.onNameChanged.bind(this);
+    this.isExpandedValue = this.isExpandedValue.bind(this);
 
     this.inputViewRef = React.createRef<InputView>();
 
@@ -54,7 +56,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
     return (
       <div className="request_row">
         <div className="request_short" onClick={this.onRequestShortClicked}>
-          {this.renderExpandedMark('request_expand_mark', this.state.isExpanded)}
+          {this.renderExpandedMark('request_expand_mark', this.isExpandedValue())}
 
           <div className="request_method">
             {this.props.request.method}
@@ -83,7 +85,7 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
             Run
           </div>
         </div>
-        {this.state.isExpanded ? this.renderExtra() : undefined}
+        {this.isExpandedValue() ? this.renderExtra() : undefined}
       </div>
     );
   }
@@ -186,9 +188,18 @@ export class RequestRow extends React.Component<RequestRowProps, RequestRowState
   }
 
   onRequestShortClicked() {
-    this.setState({
-      isExpanded: !this.state.isExpanded,
-    });
+    const newValue = !this.isExpandedValue();
+    if (this.props.onExpandedChanged) {
+      this.props.onExpandedChanged(newValue);
+    } else {
+      this.setState({
+        isExpanded: newValue,
+      });
+    }
+  }
+
+  isExpandedValue() {
+    return this.props.onExpandedChanged ? this.props.isExpanded : this.state.isExpanded;
   }
 
   onSentShortClicked() {
