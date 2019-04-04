@@ -74,15 +74,6 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
   }
 });
 
-// const tmpServer = http.createServer((request, response) => {
-//   console.log((new Date()) + ' Received request for ' + request.url);
-//   response.writeHead(404);
-//   response.end();
-// });
-// tmpServer.listen(8081, () => {
-//   console.log((new Date()) + ' Server is listening on port 8080');
-// });
-
 const wsServer = new websocket.server({
   httpServer: server,
   autoAcceptConnections: false,
