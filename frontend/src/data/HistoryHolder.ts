@@ -3,45 +3,42 @@ import loadCommand from 'Utils/loadCommand';
 import { buildProxyUrl } from 'Utils/buildApiCall';
 import * as WebSocketClient from 'websocket';
 
-export type HistoryItem = Request;
+export type HistoryItem = Request | String;
 
 export default class HistoryHolder {
   items: HistoryItem[] = [];
   client: WebSocketClient.w3cwebsocket;
-  connection: WebSocketClient.connection;
 
   constructor() {
-    this.client = new WebSocketClient.w3cwebsocket('ws://localhost:7777/', 'echo-protocol');
-    this.sendNumber = this.sendNumber.bind(this);
-
+    this.client = new WebSocketClient.w3cwebsocket(`ws://localhost:${BACKEND_PORT}/`, 'echo-protocol');
     this.client.onerror = () => {
-      console.log('Connection Error');
+      console.log('WebSocket: Connection Error');
     };
 
     this.client.onopen = () => {
-      console.log('WebSocket Client Connected');
-
-      this.sendNumber();
+      console.log('WebSocket: Client Connected');
     };
 
     this.client.onclose = () => {
-      console.log('echo-protocol Client Closed');
+      console.log('WebSocket: echo-protocol Client Closed');
     };
 
     this.client.onmessage = (e) => {
       if (typeof e.data === 'string') {
-        console.log("Received: '" + e.data + "'");
+        console.log(`WebSocket: Received: ${e.data}`);
+        this.items.push(e.data);
+        this.onDataUpdated();
       }
     };
   }
 
-  sendNumber() {
-    if (this.client != null && this.client.readyState === this.client.OPEN) {
-      const number = Math.round(Math.random() * 0xFFFFFF);
-      this.client.send(number.toString());
-      setTimeout(this.sendNumber, 1000);
-    }
-  }
+  // sendNumber() {
+  //   if (this.client != null && this.client.readyState === this.client.OPEN) {
+  //     const number = Math.round(Math.random() * 0xFFFFFF);
+  //     this.client.send(number.toString());
+  //     setTimeout(this.sendNumber, 1000);
+  //   }
+  // }
 
   onDataUpdated() {
   }

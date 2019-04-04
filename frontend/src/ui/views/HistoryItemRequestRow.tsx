@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { HistoryItem } from 'Data/HistoryHolder';
 import { Manager, Reference, Popper } from 'react-popper';
 import RequestRow from 'UI/views/RequestRow';
+import Request from 'Model/Request';
 
 export interface HistoryItemRequestRowProps {
-  item: HistoryItem;
+  item: Request;
   isSelected: boolean;
   onClicked: () => void;
 }

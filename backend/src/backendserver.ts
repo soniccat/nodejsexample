@@ -20,6 +20,7 @@ import { StubGroupTable } from 'DB/StubGroupTable';
 import SessionManager from 'main/session/SessionManager';
 import SendInfo, { SendInfoBuilder } from 'Data/request/SendInfo';
 import { IgnoreProxyStorageHeader } from 'Model/Request';
+import WSLogger from 'Logger/WSLogger';
 
 // Config
 const host = 'news360.com';
@@ -33,20 +34,27 @@ if (!databaseUser || !databasePass) {
   throw new Error('setup your DB_USER and DB_PASS environment variables');
 }
 
+const server = http.createServer(onServerMessage);
+const wsServer = new websocket.server({
+  httpServer: server,
+  autoAcceptConnections: false,
+});
+
 const consoleLogger = new ConsoleLogger();
-const logger = new LoggerCollection([new RequestLoggerExtension(consoleLogger), consoleLogger]);
+const wsLogger = new WSLogger(wsServer);
+const logger = new LoggerCollection([[new RequestLoggerExtension(consoleLogger), consoleLogger]]);
 
 const sendInfoBuilder = new SendInfoBuilder(host);
 const proxy = new Proxy(logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const stubGroupTable = new StubGroupTable(dbConnection);
-const sessionManager = new SessionManager(stubGroupTable, logger);
+const sessionManager = new SessionManager(stubGroupTable, new LoggerCollection([[wsLogger], [consoleLogger]]));
 const apiHandler = new ApiHandler(dbConnection, sessionManager, apiPath, logger);
 
 const severPort = process.env.SERVER_PORT;
 
-const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
+function onServerMessage(req: http.IncomingMessage, res: http.ServerResponse) {
   if (isApiRequest(req)) {
     apiHandler.handleRequest(req, res).then((res) => {
       res.end();
@@ -72,36 +80,24 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       res.end();
     });
   }
-});
-
-const wsServer = new websocket.server({
-  httpServer: server,
-  autoAcceptConnections: false,
-});
+}
 
 ///// ws test
 
 wsServer.on('request', (request) => {
-  // if (!originIsAllowed(request.origin)) {
-  //   // Make sure we only accept requests from an allowed origin
-  //   request.reject();
-  //   console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
-  //   return;
-  // }
-
   const connection = request.accept('echo-protocol', request.origin);
-  console.log((new Date()) + ' Connection accepted.');
+  console.log(`${new Date()} Connection accepted.`);
   connection.on('message', (message) => {
     if (message.type === 'utf8') {
-      console.log('Received Message: ' + message.utf8Data);
+      console.log(`Received Message: ${message.utf8Data}`);
       connection.sendUTF(message.utf8Data!);
     } else if (message.type === 'binary') {
-      console.log('Received Binary Message of ' + message.binaryData!.length + ' bytes');
+      console.log(`Received Binary Message of ${message.binaryData!.length} bytes`);
       connection.sendBytes(message.binaryData!);
     }
   });
   connection.on('close', (reasonCode, description) => {
-    console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+    console.log(`${new Date()} Peer ${connection.remoteAddress} disconnected.`);
   });
 });
 

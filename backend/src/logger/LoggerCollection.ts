@@ -1,26 +1,35 @@
 import ILogger, { LogLevel } from 'Logger/ILogger';
 
 class LoggerCollection implements ILogger {
-  loggers: ILogger[];
+  // call log.apply for the first logger in a group, do that for every group
+  loggerGroups: ILogger[][];
 
-  constructor(loggers: ILogger[]) {
-    this.loggers = loggers;
+  constructor(loggerGroups: ILogger[][]) {
+    this.loggerGroups = loggerGroups;
   }
 
   log(level: LogLevel, ...args: any[]) {
-    for (const logger of this.loggers) {
-      if (logger.canLog.apply(null, args)) {
-        logger.log.apply(null, [level, ...args]);
-        break;
+    for (const loggers of this.loggerGroups) {
+      for (const logger of loggers) {
+        if (logger.canLog.apply(logger, args)) {
+          logger.log.apply(logger, [level, ...args]);
+          break;
+        }
       }
     }
   }
 
   canLog(...args: any[]): boolean {
     let canLog = false;
-    for (const logger of this.loggers) {
-      if (logger.canLog.apply(null, args)) {
-        canLog = true;
+    for (const loggers of this.loggerGroups) {
+      for (const logger of loggers) {
+        if (logger.canLog.apply(logger, args)) {
+          canLog = true;
+          break;
+        }
+      }
+
+      if (canLog) {
         break;
       }
     }

@@ -25,6 +25,7 @@ export default class SessionManager {
     if (notActiveIds.length) {
       return this.loadStubGroups(notActiveIds).then((groups) => {
         this.stubGroups = this.stubGroups.concat(groups);
+        this.logger.log(LogLevel.INFO, 'SessionManager started');
       }).catch((e) => {
         this.logger.log(LogLevel.ERROR, `Can't start SessionManager ${util.inspect(e)}`);
       });
@@ -35,6 +36,7 @@ export default class SessionManager {
 
   stop(stubGroupIds: number[]) {
     this.stubGroups = this.stubGroups.filter(o => stubGroupIds.find(id => id === o.id) === undefined);
+    this.logger.log(LogLevel.INFO, 'SessionManager stopped');
     return Promise.resolve();
   }
 
