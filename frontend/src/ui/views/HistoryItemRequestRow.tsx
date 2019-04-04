@@ -2,8 +2,6 @@ import * as React from 'react';
 import { HistoryItem } from 'Data/HistoryHolder';
 import { Manager, Reference, Popper } from 'react-popper';
 import RequestRow from 'UI/views/RequestRow';
-import { Data } from 'popper.js';
-import Tooltip from 'tooltip.js';
 
 export interface HistoryItemRequestRowProps {
   item: HistoryItem;
@@ -14,7 +12,7 @@ export interface HistoryItemRequestRowProps {
 export interface HistoryItemRequestRowState {
 }
 
-export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRowProps, HistoryItemRequestRowState> {
+export class HistoryItemRequestRow extends React.PureComponent<HistoryItemRequestRowProps, HistoryItemRequestRowState> {
 
   constructor(props: HistoryItemRequestRowProps) {
     super(props);
@@ -24,7 +22,7 @@ export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRow
   }
 
   modifyStyle(style: React.CSSProperties): React.CSSProperties {
-    return { height: '200px',
+    return { maxHeight: '200px',
       backgroundColor: 'lightyellow',
       overflow: 'scroll',
       background: 'rgb(255, 255, 255)',
@@ -47,9 +45,10 @@ export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRow
           )}
         </Reference>
         <Popper placement="top-start">
-          {({ ref, style, placement, arrowProps }) => (
+          {({ ref, style, placement, arrowProps, scheduleUpdate }) => (
             <div ref={ref} style={ this.modifyStyle(style)} data-placement={placement} onClick={(e) => {
               e.stopPropagation();
+              scheduleUpdate();
             }}>
               <RequestRow
                 key={this.props.item.id}
