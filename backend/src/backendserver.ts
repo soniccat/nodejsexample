@@ -5,6 +5,7 @@
 import * as http from 'http';
 import * as url from 'url';
 import * as util from 'util';
+import * as websocket from 'websocket';
 
 import Proxy from 'Proxy/Proxy';
 import DbConnection from 'DB/DbConnection';
@@ -72,6 +73,48 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
     });
   }
 });
+
+// const tmpServer = http.createServer((request, response) => {
+//   console.log((new Date()) + ' Received request for ' + request.url);
+//   response.writeHead(404);
+//   response.end();
+// });
+// tmpServer.listen(8081, () => {
+//   console.log((new Date()) + ' Server is listening on port 8080');
+// });
+
+const wsServer = new websocket.server({
+  httpServer: server,
+  autoAcceptConnections: false,
+});
+
+///// ws test
+
+wsServer.on('request', (request) => {
+  // if (!originIsAllowed(request.origin)) {
+  //   // Make sure we only accept requests from an allowed origin
+  //   request.reject();
+  //   console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+  //   return;
+  // }
+
+  const connection = request.accept('echo-protocol', request.origin);
+  console.log((new Date()) + ' Connection accepted.');
+  connection.on('message', (message) => {
+    if (message.type === 'utf8') {
+      console.log('Received Message: ' + message.utf8Data);
+      connection.sendUTF(message.utf8Data!);
+    } else if (message.type === 'binary') {
+      console.log('Received Binary Message of ' + message.binaryData!.length + ' bytes');
+      connection.sendBytes(message.binaryData!);
+    }
+  });
+  connection.on('close', (reasonCode, description) => {
+    console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+  });
+});
+
+/////
 
 async function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
   return proxy.handleRequest(sendInfo, res)
