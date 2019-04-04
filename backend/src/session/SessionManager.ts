@@ -3,6 +3,7 @@ import { StubGroupTable } from 'DB/StubGroupTable';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as util from 'util';
 import * as http from 'http';
+import * as url from 'url';
 import SendInfo from 'Data/request/SendInfo';
 import Request from 'Model/Request';
 import SessionInfo from 'Model/SessionInfo';
@@ -67,6 +68,9 @@ export default class SessionManager {
 
     this.stubGroups.find((group) => {
       request = this.tryMatchStubGroup(sendInfo, group);
+      if (request) {
+        this.logger.log(LogLevel.INFO, `Stub ${group.name} Applied for ${request.url} ${request.name}`);
+      }
       return request !== undefined;
     });
 
@@ -78,7 +82,10 @@ export default class SessionManager {
   }
 
   tryMatchRequest(sendInfo: SendInfo, request: Request): boolean {
-    return sendInfo.method === request.method &&
+    const parsedUrl = url.parse(request.url);
+    return sendInfo.host === parsedUrl.host &&
+      sendInfo.path === parsedUrl.path &&
+      sendInfo.method === request.method &&
       this.tryMatchObjects(sendInfo.headers, request.headers) && this.tryMatchObjects(sendInfo.body, request.body);
   }
 
