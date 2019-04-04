@@ -3,13 +3,15 @@ import { HistoryItem } from 'Data/HistoryHolder';
 import { Manager, Reference, Popper } from 'react-popper';
 import RequestRow from 'UI/views/RequestRow';
 import { Data } from 'popper.js';
+import Tooltip from 'tooltip.js';
 
 export interface HistoryItemRequestRowProps {
   item: HistoryItem;
+  isSelected: boolean;
+  onClicked: () => void;
 }
 
 export interface HistoryItemRequestRowState {
-  isExpanded: boolean;
 }
 
 export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRowProps, HistoryItemRequestRowState> {
@@ -18,20 +20,24 @@ export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRow
     super(props);
     this.modifyStyle = this.modifyStyle.bind(this);
     this.state = {
-      isExpanded: false,
     };
   }
 
   modifyStyle(style: React.CSSProperties): React.CSSProperties {
-    const height = this.state.isExpanded ? '200px' : '55px';
-    return { height, backgroundColor: 'lightyellow', overflow: 'scroll', ...style };
+    return { height: '200px',
+      backgroundColor: 'lightyellow',
+      overflow: 'scroll',
+      background: 'rgb(255, 255, 255)',
+      border: '1px solid rgb(187, 187, 187)',
+      boxShadow: 'rgba(0, 0, 0, 0.2) 0px 1px 3px',
+      visibility: this.props.isSelected ? 'visible' : 'hidden',
+      ...style };
   }
 
   render() {
-    const contentStyle = { width: '95%' };
-    const arrowStyle = { left: '100px' };
-
-    return <div className="history_request_row">
+    return <div className="history_request_row" onClick={() => {
+      this.props.onClicked();
+    }}>
       <Manager>
         <Reference>
           {({ ref }) => (
@@ -41,18 +47,14 @@ export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRow
           )}
         </Reference>
         <Popper placement="top-start">
-          {({ ref, style, placement, arrowProps, scheduleUpdate }) => (
-            <div ref={ref} style={ this.modifyStyle(style)} data-placement={placement}>
+          {({ ref, style, placement, arrowProps }) => (
+            <div ref={ref} style={ this.modifyStyle(style)} data-placement={placement} onClick={(e) => {
+              e.stopPropagation();
+            }}>
               <RequestRow
                 key={this.props.item.id}
                 request={this.props.item}
-                isExpanded={this.state.isExpanded}
-                onExpandedChanged={(isExpanded: boolean) => {
-                  this.setState({
-                    isExpanded,
-                  });
-                  scheduleUpdate();
-                }}/>
+                isExpanded={true}/>
               <div ref={arrowProps.ref} style={arrowProps.style} />
             </div>
           )}
@@ -61,21 +63,3 @@ export class HistoryItemRequestRow extends React.Component<HistoryItemRequestRow
     </div>;
   }
 }
-
-
-/*
-<Popup
-          trigger={open => (
-            <div className="stub_group_add_button">Stub groups</div>
-          )}
-          closeOnDocumentClick={true}
-          keepTooltipInside={true}
-          position="top left"
-          contentStyle={contentStyle}
-          arrowStyle={arrowStyle}>
-          <RequestRow
-            key={this.props.item.id}
-            request={this.props.item}
-            isExpanded={false}/>
-        </Popup>
-*/

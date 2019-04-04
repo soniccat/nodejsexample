@@ -10,6 +10,7 @@ export interface LogViewerProps {
 }
 
 export interface LogViewerState {
+  selectedIndex: number;
 }
 
 export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
@@ -18,6 +19,7 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
   constructor(props: LogViewerProps) {
     super(props);
     this.state = {
+      selectedIndex: -1,
     };
   }
 
@@ -32,6 +34,12 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
     const rows = items.map((item, i) => (<HistoryItemRequestRow
       key={i}
       item={item}
+      isSelected={i === this.state.selectedIndex}
+      onClicked={() => {
+        this.setState({
+          selectedIndex: i !== this.state.selectedIndex ? i : -1,
+        });
+      }}
       />));
 
     this.rowRefs = newRefs;
