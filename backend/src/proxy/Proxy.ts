@@ -22,7 +22,7 @@ class Proxy {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PATCH',
-          'Access-Control-Allow-Headers': `X-PINGOTHER, Content-Type, cache-control, upgrade-insecure-requests, ${IgnoreProxyStorageHeader}`,
+          'Access-Control-Allow-Headers': '*',//`X-PINGOTHER, Content-Type, cache-control, upgrade-insecure-requests, ${IgnoreProxyStorageHeader}`,
         },
         statusCode: 200,
         body: undefined,

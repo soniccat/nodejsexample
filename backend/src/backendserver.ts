@@ -23,7 +23,13 @@ import { IgnoreProxyStorageHeader } from 'Model/Request';
 import WSLogger from 'Logger/WSLogger';
 
 // Config
-const host = 'news360.com';
+const hostResolver = (url: url.UrlWithStringQuery) => {
+  if (url.path != null && (url.path.startsWith('/v5') || url.path.startsWith('/v4') || url.path.startsWith('/v3'))) {
+    return 'api.news360.com';
+  }
+
+  return 'news360.com';
+};
 const apiPath = '__api__';
 
 const databaseUser = process.env.DB_USER;
@@ -44,7 +50,7 @@ const consoleLogger = new ConsoleLogger();
 const wsLogger = new WSLogger(wsServer);
 const logger = new LoggerCollection([[new RequestLoggerExtension(consoleLogger), consoleLogger]]);
 
-const sendInfoBuilder = new SendInfoBuilder(host);
+const sendInfoBuilder = new SendInfoBuilder(hostResolver);
 const proxy = new Proxy(logger);
 const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
@@ -147,7 +153,7 @@ dbConnection.connect((err) => {
 
 function needWriteRequestRow(requestInfo: RequestInfo) {
   return requestInfo.sendInfo.path &&
-    requestInfo.sendInfo.path.indexOf('api') !== -1 &&
+    (requestInfo.sendInfo.path.indexOf('api') !== -1 || requestInfo.sendInfo.host.indexOf('api') !== -1) &&
     requestInfo.sendInfo.method !== 'OPTIONS' &&
     requestInfo.sendInfo.headers[IgnoreProxyStorageHeader] === undefined;
 }
@@ -158,7 +164,7 @@ function isApiRequest(req: http.IncomingMessage) {
   }
 
   const reqUrl = url.parse(req.url);
-  const isHostValid = reqUrl.host == null || reqUrl.host === 'localhost' || reqUrl.host === host;
+  const isHostValid = reqUrl.host == null || reqUrl.host === 'localhost';// || reqUrl.host === host;
 
   if (reqUrl.path === undefined) {
     return false;

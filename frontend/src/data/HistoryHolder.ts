@@ -48,7 +48,12 @@ export default class HistoryHolder {
     copyRequest.url = request.url;
     copyRequest.port = request.port;
     copyRequest.method = request.method;
-    copyRequest.headers = request.headers;
+    copyRequest.headers = {};//request.headers;
+    for (const key in request.headers) {
+      if (key !== 'user-agent' && key !== 'host' && key !== 'connection' && key !== 'accept-encoding') {
+        copyRequest.headers[key] = request.headers[key];
+      }
+    }
 
     this.items.push(copyRequest);
     this.onDataUpdated();
