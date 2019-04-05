@@ -21,8 +21,8 @@ class Proxy {
       const responseInfo = {
         headers: {
           'access-control-allow-origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PATCH',
-          'Access-Control-Allow-Headers': '*',//`X-PINGOTHER, Content-Type, cache-control, upgrade-insecure-requests, ${IgnoreProxyStorageHeader}`,
+          'access-control-allow-methods': 'POST, GET, OPTIONS, DELETE, PATCH',
+          'access-control-allow-headers': '*',//`X-PINGOTHER, Content-Type, cache-control, upgrade-insecure-requests, ${IgnoreProxyStorageHeader}`,
         },
         statusCode: 200,
         body: undefined,
