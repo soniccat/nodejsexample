@@ -86,7 +86,7 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
   private createRequestPopup() {
     return <RequestRow
       key="poupKey"
-      request={this.props.historyHolder.items[this.state.selectedIndex]}
+      request={this.props.historyHolder.items[this.state.selectedIndex] as Request}
       isExpanded={true}/>;
   }
 
