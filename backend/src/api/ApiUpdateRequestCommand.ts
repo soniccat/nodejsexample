@@ -22,7 +22,7 @@ export default class ApiUpdateRequestCommand implements ApiCommand {
 
   async run(requestInfo: ApiCommandInfo, res: http.ServerResponse): Promise<http.ServerResponse> {
     if (!Request.checkType(requestInfo.body)) {
-      setResponse(res, 400, `Body is incorrect`);
+      setResponse(res, 400, 'Body is incorrect');
     } else {
       requestInfo.body.id = parseInt(requestInfo.components[1], 10);
       await this.handleUpdateRequest(requestInfo.body, res);

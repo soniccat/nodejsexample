@@ -5,6 +5,7 @@ import InputView from './InputView';
 import 'CSS/JsonView';
 import { ensureRef } from 'Utils/RefTools';
 import { InputRefDictType, JsonViewRefDictType } from 'Utils/types';
+import { isArray } from 'util';
 
 export interface JsonViewProps {
   obj: any;
@@ -56,7 +57,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
 
   changeKey(oldObjKey: string, newObjKey: string, index: number) {
     const obj = this.props.obj;
-    const newObj = Object.assign({}, obj, { [newObjKey]: obj[oldObjKey] });
+    const newObj = this.assign({ [newObjKey]: obj[oldObjKey] });
     delete newObj[oldObjKey];
 
     this.childIndexes[newObjKey] = index;
@@ -70,7 +71,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   removeKey(objKey: string) {
-    const newObj = Object.assign({}, this.props.obj);
+    const newObj = this.assign(undefined);
     delete newObj[objKey];
 
     this.setState({
@@ -82,7 +83,7 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   changeValue(objKey: string, newValue: any) {
-    const newObj = Object.assign({}, this.props.obj, { [objKey]: newValue });
+    const newObj = this.assign({ [objKey]: newValue });
     this.props.onObjChanged(newObj);
   }
 
@@ -242,8 +243,13 @@ export class JsonView extends React.Component<JsonViewProps, JsonViewState> {
   }
 
   private onObjChanged(objKey: string, obj: any) {
-    const newObj = Object.assign({}, this.props.obj, { [objKey]: obj });
+    const newObj = this.assign({ [objKey]: obj });
     this.props.onObjChanged(newObj);
+  }
+
+  private assign(obj: any) {
+    const emptyObj = isArray(this.props.obj) ? [] : {};
+    return Object.assign(emptyObj, this.props.obj, obj);
   }
 
   private renderExpandButton(isExpanded: boolean, index: number, isSubJson: boolean): any {

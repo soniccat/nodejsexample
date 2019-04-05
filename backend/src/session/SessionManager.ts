@@ -41,6 +41,12 @@ export default class SessionManager {
     return Promise.resolve();
   }
 
+  async restart() {
+    const ids = this.stubGroups.map(o => o.id);
+    this.stop(ids);
+    return this.start(ids);
+  }
+
   isActive(): boolean {
     return this.stubGroups.length > 0;
   }
