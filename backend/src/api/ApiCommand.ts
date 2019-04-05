@@ -24,5 +24,5 @@ export function setNotFoundResponse(res: http.ServerResponse): http.ServerRespon
 }
 
 function baseHead() {
-  return { 'Access-Control-Allow-Origin': '*' };
+  return { 'access-control-allow-origin': '*' };
 }

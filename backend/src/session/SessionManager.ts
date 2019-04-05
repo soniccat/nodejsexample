@@ -7,7 +7,7 @@ import * as url from 'url';
 import SendInfo from 'Data/request/SendInfo';
 import Request from 'Model/Request';
 import SessionInfo from 'Model/SessionInfo';
-import { isObject } from 'Utils/objectTools';
+import { isObject, isEmptyObject } from 'Utils/objectTools';
 import { bodyToString, isZipContent, handleGzipPromise } from 'Utils/requesttools';
 
 export default class SessionManager {
@@ -90,6 +90,10 @@ export default class SessionManager {
   }
 
   tryMatchObjects(src: any, pattern: any): boolean {
+    if ((src === undefined || isEmptyObject(src)) && (pattern === undefined || isEmptyObject(pattern))) {
+      return true;
+    }
+
     const isSrcObject = isObject(src);
     const isPatternObject = isObject(pattern);
 
@@ -121,7 +125,7 @@ export default class SessionManager {
     if (matchedRequest.responseBody) {
       body = bodyToString(matchedRequest.responseBody);
       if (isZipContent(matchedRequest.responseHeaders) && body) {
-        body = await handleGzipPromise(bodyToString(body) as string);
+        body = await handleGzipPromise(body);
         if (body) {
           contentLength = `${body.length}`;
         }
@@ -129,7 +133,7 @@ export default class SessionManager {
     }
 
     const resultHeaders = { ...matchedRequest.responseHeaders,
-      'Access-Control-Allow-Origin': '*',
+      'access-control-allow-origin': '*',
       'content-length': contentLength };
 
     response.writeHead(matchedRequest.responseStatus, resultHeaders);

@@ -20,7 +20,7 @@ class Proxy {
       // TODO: set that in settings
       const responseInfo = {
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          'access-control-allow-origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, DELETE, PATCH',
           'Access-Control-Allow-Headers': '*',//`X-PINGOTHER, Content-Type, cache-control, upgrade-insecure-requests, ${IgnoreProxyStorageHeader}`,
         },
