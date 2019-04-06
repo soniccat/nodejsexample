@@ -80,6 +80,7 @@ export class App extends React.Component<AppProps, AppState> {
 
         <TabPanel>
           <RequestViewer dataHolder={this.state.dataHolder}
+            wsClient={this.wsClient}
             historyHolder={this.state.historyHolder}/>
         </TabPanel>
         <TabPanel>

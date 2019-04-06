@@ -116,6 +116,10 @@ async function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerRespons
           const name = getDateString();
           requestDb.writeRequestAsRequestInfo(name, requestInfo).then((rows:any[]) => {
             logger.log(LogLevel.DEBUG, `added to DB ${requestInfo.sendInfo.path}`);
+
+            wsServer.connections.forEach((c) => {
+              c.sendBytes(new Buffer('test'));
+            });
           });
         }
         return res;

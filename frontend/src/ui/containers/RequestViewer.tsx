@@ -7,11 +7,13 @@ import { StubGroupList } from 'UI/containers/StubGroupList';
 import { RequestRowRefDictType } from 'Utils/types';
 import { ensureRef } from 'Utils/RefTools';
 import HistoryHolder from 'Data/HistoryHolder';
+import WSClient from 'Data/WSClient';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
   dataHolder: DataHolder;
   historyHolder: HistoryHolder;
+  wsClient: WSClient;
 }
 
 export interface RequestViewerState {
@@ -30,12 +32,26 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   constructor(props: RequestViewerProps) {
     super(props);
 
+    this.loadRequests = this.loadRequests.bind(this);
     this.onSearchChanged = this.onSearchChanged.bind(this);
     this.onCreateStubClicked = this.onCreateStubClicked.bind(this);
     this.onRequestChanged = this.onRequestChanged.bind(this);
     this.onRequestDeleteClicked = this.onRequestDeleteClicked.bind(this);
     this.onRunRequestClicked = this.onRunRequestClicked.bind(this);
     this.handleWillStartNameEditing = this.handleWillStartNameEditing.bind(this);
+
+    // tslint:disable-next-line:no-this-assignment
+    const localThis = this;
+    this.props.wsClient.addHandler({
+      handle(message: any): void {
+        console.log(`WebSocket: Received: Buffer`);
+        localThis.loadRequests();
+      },
+
+      canHandle(message: any): boolean {
+        return message.data instanceof Blob;
+      },
+    });
 
     this.state = {
       requestOptions: this.props.requestOptions,
@@ -45,14 +61,18 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
   // Events
 
   componentDidMount() {
-    this.props.dataHolder.loadRequests(this.state.requestOptions);
+    this.loadRequests();
   }
 
   private onSearchChanged(event) {
     this.setState({ requestOptions: { urlRegexp: event.target.value } }, () => {
       console.log(`regexp ${this.state.requestOptions.urlRegexp}`);
-      this.props.dataHolder.loadRequests(this.state.requestOptions);
+      this.loadRequests();
     });
+  }
+
+  private loadRequests() {
+    this.props.dataHolder.loadRequests(this.state.requestOptions);
   }
 
   private onCreateStubClicked(row: Request) {
