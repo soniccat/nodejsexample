@@ -10,7 +10,6 @@ import * as websocket from 'websocket';
 import Proxy from 'Proxy/Proxy';
 import DbConnection from 'DB/DbConnection';
 import RequestTable from 'DB/RequestTable';
-import ApiHandler from 'main/api/ApiHandler';
 import ConsoleLogger from 'Logger/ConsoleLogger';
 import RequestLoggerExtension from 'Logger/RequestLoggerExtension';
 import LoggerCollection from 'Logger/LoggerCollection';
@@ -21,6 +20,7 @@ import SessionManager from 'main/session/SessionManager';
 import SendInfo, { SendInfoBuilder } from 'Data/request/SendInfo';
 import { IgnoreProxyStorageHeader } from 'Model/Request';
 import WSLogger from 'Logger/WSLogger';
+import ApiHandlerBuilder from './api/ApiHandlerBuilder';
 
 // Config
 const hostResolver = (url: url.UrlWithStringQuery) => {
@@ -56,7 +56,7 @@ const dbConnection = new DbConnection(databaseUser, databasePass, databaseName);
 const requestDb = new RequestTable(dbConnection);
 const stubGroupTable = new StubGroupTable(dbConnection);
 const sessionManager = new SessionManager(stubGroupTable, new LoggerCollection([[wsLogger], [consoleLogger]]));
-const apiHandler = new ApiHandler(dbConnection, sessionManager, apiPath, logger);
+const apiHandler = new ApiHandlerBuilder(dbConnection, sessionManager).build(apiPath, logger);
 
 const severPort = process.env.SERVER_PORT;
 

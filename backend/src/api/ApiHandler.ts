@@ -1,63 +1,23 @@
 import * as url from 'url';
 import * as util from 'util';
 import { readPostBodyPromise } from 'Utils/requesttools';
-import RequestTable from 'DB/RequestTable';
-import DbConnection from 'DB/DbConnection';
 import ILogger, { LogLevel } from 'Logger/ILogger';
 import * as http from 'http';
 import ApiCommandInfo from 'main/api/ApiCommandInfo';
 import { ApiCommand, setNotFoundResponse, setResponse } from 'main/api/ApiCommand';
-import ApiOptionsCommand from 'main/api/ApiOptionsCommand';
-import ApiRequestsCommand from 'main/api/ApiRequestsCommand';
-import ApiUpdateRequestCommand from 'main/api/ApiUpdateRequestCommand';
-import ApiCreateRequestCommand from 'main/api/ApiCreateRequestCommand';
-import ApiDeleteRequestCommand from 'main/api/ApiDeleteRequestCommand';
-import { StubGroupTable } from 'DB/StubGroupTable';
-import ApiStubGroupsCommand from 'main/api/ApiStubGroupsCommand';
-import ApiAddRequestInStubGroupCommand from 'main/api/ApiAddRequestInStubGroupCommand';
-import ApiDeleteRequestInStubGroupCommand from 'main/api/ApiDeleteRequestInStubGroupCommand';
-import ApiCreateStubGroupCommand from 'main/api/ApiCreateStubGroupCommand';
-import ApiDeleteStubGroupCommand from 'main/api/ApiDeleteStubGroupCommand';
-import ApiSessionCommand from 'main/api/ApiSessionCommand';
-import SessionManager from 'main/session/SessionManager';
-import ApiPatchSessionCommand from 'main/api/ApiPatchSessionCommand';
-import ApiUpdateStubGroupCommand from 'main/api/ApiUpdateStubGroupCommand';
 
 class ApiHandler {
-  dbConnection: DbConnection;
   apiPath: string;
   logger: ILogger;
-  requestTable: RequestTable;
-  stubGroupsTable: StubGroupTable;
-  sessionManager: SessionManager;
-  commands: ApiCommand[];
+  commands: ApiCommand[] = [];
 
-  constructor(dbConnection: DbConnection, sessionManager: SessionManager, apiPath: string, logger: ILogger) {
-    this.dbConnection = dbConnection;
+  constructor(apiPath: string, logger: ILogger) {
     this.apiPath = apiPath;
     this.logger = logger;
-    this.requestTable = new RequestTable(this.dbConnection);
-    this.stubGroupsTable = new StubGroupTable(this.dbConnection);
-    this.sessionManager = sessionManager;
+  }
 
-    this.commands = [
-      new ApiOptionsCommand(),
-
-      new ApiRequestsCommand(this.requestTable, logger),
-      new ApiUpdateRequestCommand(this.requestTable, logger),
-      new ApiCreateRequestCommand(this.requestTable, logger),
-      new ApiDeleteRequestCommand(this.requestTable, logger),
-
-      new ApiStubGroupsCommand(this.stubGroupsTable, logger),
-      new ApiAddRequestInStubGroupCommand(this.stubGroupsTable, logger),
-      new ApiDeleteRequestInStubGroupCommand(this.stubGroupsTable, logger),
-      new ApiCreateStubGroupCommand(this.stubGroupsTable, logger),
-      new ApiDeleteStubGroupCommand(this.stubGroupsTable, logger),
-      new ApiUpdateStubGroupCommand(this.stubGroupsTable, logger),
-
-      new ApiSessionCommand(this.sessionManager, logger),
-      new ApiPatchSessionCommand(this.sessionManager, logger),
-    ];
+  setCommands(commands: ApiCommand[]) {
+    this.commands = commands;
   }
 
   async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<http.ServerResponse> {

@@ -7,6 +7,7 @@ import DataHolder from 'Data/DataHolder';
 import SessionHolder from 'Data/SessionHolder';
 import HistoryHolder from 'Data/HistoryHolder';
 import { LogViewer } from 'UI/containers/LogViewer';
+import WSClient from 'Data/WSClient';
 
 export interface AppProps {
 }
@@ -18,6 +19,8 @@ export interface AppState {
 }
 
 export class App extends React.Component<AppProps, AppState> {
+  wsClient: WSClient;
+
   constructor(props) {
     super(props);
     this.updateDataHolder = this.updateDataHolder.bind(this);
@@ -25,6 +28,18 @@ export class App extends React.Component<AppProps, AppState> {
     const dataHolder = new AppDataHolder(this);
     const sessionHolder = new AppSessionHolder(this);
     const historyHolder = new AppHistoryHolder(this);
+
+    this.wsClient = new WSClient();
+    this.wsClient.addHandler({
+      handle(message: any): void {
+        console.log(`WebSocket: Received: ${message.data}`);
+        historyHolder.addMessage(message.data);
+      },
+
+      canHandle(message: any): boolean {
+        return typeof message.data === 'string';
+      },
+    });
 
     this.state = {
       dataHolder,

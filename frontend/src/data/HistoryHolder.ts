@@ -7,29 +7,10 @@ export type HistoryItem = Request | String;
 
 export default class HistoryHolder {
   items: HistoryItem[] = [];
-  client: WebSocketClient.w3cwebsocket;
 
-  constructor() {
-    this.client = new WebSocketClient.w3cwebsocket(`ws://localhost:${BACKEND_PORT}/`, 'echo-protocol');
-    this.client.onerror = () => {
-      console.log('WebSocket: Connection Error');
-    };
-
-    this.client.onopen = () => {
-      console.log('WebSocket: Client Connected');
-    };
-
-    this.client.onclose = () => {
-      console.log('WebSocket: echo-protocol Client Closed');
-    };
-
-    this.client.onmessage = (e) => {
-      if (typeof e.data === 'string') {
-        console.log(`WebSocket: Received: ${e.data}`);
-        this.items.push(e.data);
-        this.onDataUpdated();
-      }
-    };
+  addMessage(message: string) {
+    this.items.push(message);
+    this.onDataUpdated();
   }
 
   // sendNumber() {
@@ -48,7 +29,8 @@ export default class HistoryHolder {
     copyRequest.url = request.url;
     copyRequest.port = request.port;
     copyRequest.method = request.method;
-    copyRequest.headers = {};//request.headers;
+    copyRequest.body = request.body;
+    copyRequest.headers = {};
     for (const key in request.headers) {
       if (key !== 'user-agent' && key !== 'host' && key !== 'connection' && key !== 'accept-encoding') {
         copyRequest.headers[key] = request.headers[key];
