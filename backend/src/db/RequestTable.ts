@@ -69,17 +69,7 @@ class RequestTable {
   }
 
   async writeRequestAsRequestInfo(name: string, requestInfo: RequestInfo): Promise<any[]> {
-    return this.writeRequest({
-      name,
-      url: getUrlString(requestInfo.sendInfo),
-      port: requestInfo.sendInfo.port,
-      method: requestInfo.sendInfo.method,
-      headers: requestInfo.sendInfo.headers,
-      body: requestInfo.sendInfo.body,
-      responseStatus: requestInfo.responseInfo.statusCode,
-      responseHeaders: requestInfo.responseInfo.headers,
-      responseBody: requestInfo.responseInfo.body,
-      isStub: false});
+    return this.writeRequest(requestInfo.toRequest(name));
   }
 
   async writeRequest(obj: Request): Promise<any[]> {

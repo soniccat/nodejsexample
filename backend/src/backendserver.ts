@@ -118,7 +118,7 @@ async function handleReuestWithProxy(sendInfo: SendInfo, res: http.ServerRespons
             logger.log(LogLevel.DEBUG, `added to DB ${requestInfo.sendInfo.path}`);
 
             wsServer.connections.forEach((c) => {
-              c.sendBytes(new Buffer('test'));
+              c.sendUTF(JSON.stringify({ type: 'request', data: requestInfo.toRequest(name) }));
             });
           });
         }

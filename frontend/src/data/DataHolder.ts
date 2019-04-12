@@ -152,6 +152,10 @@ export default class DataHolder {
 
   // === Public Actions
 
+  addNewRequest(request: Request) {
+    this.setRequests([request,  ...this.requests]);
+  }
+
   loadRequests(requestOptions: LoadRequestsOption): Promise<any> {
     this.loadingRequestOptions = requestOptions;
     const options = buildRequestsCall(requestOptions);

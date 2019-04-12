@@ -30,7 +30,7 @@ class Proxy {
       };
 
       this.fillOriginalResponseInfo(originalResponse, responseInfo);
-      return { sendInfo, responseInfo };
+      return new RequestInfo(sendInfo, responseInfo);
     }
 
     this.logger.log(LogLevel.DEBUG, `start ${getUrlString(sendInfo)}`);
@@ -39,7 +39,7 @@ class Proxy {
     this.logger.log(LogLevel.DEBUG, `end ${getUrlString(sendInfo)}`);
 
     this.fillOriginalResponseInfo(originalResponse, responseInfo);
-    return { sendInfo, responseInfo };
+    return new RequestInfo(sendInfo, responseInfo);
   }
 
   fillOriginalResponseInfo(originalResponse: http.ServerResponse, responseInfo: ResponseInfo) {

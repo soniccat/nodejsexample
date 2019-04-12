@@ -1,8 +1,14 @@
 import * as WebSocketClient from 'websocket';
+import { isString } from 'util';
+
+export interface WSMessage {
+  type: string;
+  data?: any;
+}
 
 export interface WSMessageHandler {
-  handle(message: any): void;
-  canHandle(message: any): boolean;
+  handle(message: WSMessage): void;
+  canHandle(message: WSMessage): boolean;
 }
 
 export default class WSClient {
@@ -24,10 +30,15 @@ export default class WSClient {
     };
 
     this.client.onmessage = (e) => {
-      for (const h of this.handlers) {
-        if (h.canHandle(e)) {
-          h.handle(e);
-          break;
+      if (isString(e.data)) {
+        const jsonMessage = JSON.parse(e.data);
+        if (jsonMessage != null && jsonMessage.type != null) {
+          for (const h of this.handlers) {
+            if (h.canHandle(jsonMessage)) {
+              h.handle(jsonMessage);
+              break;
+            }
+          }
         }
       }
     };

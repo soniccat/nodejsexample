@@ -7,7 +7,7 @@ import { StubGroupList } from 'UI/containers/StubGroupList';
 import { RequestRowRefDictType } from 'Utils/types';
 import { ensureRef } from 'Utils/RefTools';
 import HistoryHolder from 'Data/HistoryHolder';
-import WSClient from 'Data/WSClient';
+import WSClient, { WSMessage } from 'Data/WSClient';
 
 export interface RequestViewerProps {
   requestOptions?: LoadRequestsOption;
@@ -43,13 +43,17 @@ export class RequestViewer extends React.Component<RequestViewerProps, RequestVi
     // tslint:disable-next-line:no-this-assignment
     const localThis = this;
     this.props.wsClient.addHandler({
-      handle(message: any): void {
-        console.log(`WebSocket: Received: Buffer`);
-        localThis.loadRequests();
+      handle(message: WSMessage): void {
+        console.log('WebSocket: Received a request');
+        const request = message.data as Request;
+        const regexp = new RegExp(localThis.state.requestOptions.urlRegexp);
+        if (regexp.test(request.url)) {
+          localThis.props.dataHolder.addNewRequest(request);
+        }
       },
 
-      canHandle(message: any): boolean {
-        return message.data instanceof Blob;
+      canHandle(message: WSMessage): boolean {
+        return message.type === 'request' && message.data != null && Request.checkType(message.data);
       },
     });
 
