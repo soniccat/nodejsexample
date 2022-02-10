@@ -37,7 +37,7 @@
     "json-loader": "^0.5.7",
     "jsx": "^0.9.89",
     "mysql": "^2.16.0",
-    "node-sass": "^4.11.0",
+    "node-sass": "^7.0.0",
     "npm": "^6.9.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
